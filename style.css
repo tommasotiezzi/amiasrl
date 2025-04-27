@@ -1,3 +1,88 @@
+/* BANNER */
+.side-banner {
+  position: fixed;
+  top: 100px;
+  left: 0;
+  background-color: #ffdd00;
+  color: #000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  z-index: 1000;
+  font-size: 14px;
+  line-height: 1.4;
+  transition: transform 0.3s ease;
+  border-radius: 0 4px 4px 0;
+  transform: translateX(-100%); /* Hide by default on all devices */
+}
+
+.side-banner.open {
+  transform: translateX(0); /* Show when open class is added */
+}
+
+.banner-content {
+  padding: 10px 15px;
+  max-width: 250px;
+}
+
+.banner-tab {
+  background-color: #ffdd00;
+  padding: 8px;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  right: -30px;
+  width: 30px;
+  height: 40px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.claimAction{
+  font-weight: 900;
+  font-size: 1em;
+}
+
+.bannerAnimation {
+  margin: 10px auto;
+  text-align: center;
+  display: block;
+}
+
+.bannerAnimation img {
+  border-radius: 4px;
+  display: block;
+  margin: 0 auto;
+}
+
+.banner-link {
+  color: #000;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.banner-link:hover {
+  color: #333;
+}
+
 #header {
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
   width: 100%;
