@@ -374,6 +374,7 @@ img[alt="Work in progress"] {
 
 .card {
   width: 100%;
+  border-radius: 1rem !important;
 }
 
 .card-body {
