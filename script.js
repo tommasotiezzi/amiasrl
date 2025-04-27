@@ -87,4 +87,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+        const sideBanner = document.getElementById('sideBanner');
+    const bannerTab = document.getElementById('bannerTab');
+    const closeBtn = document.getElementById('closeBtn');
+
+
+    if (bannerTab && sideBanner) {
+        bannerTab.addEventListener('click', () => {
+            sideBanner.classList.add('open');
+        });
+    } else {
+    }
+
+    if (closeBtn && sideBanner) {
+        closeBtn.addEventListener('click', () => {
+            sideBanner.classList.remove('open');
+        });
+    } else {
+    };
 });
