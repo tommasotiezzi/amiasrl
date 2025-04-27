@@ -189,8 +189,18 @@ section {
   background-color: #fafafa;
 }
 
+#persone h2 {
+  font-weight: 900;
+}
+#prodotti h2 {
+  font-weight: 900;
+}
+#lavora-con-noi h2 {
+  font-weight: 900;
+}
+
 .valori h2 {
-  font-weight: 700;
+  font-weight: 900;
   margin-bottom: 40px;
   color: #141414;
   text-align: center;
@@ -478,6 +488,10 @@ img[alt="Work in progress"] {
   .btn {
     white-space: normal;
   }
+  .product-image img {
+    max-height: 350px;
+    margin-bottom: 50px;
+  }
 }
 
 @media (max-width: 375px) {
@@ -527,6 +541,10 @@ img[alt="Work in progress"] {
   content: "";
   clear: both;
   display: table;
+}
+.product-image img {
+  max-height: 350px; 
+  margin-bottom: 50px;
 }
 
 img {
