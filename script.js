@@ -105,4 +105,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     } else {
     };
+
+    if (bannerLink && sideBanner) {
+    bannerLink.addEventListener('click', () => {
+        sideBanner.classList.remove('open');
+        setTimeout(() => {
+        const section = document.getElementById('lavora-con-noi');
+        if (section) {
+            const offsetPosition = section.offsetTop - header.offsetHeight;
+            window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+            });
+        }
+        }, 300);e
+    });
+    }
 });
