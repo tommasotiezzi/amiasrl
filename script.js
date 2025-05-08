@@ -1,11 +1,17 @@
+// Wait for DOM content to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Get the header element
     const header = document.getElementById('header');
     
+    // Get all sections that should trigger navigation changes
     const sections = document.querySelectorAll('section[id]');
     
+    // Get all navigation links
     const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
     
+    // Make the navigation sticky and highlight the active section
     function handleNavigation() {
+        // Make header sticky after scrolling a bit
         if (window.scrollY > 50) {
             header.classList.add('sticky-top');
             header.style.backgroundColor = '#fafafa';
@@ -17,55 +23,51 @@ document.addEventListener('DOMContentLoaded', function() {
             header.style.boxShadow = 'none';
         }
         
-        const scrollPosition = window.scrollY + (window.innerHeight / 3); 
+        // Calculate current scroll position with some offset
+        const scrollPosition = window.scrollY + 100; // Adding offset for better detection
         
+        // Determine which section is currently in view
         let currentSection = '';
-        
         sections.forEach(section => {
             const sectionTop = section.offsetTop - header.offsetHeight;
             const sectionBottom = sectionTop + section.offsetHeight;
             
             if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
-                currentSection = section.id;
+                currentSection = section.getAttribute('id');
             }
         });
         
+        // Update navigation links
         navLinks.forEach(link => {
-            let href = link.getAttribute('href');
-            let sectionId = '';
+            // Get the section ID from the href attribute
+            const sectionId = link.getAttribute('href').substring(1);
             
-            if (href.includes('#')) {
-                sectionId = href.split('#').pop();
-            }
-            
-            console.log("Link:", href, "->", sectionId, "Current section:", currentSection);
-            
+            // Remove active class from all links
             link.classList.remove('active');
             link.style.backgroundColor = '';
             link.style.color = '#141414';
             
-            if (sectionId && sectionId === currentSection) {
+            // Add active class to current section link
+            if (sectionId === currentSection) {
                 link.classList.add('active');
                 link.style.backgroundColor = '#141414';
                 link.style.color = '#fafafa';
-                console.log("ACTIVATED:", sectionId);
             }
         });
     }
     
+    // Listen for scroll events
     window.addEventListener('scroll', handleNavigation);
     
+    // Initial call to set up navigation state on page load
     handleNavigation();
     
+    // Add smooth scrolling for navigation links
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
-            const href = this.getAttribute('href');
-            
-            if (!href.includes('#')) return;
-            
             e.preventDefault();
             
-            const targetId = href.includes('#') ? '#' + href.split('#').pop() : href;
+            const targetId = this.getAttribute('href');
             const targetSection = document.querySelector(targetId);
             
             if (targetSection) {
@@ -79,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // Close mobile navigation when clicking a link
     const navbarCollapse = document.querySelector('.navbar-collapse');
     navLinks.forEach(link => {
         link.addEventListener('click', () => {
@@ -87,38 +90,36 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-        const sideBanner = document.getElementById('sideBanner');
-    const bannerTab = document.getElementById('bannerTab');
-    const closeBtn = document.getElementById('closeBtn');
-
-
-    if (bannerTab && sideBanner) {
-        bannerTab.addEventListener('click', () => {
-            sideBanner.classList.add('open');
-        });
-    } else {
+    const items = document.querySelectorAll('.timeline-item');
+    const dot = document.querySelector('.timeline-dot');
+    const year = document.querySelector('.current-year');
+    const prev = document.querySelector('.prev');
+    const next = document.querySelector('.next');
+    let current = 0;
+    
+    function showItem(index) {
+        items.forEach(item => item.classList.remove('active'));
+        items[index].classList.add('active');
+        
+        const position = (index / (items.length - 1)) * 100;
+        dot.style.left = position + '%';
+        
+        year.textContent = items[index].dataset.year;
     }
-
-    if (closeBtn && sideBanner) {
-        closeBtn.addEventListener('click', () => {
-            sideBanner.classList.remove('open');
-        });
-    } else {
-    };
-
-    if (bannerLink && sideBanner) {
-    bannerLink.addEventListener('click', () => {
-        sideBanner.classList.remove('open');
-        setTimeout(() => {
-        const section = document.getElementById('lavora-con-noi');
-        if (section) {
-            const offsetPosition = section.offsetTop - header.offsetHeight;
-            window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-            });
+    
+    next.addEventListener('click', () => {
+        if (current < items.length - 1) {
+            current++;
+            showItem(current);
         }
-        }, 300);e
     });
-    }
+    
+    prev.addEventListener('click', () => {
+        if (current > 0) {
+            current--;
+            showItem(current);
+        }
+    });
+    
+    showItem(current);
 });
