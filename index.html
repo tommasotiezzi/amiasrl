@@ -9,24 +9,6 @@
     <link rel="icon" type="image/png" href="./Images/Marchi/AMIA-LOGO-black-MARCHIO.svg" style="height: 32px; width: 32px">
 </head>
 <body style="background-color: #fafafa;">
-  <div class="side-banner" id="sideBanner">
-    <div class="banner-content">
-        Nessun designer è stato maltrattato nella creazione di questo sito. 
-        <br>
-        <br>
-        Perché non c'era. 
-        <br>
-        <br>
-        <a href="#lavora-con-noi"></a><span class="claimAction">Unisciti subito a <a href="#lavora-con-noi" class="banner-link" id="bannerLink">noi</a>!</span>
-        <button class="close-btn" id="closeBtn">✕</button>
-    </div>
-    <div class="banner-gif">
-      <img src="./Images/Day Of The Tentacle Pixel GIF.gif" width="200px" alt="Banner animation" class="bannerAnimation" width="100%">
-    </div>
-    <div class="banner-tab" id="bannerTab">
-        👋
-    </div>
-  </div>
     <!-- Header Section -->
     <section id="header">
         <div class="container">
@@ -46,7 +28,7 @@
                   <li class="nav-item"><a href="#valori" class="nav-link" style="color: #141414;">Valori</a></li>
                   <li class="nav-item"><a href="#persone" class="nav-link" style="color: #141414;">People</a></li>
                   <li class="nav-item"><a href="#prodotti" class="nav-link" style="color: #141414;">Prodotti</a></li>
-                  <li class="nav-item"><a href="#lavora-con-noi" class="nav-link" style="color: #141414;">Lavora con noi</a></li>
+                  <li class="nav-item"><a href="#lavoraconnoi" class="nav-link" style="color: #141414;">Lavora con noi</a></li>
                 </ul>
               </div>
             </div>
@@ -55,25 +37,68 @@
         </div>
     </section>
     <div class="section-end-fade"></div>
-    <!-- Hero Section -->
-    <section id="about" class="hero marginSection">
+    <!-- About/Hero Section - Preserved with original styling -->
+    <section id="about" class="hero marginSection" style="padding-top: 30px !important">
       <div class="container">
           <div class="container2">
               <div class="item logo-container">
                   <img src="./Images/Marchi/AMIA-LOGO-black-MARCHIO.svg" alt="AMIA Logo" class="logo-default">
                   <img src="./Images/Marchi/AMIA-LOGO-color4-MARCHIO.svg" alt="AMIA logo 2" class="logo-hover">
               </div>
+
               <div class="item heading-container">
                   <h1>Innovate Today,<span class="glow">Shape Tomorrow</span></h1>
               </div>
+
               <div class="item about-text">
                   <p class="lead mt-4">La nostra missione è migliorare l'esperienza di attimi di vita delle persone, a prescindere dal valore percepito, offrendo soluzioni intuitive e di alta qualità che rispondano a reali esigenze, guidati dai dati, dalla passione per l'innovazione e dall'impegno nella cura dei particolari</p>
+              </div>
+              <img class="arrow" src="./Images/Freccia-Nera.png" alt="">
+              <div class="timeline-carousel mt-5">
+                <h2 style="font-weight: 700; margin-bottom: 40px;">La nostra storia</h2>
+                <div class="timeline-item active" data-year="2010">
+                    <img src="./Team/Abba.png" alt="Person" class="timeline-photo">
+                    <p class="timeline-description">La nostra storia inizia con un'idea semplice: innovare per migliorare la vita delle persone.</p>
+                </div>
+                <div class="timeline-item" data-year="2012">
+                    <img src="./Team/Giamp.png" alt="Person" class="timeline-photo">
+                    <p class="timeline-description">Completamento del primo grande progetto di trasformazione digitale per una prestigiosa azienda italiana.</p>
+                </div>
+                <div class="timeline-item" data-year="2015">
+                    <img src="./Team/Matteo.png" alt="Person" class="timeline-photo">
+                    <p class="timeline-description">Espansione del team e dei servizi per includere soluzioni di AI e machine learning.</p>
+                </div>
+                <div class="timeline-item" data-year="2018">
+                    <img src="./Team/Nicola.png" alt="Person" class="timeline-photo">
+                    <p class="timeline-description">Riconoscimento per il nostro approccio innovativo alle soluzioni data-driven nel mercato italiano.</p>
+                </div>
+                <div class="timeline-item" data-year="2020">
+                    <img src="./Team/Paolo.png" alt="Person" class="timeline-photo">
+                    <p class="timeline-description">Estensione dei servizi a livello internazionale, con focus su soluzioni sostenibili e orientate al futuro.</p>
+                </div>
+                <div class="timeline-item" data-year="2023">
+                    <img src="./Team/Tancredi.png" alt="Person" class="timeline-photo">
+                    <p class="timeline-description">Lancio di piattaforme AI avanzate e partnership con aziende tecnologiche leader.</p>
+                </div>
+                <div class="timeline-item" data-year="2025">
+                    <img src="./Team/Christian.png" alt="Person" class="timeline-photo">
+                    <p class="timeline-description">Continuiamo a innovare oggi e dare forma al domani con soluzioni tecnologiche all'avanguardia.</p>
+                </div>
+                
+                <div class="timeline-controls">
+                    <button class="prev">←</button>
+                    <div class="timeline-track">
+                        <div class="timeline-dot"></div>
+                    </div>
+                    <button class="next">→</button>
+                </div>
+                <div class="current-year"></div>
               </div>
           </div>
       </div>
   </section>
 
-    <!-- Valori Section -->
+    <!-- Completely Redesigned Valori Section -->
     <section id="valori" class="valori py-5 marginSection" style="background-color: #f6f6f6; padding-top: 80px !important">
         <div class="container">
             <h2 class="text-center mb-5">I Nostri Valori</h2>
@@ -218,6 +243,7 @@
         </div>
         <div class="container">
           <div class="row align-items-center next-app-section">
+            <!-- Change the order classes to control display on mobile -->
             <div class="col-md-6 order-2 order-md-2">
               <div class="product-image text-center">
                 <img src="./Images/Pending Mental Health GIF by Pudgy Penguins.gif" class="img-fluid" alt="Work in progress" style="margin-top: 30px; max-height: 370px; max-width: 370px;">
@@ -247,12 +273,13 @@
     </section>
 
     <!-- Lavora con noi Section -->
-<section id="lavora-con-noi" class="lavora-con-noi marginSection py-5 bg-light">
+<section id="lavoraconnoi" class="lavoraconnoi marginSection py-5 bg-light">
     <div class="container">
         <h2 class="text-center mb-5">Diventa un Amians</h2>
         <div class="row justify-content-center">
             <div class="col-lg-12">
-                <div class="positions-list">
+                <div class="positions-list">     
+                    <!-- Content Creator -->
                     <div class="position-item mb-4">
                         <div class="card w-100">
                             <div class="card-body d-flex justify-content-between align-items-center">
@@ -260,10 +287,12 @@
                                     <h3 class="card-title mb-1">Content Creator</h3>
                                     <p class="card-text mb-0">Milano, Italia | Full-time | Modalità di lavoro: ibrida</p>
                                 </div>
-                                <a href="./undercostruction.html" target="_blank" class="btn btn-outline-dark">Candidati</a>
+                                <a href="https://curvy-mare-28f.notion.site/1eddebe7ab7581bab966f0e7ad833aa5?pvs=105" target="_blank" class="btn btn-outline-dark">Candidati</a>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Sales Manager -->
                     <div class="position-item mb-4">
                         <div class="card w-100">
                             <div class="card-body d-flex justify-content-between align-items-center">
@@ -271,10 +300,12 @@
                                     <h3 class="card-title mb-1">Sales Ads Manager</h3>
                                     <p class="card-text mb-0">Milano, Italia | Full-time, anche posizioni part-time verranno considerate | Modalità di lavoro: ibrida</p>
                                 </div>
-                                <a href="./undercostruction.html" target="_blank" class="btn btn-outline-dark">Candidati</a>
+                                <a href="https://curvy-mare-28f.notion.site/1e2debe7ab7581359e05c1f4e6c999c4?pvs=105" target="_blank" class="btn btn-outline-dark">Candidati</a>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- CTO -->
                     <div class="position-item mb-4">
                         <div class="card w-100">
                             <div class="card-body d-flex justify-content-between align-items-center">
@@ -282,10 +313,22 @@
                                     <h3 class="card-title mb-1">CTO</h3>
                                     <p class="card-text mb-0">Milano, Italia  | Full-time | Modalità di lavoro: ibrida</p>
                                 </div>
-                                <a href="./undercostruction.html" target="_blank" class="btn btn-outline-dark">Candidati</a>
+                                <a href="https://curvy-mare-28f.notion.site/1eddebe7ab7581219149e75ef8f9c313?pvs=105" target="_blank" class="btn btn-outline-dark">Candidati</a>
                             </div>
                         </div>
                     </div>
+                    <div class="position-item mb-4">
+                        <div class="card w-100">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h3 class="card-title mb-1">Linkedin Social Media Manager</h3>
+                                    <p class="card-text mb-0">Milano, Italia | Part-Time | Modalità di lavoro: ibrida</p>
+                                </div>
+                                <a href="https://curvy-mare-28f.notion.site/1eddebe7ab7581a4aa3df54b27b0b768?pvs=105" target="_blank" class="btn btn-outline-dark">Candidati</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Candidatura Spontanea -->
                     <div class="position-item mb-4">
                         <div class="card w-100">
                             <div class="card-body d-flex justify-content-between align-items-center">
