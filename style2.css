@@ -1,0 +1,253 @@
+/* CSS adattato per la pagina Careers che mantiene lo stile della pagina principale */
+
+:root {
+    --bg-color: #ffffff;
+    --text-color: #141414;
+    --light-gray: #f7f6f3;
+    --border-color: #e6e6e6;
+    --hover-bg: #f1f1ef;
+    --tag-bg: #ebeced;
+    --tag-text: #787774;
+    --secondary-text: #6b6b6b;
+    --accent-color: #141414;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.5;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+/* Header stilizzato come nella pagina principale */
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 60px;
+}
+
+.logo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 24px;
+}
+
+/* Stile titoli coerenti con la pagina principale */
+h1 {
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Il subtitle corrisponde allo stile della descrizione della missione nella pagina principale */
+.subtitle {
+    font-size: 18px;
+    color: var(--secondary-text);
+    margin-bottom: 32px;
+    text-align: center;
+    max-width: 600px;
+}
+
+/* Adattamento per il titolo sezione data che corrisponde a un h2 nella pagina principale */
+.date-header {
+    font-size: 32px; /* Dimensione coerente con gli h2 della pagina principale */
+    font-weight: 600;
+    margin-bottom: 24px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Lista job coerente con le sezioni della pagina principale */
+.job-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px; /* Spacing aumentato per coerenza con gli spazi del sito principale */
+    margin-bottom: 40px;
+}
+
+/* Card job stilizzate in modo simile ai blocchi contenuto della pagina principale */
+.job-card {
+    display: flex;
+    align-items: center;
+    padding: 20px; /* Padding aumentato per coerenza con gli spazi del sito principale */
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease; /* Aggiunta trasformazione per coerenza con hover della pagina principale */
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+    background-color: var(--bg-color);
+}
+
+.job-card:hover {
+    background-color: var(--hover-bg);
+    transform: translateY(-2px); /* Effetto hover simile agli elementi interattivi della pagina principale */
+}
+
+.job-card:hover::after {
+    content: "Apply →";
+    position: absolute;
+    right: 20px;
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.job-icon {
+    width: 32px; /* Dimensione aumentata per coerenza con icone pagina principale */
+    height: 32px;
+    margin-right: 16px;
+    background-color: var(--light-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.job-title {
+    font-size: 18px; /* Dimensione aumentata per coerenza con testi pagina principale */
+    font-weight: 600;
+}
+
+/* Tag stilizzati in modo coerente con elementi simili della pagina principale */
+.tag {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    line-height: normal;
+    background-color: var(--tag-bg);
+    color: var(--tag-text);
+    padding: 4px 10px; /* Padding aumentato per coerenza */
+    border-radius: 4px;
+    font-size: 14px; /* Dimensione aumentata per coerenza */
+    margin-top: 8px;
+    margin-right: 8px;
+}
+
+.tag2 {
+    display: inline-flex;
+    align-items: center;
+    background-image: linear-gradient(135deg, var(--gradient-start, #00004d) 0%, var(--gradient-end, #101828) 100%);
+    color: whitesmoke;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-top: 8px;
+    margin-right: 8px;
+    font-weight: 600;
+}
+
+.tag3 {
+    display: inline-flex;
+    align-items: center;
+    background-image: linear-gradient(135deg, var(--gradient-start, #FF6444) 0%, var(--gradient-end, #FF6ADE) 100%);
+    color: whitesmoke;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-top: 8px;
+    margin-right: 8px;
+    font-weight: 600;
+}
+
+.tag-icon {
+    width: 16px; /* Dimensione aumentata per coerenza */
+    height: 16px;
+    margin-right: 6px;
+}
+
+.footer {
+    margin-top: 60px; /* Spacing aumentato per coerenza */
+    text-align: center;
+    color: var(--secondary-text);
+    font-size: 16px; /* Dimensione aumentata per coerenza */
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Animazione per hover state coerente con interazioni della pagina principale */
+.job-card {
+    position: relative;
+}
+
+.job-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background-color: var(--accent-color);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.job-card:hover::before {
+    transform: scaleY(1);
+}
+
+/* Rimosso tema dark e toggle relativo */
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 32px;
+    }
+    
+    .subtitle {
+        font-size: 16px;
+    }
+    
+    .date-header {
+        font-size: 24px;
+    }
+    
+    .job-card:hover::after {
+        display: none;
+    }
+    
+    body {
+        padding: 20px;
+    }
+    
+    .job-title {
+        font-size: 16px;
+    }
+}
+
+/* Stile aggiuntivo per bottone "Torna indietro" simile agli altri bottoni del sito */
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--accent-color);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 30px;
+    transition: all 0.3s ease;
+}
+
+.back-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.back-button svg {
+    margin-right: 8px;
+}

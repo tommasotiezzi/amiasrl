@@ -1,0 +1,1719 @@
+/* ===================================
+   1. RESET E BASI GENERALI
+   =================================== */
+.animated {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #fafafa;
+}
+
+/* ===================================
+   HEADER E NAVIGAZIONE
+   =================================== */
+
+/* Container per header */
+.container {
+  width: 100%;
+  max-width: 1400px;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+#header {
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  z-index: 1000;
+}
+
+#header.sticky-top {
+  position: fixed;
+  top: 0;
+  background-color: #fafafa;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+body.has-sticky-nav {
+  padding-top: 80px;
+}
+
+.navbar {
+  width: 100%;
+}
+
+.navbar > .container,
+.navbar > .container-fluid {
+  width: 100%;
+  max-width: 1400px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-nav {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.nav-item {
+  margin-left: 20px;
+  padding-left: 5px;
+  padding-right: 5px;
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.nav-item > .item-valori {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.navbar-nav .nav-link {
+  padding: 0.5rem 0.75rem;
+  transition: color 0.3s ease;
+  color: #141414;
+  position: relative;
+  margin: 0 10px;
+  background-color: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.navbar-nav .nav-link.active {
+  background-color: transparent;
+  color: #141414;
+  font-weight: 600;
+}
+
+.navbar-nav .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #141414;
+}
+
+.navbar-nav .nav-link:not(.active):hover,
+.navbar-nav .nav-link:not(.active):active,
+.navbar-nav .nav-link:not(.active):focus {
+  background-color: transparent;
+  opacity: 0.7;
+}
+
+/* ===================================
+   HERO/ABOUT SECTION
+   =================================== */
+
+#about {
+  scroll-margin-top: 20px;
+  overflow-x: hidden;
+}
+
+#about.marginSection {
+  padding-top: 20px; 
+}
+
+.hero {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  position: relative;
+}
+
+.container2 {
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.container2 .item img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.container2 .item img[alt="AMIA Logo"] {
+  min-height: 220px;
+  min-width: 380px;
+  position: relative;
+}
+
+.logo-container {
+  position: relative;
+  display: inline-block;
+}
+
+.logo-default, .logo-hover {
+  transition: opacity 0.3s ease;
+}
+
+.logo-hover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+}
+
+.logo-container:hover .logo-default {
+  opacity: 0;
+}
+
+.logo-container:hover .logo-hover {
+  opacity: 1;
+}
+
+.heading-container h1 {
+  font-size: 3.75rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #141414;
+  margin-top: 0;
+}
+
+.container2 h1 .glow {
+  color: #141414;
+  position: relative;
+  display: inline-block;
+  padding: 0 5px;
+  margin-left: 7px;
+}
+
+.item.about-text {
+  margin-bottom: 30px;
+}
+
+.about-text p.lead {
+  font-size: 1.25rem;
+  line-height: 1.625;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #141414;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.arrow {
+  opacity: 0.04;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  width: 700px;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ===================================
+   SEZIONE VALORI
+   =================================== */
+
+#valori {
+  scroll-margin-top: 20px;
+  margin-bottom: 0px !important;
+  padding-bottom: 0px !important;
+  overflow-x: hidden;
+}
+
+#valori.marginSection {
+  padding-top: 20px; 
+}
+
+#valori.valori {
+  background-color: #fafafa;
+  text-align: left;
+}
+
+/* Nasconde il titolo principale */
+#valori .title-section {
+  display: none;
+}
+
+#valori .valori-timeline {
+  width: 100%;
+  max-width: 1400px;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+#valori .valori-item {
+  margin-bottom: 60px;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+  position: relative;
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+#valori .valori-item.animated {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#valori .valori-item:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+
+#valori .valori-content {
+  position: relative;
+  margin-top: 80px;
+}
+
+#valori .valori-content h3 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 2.25rem;
+  line-height: 1.2;
+  font-weight: 700;
+  margin: 0 0 24px 0;
+  color: #141414;
+  position: relative;
+  display: inline;
+}
+
+
+#valori .valori-item:hover .valori-content h3::after {
+  transform: scaleX(1);
+}
+
+#valori .valori-content p {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 1.25rem;
+  line-height: 1.625;
+  font-weight: 300;
+  margin: 0;
+  text-align: left;
+  color: #141414;
+}
+
+#valori .valori-content p.lead {
+  font-size: 1.25rem;
+  line-height: 1.625;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+/* ===================================
+   SEZIONE PEOPLE/PERSONE
+   =================================== */
+
+#persone {
+  scroll-margin-top: 20px;
+  overflow-x: hidden;
+}
+
+#persone.marginSection {
+  padding-top: 20px; 
+  padding-bottom: 60px;
+}
+
+#persone {
+  background-color: #f8f9fa;
+}
+
+/* Timeline Container */
+.container-timeline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.nostra-storia-title {
+  font-size: 3.2rem;
+  font-weight: 800;
+  margin-bottom: 5rem;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #141414;
+  margin-top: 0;
+  text-align: center;
+}
+
+.bootcamp-subtitle {
+  font-size: 1.125rem;
+  color: #141414;
+  margin: 10px auto 10px;
+  max-width: 600px;
+  line-height: 1.625;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  text-align: center;
+  margin-bottom: 40px;
+  margin-top: 40px;
+}
+
+/* Timeline Carousel */
+.timeline-carousel.mt-5 {
+  margin-top: 40px;
+}
+
+.timeline-item {
+  display: none;
+  margin-top: 50px;
+}
+
+.timeline-item.active {
+  display: block;
+}
+
+.timeline-photo {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 3px solid #ecebeb;
+  object-fit: cover;
+}
+
+.timeline-description {
+  font-size: 1.125rem;
+  color: #141414;
+  margin: 10px auto 40px;
+  max-width: 600px;
+  line-height: 1.625;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.timeline-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.timeline-controls button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0 30px;
+  transition: opacity 0.3s ease;
+  color: #141414;
+}
+
+.timeline-controls button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.timeline-track {
+  width: 300px;
+  height: 2px;
+  background: #ddd;
+  position: relative;
+  margin: 0 20px;
+}
+
+.timeline-dot {
+  width: 20px;
+  height: 20px;
+  background: #141414;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* Rimosso transition: left 0.3s ease; */
+}
+
+/* CSS VECCHIO per dot che si muove - da commentare/scommentare se serve */
+/*
+.timeline-dot {
+  width: 20px;
+  height: 20px;
+  background: #141414;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: left 0.3s ease;
+}
+*/
+.current-year {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #141414;
+}
+
+/* Bootcamp Section */
+.bootcamp-section {
+  padding: 60px 0;
+  overflow: hidden;
+  background-color: #f8f9fa;
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+
+.bootcamp-title {
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #141414;
+  margin-top: 0;
+}
+
+
+/* Infinite Carousel */
+.infinite-carousel {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding: 20px 0;
+}
+
+.infinite-carousel-wrapper {
+  display: flex;
+  width: fit-content;
+  animation: scroll-infinite 30s linear infinite;
+}
+
+.infinite-carousel-item {
+  flex: 0 0 auto;
+  width: 300px;
+  height: 260px;
+  margin-right: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.infinite-carousel-item:hover {
+  transform: translateY(-5px);
+}
+
+.infinite-carousel-item img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  display: block;
+}
+
+.infinite-carousel-caption {
+  padding: 12px;
+  text-align: center;
+}
+
+.infinite-carousel-caption h5 {
+  margin: 0;
+  font-size: 14px;
+  color: #333333;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.infinite-carousel::before,
+.infinite-carousel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 80px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.infinite-carousel::before {
+  left: 0;
+  background: linear-gradient(to right, #f8f9fa, rgba(248, 249, 250, 0));
+}
+
+.infinite-carousel::after {
+  right: 0;
+  background: linear-gradient(to left, #f8f9fa, rgba(248, 249, 250, 0));
+}
+
+@keyframes scroll-infinite {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-220px * 10 - 20px * 10));
+  }
+}
+
+
+/* ===================================
+   SEZIONE PRODUCTS/PRODOTTI
+   =================================== */
+
+#prodotti {
+  scroll-margin-top: 60px;
+  overflow-x: hidden;
+  padding-top: 0;
+}
+
+#prodotti.marginSection {
+  padding-top: 60px; 
+  padding-bottom: 60px;
+}
+
+/* Products Title */
+#prodotti .title-section {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  margin-bottom: 40px;
+  color: #141414;
+  text-align: center;
+  font-size: 2.25rem;
+  margin-top: 0;
+}
+
+/* Row margins fix */
+#prodotti .margins-fix {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Product Image */
+.product-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+}
+
+.product-image img {
+  max-width: 95%;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Product Info Container */
+.product-info {
+  padding: 20px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+/* Product Title */
+.algo-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #141414;
+  margin-bottom: 1rem;
+  margin-top: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Product Lead Text */
+.product-info p.lead {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 1.125rem;
+  line-height: 1.625;
+  color: #141414;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+/* Feature List */
+.feature-list {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.feature-list li {
+  font-size: 1.125rem;
+  line-height: 1.625;
+  margin-bottom: 1rem;
+  padding-left: 0.5rem;
+  color: #141414;
+  margin-top: 30px;
+}
+
+.feature-list li:last-child {
+  margin-bottom: 30px;
+}
+
+.feature-list li strong {
+  font-weight: 700;
+  color: #141414;
+}
+
+/* Download Buttons Container */
+.product-info .mt-4 {
+  margin-top: 1.5rem;
+}
+
+/* Download Buttons */
+.product-info .btn {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #141414;
+  color: #ffffff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.product-info .btn:hover {
+  background-color: #333333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.product-info .btn.me-2 {
+  margin-right: 0.5rem;
+}
+
+.product-info .btn svg {
+  margin-right: 0.5rem;
+}
+
+/* ===================================
+   SEZIONE CAREERS/LAVORA CON NOI
+   =================================== */
+
+#lavoraconnoi {
+  scroll-margin-top: 60px;
+  overflow-x: hidden;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* Manifesto Container */
+.manifesto-container {
+  width: 90%;
+  max-width: 1400px;
+  margin: 0 auto;
+  margin-top: 6rem;
+  padding-bottom: 40px;
+}
+
+.manifesto-container.top-container {
+  padding-top: 40px;
+}
+
+/* Manifesto Rows */
+.manifesto-row {
+  margin-bottom: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.manifesto-row:last-of-type {
+  margin-bottom: 80px;
+}
+
+/* Statement Content with Animation */
+.statement-content {
+  position: relative;
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.statement-content.animated {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Statement Text */
+.statement-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 1.75rem;
+  line-height: 1.625;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+  color: #141414;
+}
+
+/* Highlight Text */
+.highlight {
+  color: #141414;
+  font-weight: 700;
+  position: relative;
+}
+
+/* CTA Container */
+.cta-container {
+  margin-top: 30px;
+  margin-bottom: 60px;
+}
+
+/* CTA Button */
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  background-color: #141414;
+  color: #ffffff;
+  padding: 16px 36px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: 600;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cta-button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.cta-text {
+  margin-right: 15px;
+}
+
+.cta-arrow {
+  font-size: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.cta-button:hover .cta-arrow {
+  transform: translateX(5px);
+}
+
+/* Animation Keyframes */
+@keyframes fadeUpIn {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===================================
+   SEZIONE FOOTER
+   =================================== */
+
+footer {
+  padding-left: 12px;
+  padding-right: 12px;
+  background-color: #141414;
+  color: #ffffff;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+footer .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Footer Columns */
+footer .col-md-4 {
+  margin-bottom: 1.5rem;
+}
+
+footer .col-md-4.mb-md-0 {
+  margin-bottom: 0;
+}
+
+/* Footer Logo */
+.footer-logo {
+  filter: invert(1);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+/* Footer Text */
+footer p {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #ffffff;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+/* Footer Headings */
+footer h5 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+/* Footer Lists */
+footer .list-unstyled {
+  padding-left: 0;
+  list-style: none;
+  margin-bottom: 1rem;
+}
+
+footer .list-unstyled li {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #ffffff;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+/* Social Icons */
+.social-icons {
+  display: flex;
+  align-items: center;
+}
+
+.social-icons a {
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.social-icons a:hover {
+  opacity: 0.7;
+}
+
+.social-icons a.me-3 {
+  margin-right: 1rem;
+}
+
+/* Footer SVG Icons */
+
+footer a:hover img[alt=""] {
+  opacity: 0.7;
+}
+
+/* Footer HR */
+footer hr {
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+footer .social-icons img {
+  filter: invert(1);
+}
+
+
+/* ===================================
+   MEDIA QUERY - MEDIUM SCREENS (768px to 1199px)
+   =================================== */
+
+/* ===================================
+   MEDIA QUERY - MEDIUM SCREENS (768px to 1199px)
+   =================================== */
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  /* Navbar adjustments for medium screens */
+  .navbar-nav .nav-link {
+    padding-left: 12px;
+    padding-right: 12px;
+    font-size: 0.95rem;
+  }
+  
+  .navbar-brand img {
+    width: 70px;
+    height: 35px;
+  }
+  
+  /* About section - balanced sizing */
+  #about .container2 {
+    max-width: 700px;
+  }
+  
+  #about .container2 .item {
+    max-width: 100%;
+    margin-bottom: 2rem;
+  }
+  
+  #about h1 {
+    font-size: 3.8rem;
+    line-height: 1.2;
+  }
+  
+  #about .lead {
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
+  
+  #about .logo-container img {
+    max-width: 220px;
+  }
+  
+  /* Valori section - SEMPRE una colonna ma più compatta */
+  #valori .valori-timeline {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  .valori-item {
+    margin-bottom: 40px; /* Ridotto da 60px */
+    padding: 0; /* Mantieni padding 0 come design originale */
+  }
+  
+  .valori-content h3 {
+    font-size: 1.8rem; /* Ridotto da 2.25rem */
+  }
+  
+  .valori-content .lead {
+    font-size: 1.1rem; /* Leggermente ridotto */
+    line-height: 1.5;
+  }
+  
+  /* Timeline e People History - CENTRATI */
+  .container-timeline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .timeline-carousel {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .timeline-item {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .timeline-photo {
+    width: 250px;
+    height: 250px;
+    margin: 0 auto;
+    display: block;
+  }
+  
+  .timeline-description {
+    font-size: 1.1rem;
+    max-width: 450px;
+    margin: 20px auto;
+    text-align: center;
+  }
+  
+  .timeline-controls {
+    margin: 30px auto;
+    justify-content: center;
+  }
+  
+  .current-year {
+    font-size: 2.2rem;
+    text-align: center;
+  }
+  
+  /* Bootcamp section centrata */
+  .bootcamp-section {
+    text-align: center;
+  }
+  
+  .bootcamp-subtitle {
+    font-size: 1.1rem;
+    text-align: center;
+    margin: 0 auto;
+  }
+  
+  /* Infinite carousel - RIMUOVI spazi bianchi dalle immagini */
+  .infinite-carousel {
+    margin: 0;
+    padding: 20px 0;
+  }
+  
+  .infinite-carousel-item {
+    min-width: 220px;
+    height: 180px;
+    margin-bottom: 0; /* Rimuovi margini extra */
+    margin-top: 0;
+  }
+  
+  .infinite-carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    margin: 0; /* Rimuovi qualsiasi margine dalle immagini */
+    padding: 0; /* Rimuovi qualsiasi padding dalle immagini */
+  }
+  
+  /* Products section */
+  #prodotti .col-md-6 {
+    margin-bottom: 2rem;
+  }
+  
+  .algo-title {
+    font-size: 2rem;
+  }
+  
+  .feature-list li {
+    font-size: 1rem;
+    margin-top: 25px !important;
+    margin-bottom: 25px !important;
+  }
+  .manifesto-container {
+  width: 90%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  }
+  .product-info .btn.me-2 {
+    margin: 0; /* Rimuovi margin auto */
+    margin-bottom: 20px;
+    float: left;
+  }
+  /* Careers section - CTA BUTTON CORRETTO */
+  #lavoraconnoi {
+    text-align: left; /* Forza allineamento a sinistra per tutta la sezione */
+  }
+  
+  #lavoraconnoi .statement-text {
+    font-size: 1.8rem;
+    line-height: 1.4;
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: left; /* Testo allineato a sinistra */
+  }
+  
+  .cta-container {
+    text-align: left !important; /* Forza allineamento a sinistra */
+    margin-top: 30px;
+    margin-bottom: 60px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .cta-button {
+    padding: 1.2rem 2.5rem;
+    font-size: 1.1rem;
+  }
+  
+  /* Titles for medium screens */
+  .title-section, .nostra-storia-title {
+    font-size: 2.8rem !important;
+    margin-bottom: 3rem !important;
+    text-align: center;
+  }
+  
+  /* Footer adjustments */
+  footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  
+  footer .col-md-4 {
+    margin-bottom: 2rem;
+  }
+  
+  footer h5 {
+    font-size: 1.2rem;
+  }
+}
+
+
+/* ===================================
+   MEDIA QUERY - SMALL SCREENS (576px to 767px)
+   =================================== */
+
+@media (min-width: 576px) and (max-width: 767px) {
+  /* General spacing adjustments */
+  .item-valori{
+    padding-left: 16px;
+  }
+  .marginSection {
+    padding-top: 60px !important;
+  }
+  
+  /* Header adjustments */
+  #header {
+    padding: 0.75rem 0;
+  }
+  
+  .navbar-brand img {
+    width: 65px;
+    height: 32px;
+  }
+  
+  .navbar-nav .nav-link {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.6rem;
+  }
+  
+  /* About section */
+  #about {
+    padding-top: 20px !important;
+  }
+  
+  #about .container2 {
+    max-width: 500px;
+  }
+  
+  #about .container2 .item {
+    margin-bottom: 2rem;
+  }
+  
+  #about h1 {
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+  
+  #about .lead {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  #about .logo-container img {
+    max-width: 300px;
+    min-width: 300px;
+    min-height: 120px;
+  }
+  body {
+    background-color: red;
+  }
+
+
+  
+  /* Valori section - remain single column but more compact */
+  #valori {
+    padding-top: 50px !important;
+  }
+  
+  #valori .valori-timeline {
+    max-width: 520px;
+    margin: 0 auto;
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  
+  .valori-item {
+    margin-bottom: 30px;
+  }
+  
+  .valori-content h3 {
+    font-size: 1.6rem;
+  }
+  
+  .valori-content .lead {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  /* People section */
+  .nostra-storia-title {
+    font-size: 2.5rem !important;
+    margin-bottom: 2.5rem !important;
+  }
+  
+  .timeline-item {
+    max-width: 450px;
+    margin: 0 auto;
+  }
+  
+  .timeline-photo {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .timeline-description {
+    font-size: 1rem;
+    max-width: 400px;
+    margin: 15px auto;
+    padding: 0 1rem;
+  }
+  
+  .timeline-controls {
+    margin: 25px auto;
+  }
+  
+  .timeline-controls button {
+    font-size: 20px;
+    padding: 0 25px;
+  }
+  
+  .current-year {
+    font-size: 2rem;
+  }
+  
+  /* Bootcamp section */
+  .bootcamp-subtitle {
+    font-size: 1rem;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  /* Infinite carousel */
+  .infinite-carousel-item {
+    min-width: 250px;
+    height: 250px;
+  }
+  
+  .infinite-carousel-item img {
+    height: 250px;
+  }
+  .manifesto-container {
+  width: 90%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  }
+  /* Products section */
+  #prodotti {
+    padding-top: 50px !important;
+  }
+  
+  #prodotti .nostra-storia-title {
+    font-size: 2.2rem !important;
+  }
+  
+  #prodotti .row {
+    flex-direction: column;
+  }
+  
+  #prodotti .col-md-6 {
+    margin-bottom: 2rem;
+  }
+  
+  .product-image {
+    order: 1;
+    margin-bottom: 1.5rem;
+  }
+  
+  .product-image img {
+    max-width: 70% !important; /* Ridotta da 85% a 60% */
+    height: auto;
+  }
+  
+  .product-info {
+    order: 2;
+    padding: 15px 20px;
+  }
+  
+  .algo-title {
+    font-size: 1.8rem;
+    text-align: center;
+  }
+  
+  .product-info .lead {
+    text-align: center;
+    font-size: 1rem;
+  }
+  
+  .feature-list {
+    font-size: 0.95rem;
+  }
+  
+  .feature-list li {
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+  }
+  
+  .product-info .mt-4 {
+    text-align: center;
+  }
+  
+  .product-info .btn {
+    font-size: 0.9rem;
+    padding: 10px 20px;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Careers section */
+  #lavoraconnoi .statement-text {
+    font-size: 1.5rem;
+    line-height: 1.4;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  
+  .cta-container {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1rem;
+  }
+  
+  .cta-button {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+  
+  /* Footer adjustments */
+  footer {
+    padding-left: 15px;
+    padding-right: 15px;
+    text-align: center;
+  }
+  
+  footer .col-md-4 {
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  .footer-logo {
+    margin: 0 auto 1rem auto; /* Centra il logo */
+    display: block;
+  }
+  
+  footer h5 {
+    font-size: 1.1rem;
+  }
+  
+  footer p, footer li {
+    font-size: 0.95rem;
+  }
+  
+  .social-icons {
+    justify-content: center;
+  }
+}
+
+
+/* ===================================
+   MEDIA QUERY - EXTRA SMALL SCREENS (≤575px)
+   =================================== */
+
+@media (max-width: 575px) {
+  /* General containers */
+  .container {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  .item-valori{
+    padding-left: 16px;
+  }
+  /* General spacing */
+  .marginSection {
+    padding-top: 50px !important;
+  }
+  
+  /* Header mobile */
+  #header {
+    padding: 0.5rem 0;
+  }
+  
+  .navbar-brand img {
+    width: 60px;
+    height: 30px;
+  }
+  
+  /* Mobile menu button */
+  .navbar-toggler {
+    padding: 0.25rem 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .navbar-nav .nav-link {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.5rem;
+  }
+  
+  /* About section mobile */
+  #about {
+    padding-top: 15px !important;
+  }
+  
+  #about .container2 {
+    gap: 1.5rem;
+    max-width: 100%;
+    padding: 0 10px;
+  }
+  section#about .container2 img.arrow,
+  #about .container2 .arrow,
+  body #about .arrow {
+    opacity: 0.08 !important;
+    margin-bottom: 0px !important;
+    margin-top: 30px !important;
+
+  }
+
+  .item.about-text {
+  margin-bottom: 0px !important;
+}
+  .lead {
+    margin-bottom: 0px !important;
+  }
+
+  #about .logo-container img {
+    max-width: 180px; /* Ingrandito da 150px */
+    min-width: 180px;
+    min-height: 110px;
+  }
+  
+  #about h1 {
+    font-size: 2.2rem; /* Ingrandito da 2.2rem per essere più grande dei titoli sezione */
+    line-height: 1.2;
+  }
+  
+  #about .lead {
+    font-size: 1rem;
+    margin-top: 0px !important;
+  }
+  
+  /* Titles mobile */
+  .title-section, .nostra-storia-title {
+    font-size: 2rem !important;
+    margin-bottom: 2rem !important;
+    padding: 0 10px;
+  }
+   .nostra-storia-title {
+   font-size: 1.8rem !important;
+   margin-bottom: 3rem !important;
+   padding: 0 15px;
+   text-align: center;
+  }
+  
+  /* Valori section mobile - MOLTO ridotti */
+  #valori {
+    padding-top: 0px !important;
+  }
+  #valori .valori-timeline {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  
+  .valori-item {
+    margin-bottom: 1.5rem;
+    padding: 0 5px;
+  }
+  
+  .valori-content h3 {
+    font-size: 1.1rem !important; /* Reingrandito un po' da 1rem */
+  }
+  
+  .valori-content .lead {
+    font-size: 0.85rem !important; /* Reingrandito un po' da 0.8rem */
+    padding: 0 5px;
+    line-height: 1.4;
+  }
+  
+  /* People section mobile */
+  .timeline-item {
+    max-width: 280px;
+    margin: 0 auto 2rem auto;
+  }
+  
+  a.btn.btn-dark {
+    margin-right: 8px;
+  }
+  .timeline-photo {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .timeline-description {
+    font-size: 0.9rem;
+    padding: 0 1rem;
+    max-width: 250px;
+  }
+  
+  .timeline-controls {
+    margin-top: 2rem;
+    padding: 0 30px; /* Più padding per allontanare frecce dai bordi */
+  }
+  
+  .timeline-controls button {
+    padding: 0.5rem 1.5rem; /* Più padding laterale */
+    font-size: 1.2rem;
+  }
+  
+  .timeline-track {
+    width: 200px; /* Ridotta da 300px per mobile */
+    margin: 0 25px; /* Più spazio dai bottoni */
+  }
+  
+  .current-year {
+    font-size: 1.5rem;
+    margin-top: 1rem;
+  }
+  
+  
+  /* Bootcamp section mobile */
+  .bootcamp-subtitle {
+    font-size: 0.9rem;
+    padding: 0 15px;
+  }
+  
+  .infinite-carousel-item {
+    min-width: 200px;
+    height: 200px;
+  }
+  
+  .infinite-carousel-item img {
+    border-radius: 15px;
+    height: 200px;
+  }
+  
+  /* Products section mobile - LAYOUT CORRETTO */
+  #prodotti .nostra-storia-title {
+    font-size: 1.8rem !important;
+  }
+  
+  #prodotti .row {
+    flex-direction: column; /* Immagine sopra, non reverse */
+  }
+  
+  #prodotti .col-md-6 {
+    margin-bottom: 2rem;
+  }
+  .manifesto-container {
+  width: 90%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  }
+  
+  .product-image {
+    order: 1; /* Immagine per prima */
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .product-image img {
+    max-width: 70% !important; /* Leggermente più grande per mobile */
+  }
+  
+  .product-info {
+    order: 2; /* Info dopo */
+    padding: 10px 15px;
+    text-align: center; /* Tutto centrato */
+  }
+  
+  .algo-title {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+  
+  .product-info .lead {
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  
+  .feature-list {
+    text-align: left !important; /* TORNATO A SINISTRA solo le feature */
+    max-width: 300px;
+    margin: 0 auto;
+    list-style: disc; /* Riportato i bullet points */
+    padding-left: 1.2rem;
+  }
+  
+  .feature-list li {
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+    font-size: 0.9rem;
+    padding-left: 0.3rem;
+  }
+  
+  .product-info .mt-4 {
+    text-align: center;
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem; /* Aumentato gap per centrare meglio */
+  }
+  
+  .product-info .btn {
+    font-size: 0.85rem;
+    padding: 12px 24px; /* Padding più uniforme */
+    margin: 0;
+    display: inline-block; /* Cambiato da block */
+    width: auto; /* Cambiato da fit-content */
+    min-width: 160px; /* Leggermente più largo */
+  }
+  
+  .product-info .btn.me-2 {
+    margin: 0; /* Rimuovi margin auto */
+    margin-bottom: 20px;
+  }
+  
+  /* Careers section mobile */
+  #lavoraconnoi .statement-text {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    padding: 0 1rem;
+    max-width: 100%;
+  }
+  
+  .cta-container {
+    padding: 0 1rem;
+    max-width: 100%;
+    text-align: center !important; /* Forza centramento */
+    display: flex;
+    justify-content: center;
+  }
+  
+  .cta-button {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    display: inline-flex; /* ← Change from inline-block to inline-flex */
+    align-items: center;   /* ← Add this back */
+    width: auto; /* Rimosso width fit-content */
+    margin: 0; /* Rimosso margin auto */
+  }
+  
+  /* Footer mobile */
+  footer {
+    padding-left: 15px;
+    padding-right: 15px;
+    text-align: center;
+  }
+  
+  footer .col-md-4 {
+    margin-bottom: 2rem;
+  }
+  
+  .footer-logo {
+    margin: 0 auto 1rem auto;
+    display: block;
+  }
+  
+  footer h5 {
+    font-size: 1.1rem;
+  }
+  
+  footer p, footer li {
+    font-size: 0.9rem;
+  }
+  
+  .social-icons {
+    justify-content: center;
+    margin-left: 18px;
+  }
+}
