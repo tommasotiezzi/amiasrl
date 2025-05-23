@@ -942,6 +942,9 @@ footer .social-icons img {
     padding-right: 12px;
     font-size: 0.95rem;
   }
+  .item-valori{
+    padding-left: 12px !important;
+  }
   
   .navbar-brand img {
     width: 70px;
@@ -1152,7 +1155,7 @@ footer .social-icons img {
 @media (min-width: 576px) and (max-width: 767px) {
   /* General spacing adjustments */
   .item-valori{
-    padding-left: 16px;
+    padding-left: 9.6px !important;
   }
   .marginSection {
     padding-top: 60px !important;
@@ -1415,7 +1418,7 @@ footer .social-icons img {
     padding-right: 15px;
   }
   .item-valori{
-    padding-left: 16px;
+    padding-left: 8px !important;
   }
   /* General spacing */
   .marginSection {
