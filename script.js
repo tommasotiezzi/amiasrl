@@ -21,11 +21,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }, { passive: true });
   
-  // Menu mobile essenziale
+  // Menu mobile essenziale - FIXED VERSION
   if (menuButton && navbarCollapse) {
-    menuButton.addEventListener('click', function(e) {
-      e.stopPropagation(); 
-      navbarCollapse.classList.toggle('show');
+    // Remove the manual toggle listener since Bootstrap handles it
+    // Just add click outside to close
+    document.addEventListener('click', function(e) {
+      if (!navbarCollapse.contains(e.target) && !menuButton.contains(e.target)) {
+        if (navbarCollapse.classList.contains('show')) {
+          // Use Bootstrap's collapse instance to properly close
+          const bsCollapse = new bootstrap.Collapse(navbarCollapse, {toggle: false});
+          bsCollapse.hide();
+        }
+      }
     });
   }
   
@@ -58,8 +65,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
       
+      // Close mobile menu after navigation - FIXED VERSION
       if (navbarCollapse.classList.contains('show')) {
-        navbarCollapse.classList.remove('show');
+        const bsCollapse = new bootstrap.Collapse(navbarCollapse, {toggle: false});
+        bsCollapse.hide();
       }
     });
   });
