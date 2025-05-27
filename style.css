@@ -564,141 +564,339 @@ body.has-sticky-nav {
 
 
 /* ===================================
-   SEZIONE PRODUCTS/PRODOTTI
+   SEZIONE PRODUCTS/PRODOTTI - REDESIGN OTTIMIZZATO
    =================================== */
 
+/* Reset della sezione esistente */
 #prodotti {
   scroll-margin-top: 60px;
   overflow-x: hidden;
-  padding-top: 0;
+  margin-top: 0;
+  padding-top: 0 !important;
+  background-color: #fafafa;
 }
 
 #prodotti.marginSection {
-  padding-top: 60px; 
+  padding-top: 60px !important; 
   padding-bottom: 60px;
 }
 
-/* Products Title */
-#prodotti .title-section {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  font-weight: 700;
-  margin-bottom: 40px;
-  color: #141414;
-  text-align: center;
-  font-size: 2.25rem;
-  margin-top: 0;
+/* Nascondi la vecchia struttura se presente */
+#prodotti .row.align-items-center.margins-fix {
+  display: none !important;
 }
 
-/* Row margins fix */
-#prodotti .margins-fix {
-  margin-left: 0;
-  margin-right: 0;
+/* ===================================
+   NUOVA STRUTTURA OTTIMIZZATA
+   =================================== */
+
+/* Product Showcase Container - PIÙ COMPATTO */
+.product-showcase {
+  display: grid !important;
+  grid-template-columns: 1.2fr 0.8fr; /* Più spazio a sinistra per l'immagine */
+  gap: 60px; /* Ridotto da 80px */
+  align-items: center;
+  max-width: 1100px; /* Ridotto da 1200px */
+  margin: 0 auto;
+  padding: 40px 0; /* Ridotto da 60px */
 }
 
-/* Product Image */
-.product-image {
+/* ===================================
+   LEFT SIDE - PRODUCT VISUAL MIGLIORATO
+   =================================== */
+
+.product-visual {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  text-align: center;
+  position: relative;
+  min-height: 450px; /* Ridotto da 500px */
 }
 
-.product-image img {
-  max-width: 95%;
+.product-stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 450px; /* Ingrandito da 400px */
+}
+
+/* TAPPETINO/GLOW MIGLIORATO */
+.product-stage::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 140%; /* Più grande */
+  height: 140%;
+  background: radial-gradient(
+    circle at center,
+    rgba(0, 122, 255, 0.12) 0%, /* Più visibile */
+    rgba(0, 122, 255, 0.08) 30%,
+    rgba(0, 122, 255, 0.04) 60%,
+    transparent 80%
+  );
+  border-radius: 50%;
+  animation: subtle-pulse 8s ease-in-out infinite; /* Più lento */
+}
+
+.product-device {
+  position: relative;
+  z-index: 2;
+  max-width: 600px;
   height: auto;
-  border-radius: 8px;
-  display: block;
-  margin: 0 auto;
+  border-radius: 20px;
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  filter: drop-shadow(0 25px 70px rgba(0, 0, 0, 0.18)); /* Ombra più pronunciata */
 }
 
-/* Product Info Container */
-.product-info {
-  padding: 20px 30px;
+.product-device:hover {
+  transform: translateY(-12px) scale(1.03); /* Più movimento */
+  filter: drop-shadow(0 35px 90px rgba(0, 0, 0, 0.25));
+}
+
+@keyframes subtle-pulse {
+  0%, 100% { 
+    opacity: 0.7; 
+    transform: translate(-50%, -50%) scale(1); 
+  }
+  50% { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1.06); 
+  }
+}
+
+/* ===================================
+   RIGHT SIDE - PRODUCT DETAILS COMPATTO
+   =================================== */
+
+.product-details {
+  padding: 20px 0; /* Ridotto da 40px */
+  max-width: 480px; /* Ridotto da 500px */
+}
+
+/* Product Introduction - PIÙ COMPATTO */
+.product-intro {
+  margin-bottom: 32px; /* Ridotto da 48px */
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.product-name {
+  font-size: 2.4rem !important; /* Ridotto da 3rem */
+  font-weight: 700;
+  color: #1d1d1f !important;
+  margin: 0 0 12px 0 !important; /* Ridotto da 16px */
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+.product-tagline {
+  font-size: 1.2rem !important; /* Ridotto da 1.5rem */
+  font-weight: 400;
+  color: #86868b !important;
+  margin: 0 !important;
+  line-height: 1.3;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+/* Product Highlights - PIÙ COMPATTO */
+.product-highlights {
+  margin-bottom: 32px; /* Ridotto da 48px */
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.highlight-item {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 14px; /* Ridotto da 16px */
+  margin-bottom: 24px; /* Ridotto da 32px */
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.highlight-item.animate {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+.highlight-item:nth-child(1) { transition-delay: 0.1s; }
+.highlight-item:nth-child(2) { transition-delay: 0.2s; }
+.highlight-item:nth-child(3) { transition-delay: 0.3s; }
+
+.highlight-icon {
+  width: 40px; /* Ridotto da 48px */
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f7;
+  border-radius: 10px; /* Ridotto da 12px */
+  color: #141414;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.highlight-item:hover .highlight-icon {
+  background: #e9ecef;
+  transform: scale(1.1);
+}
+
+.highlight-content h3 {
+  font-size: 1.1rem !important; /* Ridotto da 1.25rem */
+  font-weight: 600 !important;
+  color: #1d1d1f !important;
+  margin: 0 0 6px 0 !important; /* Ridotto da 8px */
+  line-height: 1.2;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+.highlight-content p {
+  font-size: 0.9rem !important; /* Ridotto da 1rem */
+  font-weight: 400 !important;
+  color: #515154 !important;
+  margin: 0 !important;
+  line-height: 1.4;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+/* Product Metrics - PIÙ COMPATTO */
+.product-metrics {
+  display: flex;
+  gap: 30px; /* Ridotto da 40px */
+  margin-bottom: 32px; /* Ridotto da 48px */
+  padding: 24px 0; /* Ridotto da 32px */
+  border-top: 1px solid #d2d2d7;
+  border-bottom: 1px solid #d2d2d7;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.metric {
+  text-align: center;
+  flex: 1;
+}
+
+.metric-value {
+  display: block;
+  font-size: 2rem !important; /* Ridotto da 2.5rem */
+  font-weight: 700 !important;
+  color: #1d1d1f !important;
+  line-height: 1;
+  margin-bottom: 6px; /* Ridotto da 8px */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+.metric-label {
+  font-size: 0.8rem !important; /* Ridotto da 0.9rem */
+  font-weight: 400 !important;
+  color: #86868b !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+/* Download Section - PULSANTI MIGLIORATI */
+.download-section {
+  text-align: left;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.download-text {
+  font-size: 1rem !important; /* Ridotto da 1.1rem */
+  font-weight: 500 !important;
+  color: #1d1d1f !important;
+  margin: 0 0 18px 0 !important; /* Ridotto da 24px */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+.download-buttons {
+  display: flex;
+  flex-direction: row; /* CAMBIATO: ora orizzontali */
+  gap: 12px; /* Ridotto gap */
+}
+
+/* PULSANTI COMPLETAMENTE RIDISEGNATI */
+.download-button {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* Ridotto da 16px */
+  padding: 12px 20px; /* Più compatto */
+  background: #1d1d1f !important;
+  color: #f5f5f7 !important;
+  border-radius: 8px; /* Ridotto da 12px */
+  text-decoration: none !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 1px solid transparent !important;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  flex: 1; /* Pulsanti della stessa larghezza */
+  min-height: 50px; /* Altezza fissa */
+}
+
+.download-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.download-button:hover::before {
+  left: 100%;
+}
+
+.download-button:hover {
+  transform: translateY(-3px) !important; /* Ridotto movimento */
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.18) !important; /* Ombra più leggera */
+  color: #f5f5f7 !important;
+  text-decoration: none !important;
+}
+
+.download-button:active {
+  transform: translateY(-1px) !important;
+}
+
+.download-button svg {
+  flex-shrink: 0;
+  width: 18px; /* Icone più piccole */
+  height: 18px;
+}
+
+.button-text {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  height: 100%;
+  text-align: center; /* Centrato per layout orizzontale */
 }
 
-/* Product Title */
-.algo-title {
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: #141414;
-  margin-bottom: 1rem;
-  margin-top: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+.button-primary {
+  font-size: 0.95rem !important; /* Ridotto da 1.1rem */
+  font-weight: 600 !important;
+  line-height: 1.2;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
 }
 
-/* Product Lead Text */
-.product-info p.lead {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  font-size: 1.125rem;
-  line-height: 1.625;
-  color: #141414;
-  margin-top: 0;
-  margin-bottom: 1rem;
-}
-
-/* Feature List */
-.feature-list {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-}
-
-.feature-list li {
-  font-size: 1.125rem;
-  line-height: 1.625;
-  margin-bottom: 1rem;
-  padding-left: 0.5rem;
-  color: #141414;
-  margin-top: 30px;
-}
-
-.feature-list li:last-child {
-  margin-bottom: 30px;
-}
-
-.feature-list li strong {
-  font-weight: 700;
-  color: #141414;
-}
-
-/* Download Buttons Container */
-.product-info .mt-4 {
-  margin-top: 1.5rem;
-}
-
-/* Download Buttons */
-.product-info .btn {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background-color: #141414;
-  color: #ffffff;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-size: 1rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-}
-
-.product-info .btn:hover {
-  background-color: #333333;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.product-info .btn.me-2 {
-  margin-right: 0.5rem;
-}
-
-.product-info .btn svg {
-  margin-right: 0.5rem;
+.button-secondary {
+  font-size: 0.75rem !important; /* Ridotto da 0.9rem */
+  font-weight: 400 !important;
+  opacity: 0.8;
+  line-height: 1.2;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
 }
 
 /* ===================================
@@ -721,9 +919,6 @@ body.has-sticky-nav {
   padding-bottom: 40px;
 }
 
-.manifesto-container.top-container {
-  padding-top: 40px;
-}
 
 /* Manifesto Rows */
 .manifesto-row {
@@ -931,10 +1126,6 @@ footer .social-icons img {
    MEDIA QUERY - MEDIUM SCREENS (768px to 1199px)
    =================================== */
 
-/* ===================================
-   MEDIA QUERY - MEDIUM SCREENS (768px to 1199px)
-   =================================== */
-
 @media (min-width: 768px) and (max-width: 1199px) {
   /* Navbar adjustments for medium screens */
   .navbar-nav .nav-link {
@@ -1072,9 +1263,57 @@ footer .social-icons img {
     padding: 0; /* Rimuovi qualsiasi padding dalle immagini */
   }
   
-  /* Products section */
-  #prodotti .col-md-6 {
-    margin-bottom: 2rem;
+  /* Products section - AGGIORNATO */
+  .product-showcase {
+    gap: 45px !important;
+    padding: 35px 0 !important;
+    max-width: 950px;
+  }
+  
+  .product-device {
+    max-width: 90%;
+  }
+  
+  /* NASCONDE IL TAPPETINO */
+  .product-stage::before {
+    display: none !important;
+  }
+  
+  .product-name {
+    font-size: 2.1rem !important;
+  }
+  
+  .product-tagline {
+    font-size: 1.05rem !important;
+  }
+  
+  .highlight-content h3 {
+    font-size: 1.05rem !important;
+  }
+  
+  .highlight-content p {
+    font-size: 0.88rem !important;
+  }
+  
+  .metric-value {
+    font-size: 1.9rem !important;
+  }
+  
+  .download-buttons {
+    gap: 10px;
+  }
+  
+  .download-button {
+    padding: 11px 18px;
+    min-height: 48px;
+  }
+  
+  .button-primary {
+    font-size: 0.9rem !important;
+  }
+  
+  .button-secondary {
+    font-size: 0.72rem !important;
   }
   
   .algo-title {
@@ -1204,11 +1443,6 @@ footer .social-icons img {
     min-width: 300px;
     min-height: 120px;
   }
-  body {
-    background-color: red;
-  }
-
-
   
   /* Valori section - remain single column but more compact */
   #valori {
@@ -1294,7 +1528,87 @@ footer .social-icons img {
   padding-top: 40px;
   padding-bottom: 40px;
   }
-  /* Products section */
+  
+  /* Products section - AGGIORNATO */
+  .product-showcase {
+    grid-template-columns: 1fr !important;
+    gap: 35px !important;
+    text-align: center;
+    padding: 25px 0;
+  }
+  
+  .product-device {
+    max-width: 90%;
+  }
+  
+  /* NASCONDE IL TAPPETINO */
+  .product-stage::before {
+    display: none !important;
+  }
+  
+  .product-visual {
+    order: 1;
+    min-height: 320px;
+  }
+  
+  .product-details {
+    order: 2;
+    max-width: 100%;
+    padding: 15px 0;
+  }
+  
+  .product-name {
+    font-size: 1.9rem !important;
+  }
+  
+  .product-tagline {
+    font-size: 1rem !important;
+  }
+  
+  .product-metrics {
+    gap: 18px !important;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+  
+  .metric-value {
+    font-size: 1.7rem !important;
+  }
+  
+  .highlight-item {
+    text-align: left;
+    margin-bottom: 20px !important;
+  }
+  
+  .highlight-content h3 {
+    font-size: 1rem !important;
+  }
+  
+  .highlight-content p {
+    font-size: 0.87rem !important;
+  }
+  
+  .download-buttons {
+    flex-direction: row !important;
+    gap: 12px;
+    justify-content: center;
+  }
+  
+  .download-button {
+    padding: 10px 16px;
+    min-height: 46px;
+    flex: 1;
+    max-width: 180px;
+  }
+  
+  .button-primary {
+    font-size: 0.88rem !important;
+  }
+  
+  .button-secondary {
+    font-size: 0.7rem !important;
+  }
+
   #prodotti {
     padding-top: 50px !important;
   }
@@ -1582,6 +1896,102 @@ footer .social-icons img {
     height: 200px;
   }
   
+  /* Products section mobile - AGGIORNATO */
+  .product-showcase {
+    grid-template-columns: 1fr !important;
+    gap: 25px !important;
+    text-align: center;
+    padding: 20px 0;
+  }
+  
+  .product-device {
+    max-width: 90%;
+  }
+  
+  /* NASCONDE IL TAPPETINO SU MOBILE */
+  .product-stage::before {
+    display: none !important;
+  }
+  
+  .product-visual {
+    min-height: 280px !important;
+  }
+  
+  .product-stage {
+    max-width: 300px !important;
+  }
+  
+  .product-details {
+    max-width: 100%;
+    padding: 10px 0;
+  }
+  
+  .product-name {
+    font-size: 1.7rem !important;
+  }
+  
+  .product-tagline {
+    font-size: 0.95rem !important;
+  }
+  
+  .product-intro {
+    margin-bottom: 24px !important;
+  }
+  
+  .product-highlights {
+    margin-bottom: 24px !important;
+  }
+  
+  .highlight-item {
+    margin-bottom: 18px !important;
+    text-align: left;
+  }
+  
+  .highlight-content h3 {
+    font-size: 0.95rem !important;
+  }
+  
+  .highlight-content p {
+    font-size: 0.82rem !important;
+  }
+  
+  .product-metrics {
+    flex-direction: column !important;
+    gap: 12px !important;
+    text-align: center;
+    margin-bottom: 24px !important;
+    padding: 18px 0 !important;
+  }
+  
+  .metric-value {
+    font-size: 1.5rem !important;
+  }
+  
+  .metric-label {
+    font-size: 0.75rem !important;
+  }
+  
+  .download-buttons {
+    flex-direction: row !important;
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  .download-button {
+    padding: 9px 14px !important;
+    min-height: 42px;
+    flex: 1;
+    max-width: 160px;
+  }
+  
+  .button-primary {
+    font-size: 0.85rem !important;
+  }
+  
+  .button-secondary {
+    font-size: 0.68rem !important;
+  }
+
   /* Products section mobile - LAYOUT CORRETTO */
   #prodotti .nostra-storia-title {
     font-size: 1.8rem !important;
