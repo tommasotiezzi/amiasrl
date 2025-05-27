@@ -1,34 +1,18 @@
-// =============================================
-// AMIA WEBSITE - SCRIPT PRINCIPALE
-// =============================================
-// Versione: 2.1 - Apple Style Integration + Animazioni Fix
-// Ultimo aggiornamento: 2025
-// =============================================
-
-// =============================================
-// 1. INIZIALIZZAZIONE PRINCIPALE
+// AMIA Website - JavaScript Refactored
 // =============================================
 
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('🚀 Inizializzazione AMIA Website...');
-  
-  // Elementi DOM principali - SELETTORI CORRETTI
+  // Elementi DOM principali
   const header = document.getElementById('header');
   const body = document.body;
   const menuButton = document.querySelector('.navbar-toggler');
-  const navbarCollapse = document.querySelector('#navbarNav'); // CORRETTO: era #navbarCollapse
+  const navbarCollapse = document.querySelector('#navbarNav');
   const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
   
-  // Debug per vedere se trova gli elementi
-  console.log('🔍 Menu button:', menuButton);
-  console.log('🔍 Navbar collapse:', navbarCollapse);
-  
-  // Inizializza funzioni base immediate
+  // Inizializza funzioni base
   initializeHeader(header, body);
   initializeMobileMenu(menuButton, navbarCollapse);
   initializeNavigation(navLinks, header, navbarCollapse);
-  
-  console.log('✅ Caricamento base completato');
   
   // Carica funzioni avanzate con delay per performance
   setTimeout(() => {
@@ -37,12 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // =============================================
-// 2. HEADER E NAVIGAZIONE
+// HEADER E NAVIGAZIONE
 // =============================================
 
-/**
- * Gestisce lo sticky header durante lo scroll
- */
 function initializeHeader(header, body) {
   if (!header || !body) return;
   
@@ -55,38 +36,27 @@ function initializeHeader(header, body) {
       body.classList.remove('has-sticky-nav');
     }
   }, { passive: true });
-  
-  console.log('📌 Header sticky inizializzato');
 }
 
-/**
- * Gestisce il menu mobile hamburger - VERSIONE SENZA BOOTSTRAP
- */
 function initializeMobileMenu(menuButton, navbarCollapse) {
   if (!menuButton || !navbarCollapse) return;
   
-  // DISABILITA Bootstrap toggle per questo elemento
+  // Disabilita Bootstrap toggle per gestione manuale
   menuButton.removeAttribute('data-bs-toggle');
   menuButton.removeAttribute('data-bs-target');
-  
-  console.log('🔧 Bootstrap attributes rimossi');
   
   menuButton.addEventListener('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
     
-    // Gestione manuale del toggle
     const isOpen = navbarCollapse.classList.contains('show');
     
     if (isOpen) {
       navbarCollapse.classList.remove('show');
-      console.log('📱 Menu chiuso');
     } else {
       navbarCollapse.classList.add('show');
-      console.log('📱 Menu aperto');
     }
     
-    // Update aria-expanded
     menuButton.setAttribute('aria-expanded', !isOpen);
   });
   
@@ -96,16 +66,10 @@ function initializeMobileMenu(menuButton, navbarCollapse) {
     link.addEventListener('click', () => {
       navbarCollapse.classList.remove('show');
       menuButton.setAttribute('aria-expanded', 'false');
-      console.log('📱 Menu chiuso dopo click link');
     });
   });
-  
-  console.log('📱 Menu mobile inizializzato SENZA Bootstrap');
 }
 
-/**
- * Gestisce la navigazione tra sezioni con smooth scroll
- */
 function initializeNavigation(navLinks, header, navbarCollapse) {
   if (!navLinks.length) return;
   
@@ -124,11 +88,9 @@ function initializeNavigation(navLinks, header, navbarCollapse) {
       if (targetSection || targetId === '#about') {
         let headerHeight = header.offsetHeight || 80;
         
-        // Aggiustamenti specifici per sezione
         if (targetId === '#about') {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
-          // Offsets personalizzati per ogni sezione
           const offsets = {
             '#valori': -30,
             '#persone': -30,
@@ -155,24 +117,15 @@ function initializeNavigation(navLinks, header, navbarCollapse) {
   // Attiva About di default
   const firstLink = document.querySelector('.navbar-nav .nav-link[href="#about"]');
   if (firstLink) firstLink.classList.add('active');
-  
-  console.log('🧭 Navigazione inizializzata');
 }
 
 // =============================================
-// 3. FUNZIONI AVANZATE
+// FUNZIONI AVANZATE
 // =============================================
 
-/**
- * Inizializza tutte le funzioni avanzate con timing ottimizzato
- */
 function initializeAdvancedFeatures() {
-  console.log('⚡ Caricamento funzioni avanzate...');
-  
-  // CSS per animazioni generali
   addAnimationStyles();
   
-  // Inizializza componenti nell'ordine corretto
   initializeTimelineCarousel();
   
   setTimeout(() => {
@@ -187,17 +140,11 @@ function initializeAdvancedFeatures() {
     initializeAdvancedNavigation();
   }, 150);
   
-  // NUOVO: Prodotti Apple-style - DELAY MAGGIORE per evitare conflitti
   setTimeout(() => {
-    initializeAppleStyleProducts();
+    initializeProductsSection();
   }, 400);
-  
-  console.log('🎨 Funzioni avanzate caricate');
 }
 
-/**
- * Aggiunge gli stili CSS per le animazioni
- */
 function addAnimationStyles() {
   const style = document.createElement('style');
   style.textContent = `
@@ -215,31 +162,17 @@ function addAnimationStyles() {
 }
 
 // =============================================
-// 4. SISTEMA DI ANIMAZIONI
+// SISTEMA DI ANIMAZIONI
 // =============================================
 
-/**
- * Gestisce tutte le animazioni scroll delle sezioni
- */
 function initializeAnimations() {
-  console.log('🎭 Inizializzazione animazioni...');
-  
-  // Animazioni Valori
   initializeValoriAnimations();
-  
-  // Animazioni Careers
   initializeCareersAnimations();
-  
-  // Animazioni generali (escluso prodotti per evitare conflitti)
   initializeGeneralAnimations();
 }
 
-/**
- * Animazioni specifiche per la sezione Valori
- */
 function initializeValoriAnimations() {
   const valoriItems = document.querySelectorAll('#valori .valori-item');
-  
   if (valoriItems.length === 0) return;
   
   const valoriObserver = new IntersectionObserver((entries) => {
@@ -256,13 +189,8 @@ function initializeValoriAnimations() {
     item.classList.remove('animate-on-scroll');
     valoriObserver.observe(item);
   });
-  
-  console.log('📋 Animazioni Valori attive');
 }
 
-/**
- * Animazioni specifiche per la sezione Careers
- */
 function initializeCareersAnimations() {
   const careersSection = document.querySelector('#lavoraconnoi');
   const statementItems = document.querySelectorAll('#lavoraconnoi .statement-content');
@@ -272,27 +200,20 @@ function initializeCareersAnimations() {
   const careersObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting && entry.target === careersSection) {
-        // Anima tutti gli statement in sequenza
         statementItems.forEach((item, i) => {
           setTimeout(() => {
             item.classList.add('animate-element', 'animated');
           }, i * 150);
         });
       } else if (!entry.isIntersecting) {
-        // Reset quando esce dalla vista
         statementItems.forEach(item => item.classList.remove('animated'));
       }
     });
   }, { threshold: 0.15 });
   
   careersObserver.observe(careersSection);
-  
-  console.log('💼 Animazioni Careers attive');
 }
 
-/**
- * Animazioni per elementi generali del sito
- */
 function initializeGeneralAnimations() {
   const otherElements = document.querySelectorAll(`
     #about .container2 .item,
@@ -321,28 +242,21 @@ function initializeGeneralAnimations() {
   otherElements.forEach(element => {
     generalObserver.observe(element);
   });
-  
-  console.log('🌟 Animazioni generali attive');
 }
 
 // =============================================
-// 5. NAVIGAZIONE AVANZATA
+// NAVIGAZIONE AVANZATA
 // =============================================
 
-/**
- * Evidenzia automaticamente la sezione corrente durante lo scroll
- */
 function initializeAdvancedNavigation() {
   let lastClickedTime = 0;
   
   function updateActiveNavOnScroll() {
-    // Non aggiornare se l'utente ha appena cliccato
     if (lastClickedTime && Date.now() - lastClickedTime < 1500) return;
     
     const sections = document.querySelectorAll('section[id]');
     const scrollPosition = window.scrollY + 150;
     
-    // Se siamo in cima, attiva About
     if (window.scrollY < 100) {
       document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
         link.classList.remove('active');
@@ -353,7 +267,6 @@ function initializeAdvancedNavigation() {
       return;
     }
     
-    // Trova la sezione corrente
     sections.forEach(section => {
       const sectionId = '#' + section.getAttribute('id');
       const sectionTop = section.offsetTop;
@@ -370,7 +283,6 @@ function initializeAdvancedNavigation() {
     });
   }
   
-  // Throttled scroll per performance
   let ticking = false;
   window.addEventListener('scroll', function() {
     if (!ticking) {
@@ -380,51 +292,38 @@ function initializeAdvancedNavigation() {
     }
   }, { passive: true });
   
-  // Traccia i click per evitare interferenze
   document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
     link.addEventListener('click', function() {
       lastClickedTime = Date.now();
     });
   });
-  
-  console.log('🎯 Navigazione avanzata attiva');
 }
 
 // =============================================
-// 6. TIMELINE CAROUSEL
+// TIMELINE CAROUSEL
 // =============================================
 
-/**
- * Gestisce il carousel della timeline nella sezione People
- */
 function initializeTimelineCarousel() {
   const timelineItems = document.querySelectorAll('.timeline-item');
   const prevButton = document.querySelector('.timeline-controls .prev');
   const nextButton = document.querySelector('.timeline-controls .next');
   const currentYearElement = document.querySelector('.current-year');
   
-  if (!timelineItems.length || !prevButton || !nextButton || !currentYearElement) {
-    console.log('⚠️ Timeline carousel: elementi mancanti');
-    return;
-  }
+  if (!timelineItems.length || !prevButton || !nextButton || !currentYearElement) return;
   
   let currentIndex = 0;
   
   function updateTimelineDisplay() {
-    // Aggiorna visualizzazione
     timelineItems.forEach(item => item.classList.remove('active'));
     timelineItems[currentIndex].classList.add('active');
     
-    // Aggiorna anno corrente
     const currentYear = timelineItems[currentIndex].getAttribute('data-year');
     currentYearElement.textContent = currentYear;
     
-    // Aggiorna stato bottoni
     prevButton.disabled = currentIndex === 0;
     nextButton.disabled = currentIndex === timelineItems.length - 1;
   }
   
-  // Event listeners
   prevButton.addEventListener('click', function() {
     if (currentIndex > 0) {
       currentIndex--;
@@ -439,45 +338,23 @@ function initializeTimelineCarousel() {
     }
   });
   
-  // Inizializza
   updateTimelineDisplay();
-  
-  console.log('🎠 Timeline carousel inizializzato');
 }
 
 // =============================================
-// 7. CAROSELLO INFINITO
+// CAROSELLO INFINITO
 // =============================================
 
-/**
- * Gestisce il carosello infinito delle foto bootcamp
- */
 function initializeOptimizedCarousel() {
   const carousel = document.querySelector('.infinite-carousel');
+  if (!carousel) return;
   
-  if (!carousel) {
-    console.log('⚠️ Carosello infinito non trovato');
-    return;
-  }
-  
-  // Aggiungi stili per ottimizzazione
   addCarouselStyles();
-  
-  // Pausa quando non visibile per performance
   setupCarouselVisibilityControl(carousel);
-  
-  // Controlli hover solo su desktop
   setupCarouselHoverControls(carousel);
-  
-  // Ottimizzazioni mobile
   optimizeCarouselForMobile(carousel);
-  
-  console.log('🎡 Carosello infinito ottimizzato');
 }
 
-/**
- * Aggiunge stili CSS per il carosello
- */
 function addCarouselStyles() {
   const style = document.createElement('style');
   style.textContent = `
@@ -516,9 +393,6 @@ function addCarouselStyles() {
   document.head.appendChild(style);
 }
 
-/**
- * Controlla la visibilità del carosello per pausarlo quando non serve
- */
 function setupCarouselVisibilityControl(carousel) {
   const carouselObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -533,9 +407,6 @@ function setupCarouselVisibilityControl(carousel) {
   carouselObserver.observe(carousel);
 }
 
-/**
- * Aggiunge controlli hover per desktop
- */
 function setupCarouselHoverControls(carousel) {
   if (window.innerWidth <= 768) return;
   
@@ -554,9 +425,6 @@ function setupCarouselHoverControls(carousel) {
   });
 }
 
-/**
- * Ottimizzazioni specifiche per mobile
- */
 function optimizeCarouselForMobile(carousel) {
   if (window.innerWidth > 768) return;
   
@@ -567,35 +435,17 @@ function optimizeCarouselForMobile(carousel) {
 }
 
 // =============================================
-// 8. PRODOTTI APPLE-STYLE [COMPLETAMENTE RISCRITTO]
+// SEZIONE PRODOTTI
 // =============================================
 
-/**
- * Inizializza la nuova sezione prodotti in stile Apple
- */
-function initializeAppleStyleProducts() {
-  console.log('🍎 Inizializzazione prodotti Apple-style...');
-  
-  // Setup animazioni con controlli specifici
-  setupProductAnimationsFixed();
-  
-  // Setup interazioni
+function initializeProductsSection() {
+  setupProductAnimations();
   setupProductInteractions();
-  
-  console.log('✨ Prodotti Apple-style attivi');
 }
 
-/**
- * ANIMAZIONI PRODOTTI - VERSIONE CORRETTA (MOBILE FIXED)
- */
-function setupProductAnimationsFixed() {
-  console.log('🎬 Setup animazioni prodotti...');
-  
-  // Rilevamento mobile
+function setupProductAnimations() {
   const isMobile = window.innerWidth <= 768;
-  console.log('📱 Mobile detected:', isMobile);
   
-  // TROVA E OSSERVA TUTTI GLI ELEMENTI PRODOTTI
   const productElements = [
     document.querySelector('.product-intro'),
     document.querySelector('.product-highlights'), 
@@ -603,96 +453,124 @@ function setupProductAnimationsFixed() {
     document.querySelector('.download-section')
   ].filter(element => element !== null);
   
-  console.log('📊 Elementi prodotti trovati:', productElements.length);
-  
-  if (productElements.length === 0) {
-    console.log('⚠️ Nessun elemento prodotto trovato - verificare HTML');
-    return;
-  }
-  
-  // Su mobile: animazione più semplice e diretta
   if (isMobile) {
-    console.log('📱 Usando animazioni mobile semplificate');
-    
-    // Observer semplificato per mobile
-    const mobileObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const element = entry.target;
-          console.log('📱 Mobile: Animando elemento', element.className);
-          
-          // Animazione diretta su mobile
-          element.style.opacity = '1';
-          element.style.transform = 'translateY(0)';
-          
-          // Anima contenuti specifici se esistono
-          if (element.classList.contains('product-highlights')) {
-            animateHighlightsMobile(element);
-          } else if (element.classList.contains('product-metrics')) {
-            animateMetricsMobile(element);
-          }
-          
-          mobileObserver.unobserve(element);
-        }
-      });
-    }, { 
-      threshold: 0.15,
-      rootMargin: '0px 0px -30px 0px' 
-    });
-    
-    // Setup elementi per mobile
-    productElements.forEach(element => {
-      element.style.opacity = '0';
-      element.style.transform = 'translateY(15px)';
-      element.style.transition = 'all 0.5s ease-out';
-      mobileObserver.observe(element);
-    });
-    
+    setupMobileProductAnimations(productElements);
   } else {
-    // Desktop: animazioni complete
-    console.log('💻 Usando animazioni desktop complete');
-    
-    const desktopObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const element = entry.target;
-          console.log('💻 Desktop: Animando elemento', element.className);
-          
-          // ANIMAZIONI SPECIFICHE PER TIPO
-          if (element.classList.contains('product-intro')) {
-            animateProductIntro(element);
-          } else if (element.classList.contains('product-highlights')) {
-            animateProductHighlights(element);
-          } else if (element.classList.contains('product-metrics')) {
-            animateProductMetrics(element);
-          } else if (element.classList.contains('download-section')) {
-            animateDownloadSection(element);
-          }
-          
-          desktopObserver.unobserve(element);
-        }
-      });
-    }, {
-      threshold: 0.3,
-      rootMargin: '0px 0px -50px 0px'
-    });
-    
-    // Setup elementi per desktop
-    productElements.forEach(element => {
-      element.style.opacity = '0';
-      element.style.transform = 'translateY(30px)';
-      element.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-      desktopObserver.observe(element);
-    });
+    setupDesktopProductAnimations(productElements);
   }
 }
 
-/**
- * Animazioni highlights semplificate per mobile
- */
+function setupMobileProductAnimations(productElements) {
+  const mobileObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const element = entry.target;
+        
+        element.style.opacity = '1';
+        element.style.transform = 'translateY(0)';
+        
+        if (element.classList.contains('product-highlights')) {
+          animateHighlightsMobile(element);
+        } else if (element.classList.contains('product-metrics')) {
+          animateMetricsMobile(element);
+        }
+      } else {
+        // Reset quando esce dalla vista
+        const element = entry.target;
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(15px)';
+        
+        // Reset degli highlights
+        if (element.classList.contains('product-highlights')) {
+          const highlights = element.querySelectorAll('.highlight-item');
+          highlights.forEach(highlight => {
+            highlight.style.opacity = '0';
+            highlight.style.transform = 'translateY(15px)';
+            highlight.classList.remove('animate');
+          });
+        }
+      }
+    });
+  }, { 
+    threshold: 0.15,
+    rootMargin: '0px 0px -30px 0px' 
+  });
+  
+  productElements.forEach(element => {
+    element.style.opacity = '0';
+    element.style.transform = 'translateY(15px)';
+    element.style.transition = 'all 0.5s ease-out';
+    mobileObserver.observe(element);
+  });
+}
+
+function setupDesktopProductAnimations(productElements) {
+  const desktopObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const element = entry.target;
+        
+        if (element.classList.contains('product-intro')) {
+          animateProductIntro(element);
+        } else if (element.classList.contains('product-highlights')) {
+          animateProductHighlights(element);
+        } else if (element.classList.contains('product-metrics')) {
+          animateProductMetrics(element);
+        } else if (element.classList.contains('download-section')) {
+          animateDownloadSection(element);
+        }
+      } else {
+        // Reset quando esce dalla vista
+        const element = entry.target;
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(30px)';
+        
+        // Reset specifici per tipo di elemento
+        if (element.classList.contains('product-highlights')) {
+          const highlights = element.querySelectorAll('.highlight-item');
+          highlights.forEach(highlight => {
+            highlight.style.opacity = '0';
+            highlight.style.transform = 'translateY(15px)';
+            highlight.classList.remove('animate');
+          });
+        } else if (element.classList.contains('product-metrics')) {
+          const metrics = element.querySelectorAll('.metric-value');
+          metrics.forEach(metric => {
+            // Reset del testo originale se necessario
+            const originalText = metric.getAttribute('data-original-text');
+            if (originalText) {
+              metric.textContent = originalText;
+            }
+          });
+        }
+      }
+    });
+  }, {
+    threshold: 0.3,
+    rootMargin: '0px 0px -50px 0px'
+  });
+  
+  productElements.forEach(element => {
+    element.style.opacity = '0';
+    element.style.transform = 'translateY(30px)';
+    element.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    
+    // Salva il testo originale delle metriche per il reset
+    if (element.classList.contains('product-metrics')) {
+      const metrics = element.querySelectorAll('.metric-value');
+      metrics.forEach(metric => {
+        if (!metric.getAttribute('data-original-text')) {
+          metric.setAttribute('data-original-text', metric.textContent.trim());
+        }
+      });
+    }
+    
+    desktopObserver.observe(element);
+  });
+}
+
 function animateHighlightsMobile(container) {
   const highlights = container.querySelectorAll('.highlight-item');
-  console.log('📱 Mobile highlights:', highlights.length);
   
   highlights.forEach((highlight, index) => {
     setTimeout(() => {
@@ -703,88 +581,31 @@ function animateHighlightsMobile(container) {
   });
 }
 
-/**
- * Animazioni metriche semplificate per mobile  
- */
 function animateMetricsMobile(container) {
   const metrics = container.querySelectorAll('.metric-value');
-  console.log('📱 Mobile metrics:', metrics.length);
   
   metrics.forEach((metric, index) => {
     setTimeout(() => {
-      animateCounterNumberMobile(metric);
+      animateCounterNumber(metric, true);
     }, index * 100);
   });
 }
 
-/**
- * Contatore semplificato per mobile
- */
-function animateCounterNumberMobile(element) {
-  const text = element.textContent.trim();
-  const matches = text.match(/(\d+(?:\.\d+)?)\s*(.*)$/);
-  
-  if (!matches) return;
-  
-  const targetNumber = parseFloat(matches[1]);
-  const suffix = matches[2];
-  const duration = 1000; // Più veloce su mobile
-  const startTime = performance.now();
-  
-  function updateNumber(currentTime) {
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const currentNumber = targetNumber * progress;
-    
-    let displayNumber;
-    if (text.includes('.')) {
-      displayNumber = currentNumber.toFixed(1);
-    } else {
-      displayNumber = Math.floor(currentNumber);
-    }
-    
-    element.textContent = displayNumber + suffix;
-    
-    if (progress < 1) {
-      requestAnimationFrame(updateNumber);
-    }
-  }
-  
-  requestAnimationFrame(updateNumber);
-}
-
-/**
- * Anima l'introduzione del prodotto
- */
 function animateProductIntro(element) {
-  console.log('📝 Animando product intro...');
   element.style.opacity = '1';
   element.style.transform = 'translateY(0)';
 }
 
-/**
- * Anima gli highlights in sequenza - MOBILE OPTIMIZED
- */
 function animateProductHighlights(container) {
-  console.log('⭐ Animando highlights...');
-  
   const isMobile = window.innerWidth <= 768;
   
-  // Anima il container
   container.style.opacity = '1';
   container.style.transform = 'translateY(0)';
   
-  // Trova e anima gli highlights in sequenza
   const highlights = container.querySelectorAll('.highlight-item');
-  console.log('🔍 Highlights trovati:', highlights.length);
-  
-  if (highlights.length === 0) {
-    console.log('⚠️ Nessun highlight trovato nel container');
-    return;
-  }
+  if (highlights.length === 0) return;
   
   highlights.forEach((highlight, index) => {
-    // Setup iniziale per ogni highlight
     highlight.style.opacity = '0';
     highlight.style.transform = 'translateY(15px)';
     highlight.style.transition = isMobile ? 'all 0.4s ease-out' : 'all 0.6s ease-out';
@@ -795,78 +616,46 @@ function animateProductHighlights(container) {
       highlight.style.opacity = '1';
       highlight.style.transform = 'translateY(0)';
       highlight.classList.add('animate');
-      console.log(`✨ Highlight ${index + 1} animato`);
     }, delay);
   });
 }
 
-/**
- * Anima le metriche con contatori - MOBILE OPTIMIZED
- */
 function animateProductMetrics(container) {
-  console.log('📊 Animando metriche...');
-  
   const isMobile = window.innerWidth <= 768;
   
-  // Anima il container
   container.style.opacity = '1';
   container.style.transform = 'translateY(0)';
   
-  // Trova e anima i contatori
   const metrics = container.querySelectorAll('.metric-value');
-  console.log('🔢 Metriche trovate:', metrics.length);
-  
-  if (metrics.length === 0) {
-    console.log('⚠️ Nessuna metrica trovata nel container');
-    return;
-  }
+  if (metrics.length === 0) return;
   
   metrics.forEach((metric, index) => {
     const delay = isMobile ? index * 150 : index * 200;
     
     setTimeout(() => {
-      animateCounterNumber(metric);
+      animateCounterNumber(metric, isMobile);
     }, delay);
   });
 }
 
-/**
- * Anima la sezione download
- */
 function animateDownloadSection(element) {
-  console.log('⬇️ Animando download section...');
   element.style.opacity = '1';
   element.style.transform = 'translateY(0)';
 }
 
-/**
- * Anima un contatore numerico - MOBILE OPTIMIZED
- */
-function animateCounterNumber(element) {
+function animateCounterNumber(element, isMobile = false) {
   const text = element.textContent.trim();
-  console.log('🔢 Animando contatore:', text);
-  
   const hasNumber = /\d/.test(text);
-  if (!hasNumber) {
-    console.log('⚠️ Nessun numero trovato in:', text);
-    return;
-  }
+  if (!hasNumber) return;
   
   const matches = text.match(/(\d+(?:\.\d+)?)\s*(.*)$/);
-  if (!matches) {
-    console.log('⚠️ Pattern non riconosciuto:', text);
-    return;
-  }
+  if (!matches) return;
   
   const targetNumber = parseFloat(matches[1]);
   const suffix = matches[2];
-  const isMobile = window.innerWidth <= 768;
-  const duration = isMobile ? 1500 : 2000; // Più veloce su mobile
+  const duration = isMobile ? 1500 : 2000;
   const startTime = performance.now();
   
-  console.log('🎯 Target:', targetNumber, 'Suffix:', suffix, 'Mobile:', isMobile);
-  
-  // Easing function per animazione naturale
   const easeOutQuart = t => 1 - Math.pow(1 - t, 4);
   
   function updateNumber(currentTime) {
@@ -875,7 +664,6 @@ function animateCounterNumber(element) {
     const easedProgress = easeOutQuart(progress);
     const currentNumber = targetNumber * easedProgress;
     
-    // Formatta il numero
     let displayNumber;
     if (text.includes('.')) {
       displayNumber = currentNumber.toFixed(1);
@@ -889,37 +677,22 @@ function animateCounterNumber(element) {
     
     if (progress < 1) {
       requestAnimationFrame(updateNumber);
-    } else {
-      console.log('✅ Contatore completato:', displayNumber + suffix);
     }
   }
   
   requestAnimationFrame(updateNumber);
 }
 
-/**
- * Setup interazioni prodotti
- */
 function setupProductInteractions() {
-  console.log('🤝 Setup interazioni prodotti...');
-  
-  // Hover effects sugli highlights - VERSIONE CORRETTA
-  setupHighlightHoversFixed();
-  
-  // Pulsanti download
-  setupDownloadButtonsFixed();
+  setupHighlightHovers();
+  setupDownloadButtons();
 }
 
-/**
- * Hover effects per gli highlights - VERSIONE CORRETTA
- */
-function setupHighlightHoversFixed() {
+function setupHighlightHovers() {
   const highlights = document.querySelectorAll('.highlight-item');
-  console.log('👆 Setup hover per highlights:', highlights.length);
   
-  highlights.forEach((highlight, index) => {
+  highlights.forEach((highlight) => {
     highlight.addEventListener('mouseenter', () => {
-      // Solo se l'elemento è già stato animato
       if (highlight.classList.contains('animate')) {
         highlight.style.transform = 'translateY(-4px)';
         
@@ -945,38 +718,23 @@ function setupHighlightHoversFixed() {
   });
 }
 
-/**
- * Pulsanti download - VERSIONE CORRETTA
- */
-function setupDownloadButtonsFixed() {
+function setupDownloadButtons() {
   const downloadButtons = document.querySelectorAll('.download-button');
-  console.log('📱 Setup download buttons:', downloadButtons.length);
   
   downloadButtons.forEach(button => {
     button.addEventListener('click', (e) => {
-      console.log('🔘 Click su download button');
-      
-      // Animazione click
       button.style.transform = 'translateY(0) scale(0.98)';
       
       setTimeout(() => {
         button.style.transform = 'translateY(-2px) scale(1)';
       }, 150);
       
-      // Feedback visivo
-      showDownloadFeedbackFixed(button);
-      
-      // Log per analytics
-      const platform = button.classList.contains('app-store') ? 'App Store' : 'Google Play';
-      console.log(`📱 Download avviato: ${platform}`);
+      showDownloadFeedback(button);
     });
   });
 }
 
-/**
- * Feedback download - VERSIONE CORRETTA
- */
-function showDownloadFeedbackFixed(button) {
+function showDownloadFeedback(button) {
   const platform = button.classList.contains('app-store') ? 'App Store' : 'Google Play';
   
   const feedback = document.createElement('div');
@@ -1002,36 +760,29 @@ function showDownloadFeedbackFixed(button) {
     z-index: 9999;
     backdrop-filter: blur(20px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    animation: slideInApple 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation: slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   `;
   
-  // Aggiungi animazioni se non esistono
-  addAppleFeedbackStylesFixed();
+  addFeedbackStyles();
   
   document.body.appendChild(feedback);
-  console.log('💬 Feedback mostrato:', platform);
   
-  // Rimuovi dopo 3 secondi
   setTimeout(() => {
-    feedback.style.animation = 'slideOutApple 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards';
+    feedback.style.animation = 'slideOut 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards';
     setTimeout(() => {
       feedback.remove();
-      console.log('💬 Feedback rimosso');
     }, 300);
   }, 3000);
 }
 
-/**
- * Stili feedback Apple - VERSIONE CORRETTA
- */
-function addAppleFeedbackStylesFixed() {
-  if (document.querySelector('#apple-feedback-styles-fixed')) return;
+function addFeedbackStyles() {
+  if (document.querySelector('#feedback-styles')) return;
   
   const style = document.createElement('style');
-  style.id = 'apple-feedback-styles-fixed';
+  style.id = 'feedback-styles';
   style.textContent = `
-    @keyframes slideInApple {
+    @keyframes slideIn {
       from {
         transform: translateX(100%) scale(0.9);
         opacity: 0;
@@ -1042,7 +793,7 @@ function addAppleFeedbackStylesFixed() {
       }
     }
     
-    @keyframes slideOutApple {
+    @keyframes slideOut {
       from {
         transform: translateX(0) scale(1);
         opacity: 1;
@@ -1055,65 +806,3 @@ function addAppleFeedbackStylesFixed() {
   `;
   document.head.appendChild(style);
 }
-
-// =============================================
-// 9. UTILITY E HELPER
-// =============================================
-
-/**
- * Utility per debug - mostra info sulle sezioni
- */
-function debugSections() {
-  const sections = document.querySelectorAll('section[id]');
-  console.log('📋 Sezioni trovate:', sections.length);
-  sections.forEach(section => {
-    console.log(`- ${section.id}: ${section.offsetTop}px`);
-  });
-}
-
-/**
- * Performance monitor - mostra FPS
- */
-function monitorPerformance() {
-  let fps = 0;
-  let lastTime = performance.now();
-  
-  function countFPS() {
-    const currentTime = performance.now();
-    fps++;
-    
-    if (currentTime >= lastTime + 1000) {
-      console.log(`🚀 FPS: ${fps}`);
-      fps = 0;
-      lastTime = currentTime;
-    }
-    
-    requestAnimationFrame(countFPS);
-  }
-  
-  // Avvia solo in development
-  if (window.location.hostname === 'localhost') {
-    countFPS();
-  }
-}
-
-// =============================================
-// 10. INIZIALIZZAZIONE FINALE
-// =============================================
-
-// Avvia monitor performance se in development
-if (window.location.hostname === 'localhost') {
-  setTimeout(monitorPerformance, 2000);
-}
-
-// Export per testing (se necessario)
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    initializeHeader,
-    initializeMobileMenu,
-    initializeNavigation,
-    initializeAppleStyleProducts
-  };
-}
-
-console.log('🎉 AMIA Website completamente inizializzato!');
