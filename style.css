@@ -340,7 +340,6 @@ body.has-sticky-nav {
   background-color: #f8f9fa;
 }
 
-/* Timeline Container */
 .container-timeline {
   display: flex;
   align-items: center;
@@ -371,7 +370,6 @@ body.has-sticky-nav {
   margin-top: 40px;
 }
 
-/* Timeline Carousel */
 .timeline-carousel.mt-5 {
   margin-top: 40px;
 }
@@ -483,7 +481,6 @@ body.has-sticky-nav {
 }
 
 
-/* Infinite Carousel */
 .infinite-carousel {
   position: relative;
   width: 100%;
@@ -562,12 +559,10 @@ body.has-sticky-nav {
   }
 }
 
-
 /* ===================================
    SEZIONE PRODUCTS/PRODOTTI - REDESIGN OTTIMIZZATO
    =================================== */
 
-/* Reset della sezione esistente */
 #prodotti {
   scroll-margin-top: 60px;
   overflow-x: hidden;
@@ -581,36 +576,26 @@ body.has-sticky-nav {
   padding-bottom: 60px;
 }
 
-/* Nascondi la vecchia struttura se presente */
 #prodotti .row.align-items-center.margins-fix {
   display: none !important;
 }
 
-/* ===================================
-   NUOVA STRUTTURA OTTIMIZZATA
-   =================================== */
-
-/* Product Showcase Container - PIÙ COMPATTO */
 .product-showcase {
   display: grid !important;
-  grid-template-columns: 1.2fr 0.8fr; /* Più spazio a sinistra per l'immagine */
-  gap: 60px; /* Ridotto da 80px */
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 60px;
   align-items: center;
-  max-width: 1100px; /* Ridotto da 1200px */
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 40px 0; /* Ridotto da 60px */
+  padding: 40px 0; 
 }
-
-/* ===================================
-   LEFT SIDE - PRODUCT VISUAL MIGLIORATO
-   =================================== */
 
 .product-visual {
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
-  min-height: 450px; /* Ridotto da 500px */
+  min-height: 450px;
 }
 
 .product-stage {
@@ -619,27 +604,26 @@ body.has-sticky-nav {
   justify-content: center;
   align-items: center;
   width: 100%;
-  max-width: 450px; /* Ingrandito da 400px */
+  max-width: 450px;
 }
 
-/* TAPPETINO/GLOW MIGLIORATO */
 .product-stage::before {
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 140%; /* Più grande */
+  width: 140%; 
   height: 140%;
   background: radial-gradient(
     circle at center,
-    rgba(0, 122, 255, 0.12) 0%, /* Più visibile */
+    rgba(0, 122, 255, 0.12) 0%, 
     rgba(0, 122, 255, 0.08) 30%,
     rgba(0, 122, 255, 0.04) 60%,
     transparent 80%
   );
   border-radius: 50%;
-  animation: subtle-pulse 8s ease-in-out infinite; /* Più lento */
+  animation: subtle-pulse 8s ease-in-out infinite; 
 }
 
 .product-device {
@@ -649,11 +633,11 @@ body.has-sticky-nav {
   height: auto;
   border-radius: 20px;
   transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  filter: drop-shadow(0 25px 70px rgba(0, 0, 0, 0.18)); /* Ombra più pronunciata */
+  filter: drop-shadow(0 25px 70px rgba(0, 0, 0, 0.18)); 
 }
 
 .product-device:hover {
-  transform: translateY(-12px) scale(1.03); /* Più movimento */
+  transform: translateY(-12px) scale(1.03); 
   filter: drop-shadow(0 35px 90px rgba(0, 0, 0, 0.25));
 }
 
@@ -668,35 +652,30 @@ body.has-sticky-nav {
   }
 }
 
-/* ===================================
-   RIGHT SIDE - PRODUCT DETAILS COMPATTO
-   =================================== */
-
 .product-details {
-  padding: 20px 0; /* Ridotto da 40px */
-  max-width: 480px; /* Ridotto da 500px */
+  padding: 20px 0; 
+  max-width: 480px; 
 }
 
-/* Product Introduction - PIÙ COMPATTO */
 .product-intro {
-  margin-bottom: 32px; /* Ridotto da 48px */
+  margin-bottom: 32px; 
   opacity: 0;
   transform: translateY(30px);
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .product-name {
-  font-size: 2.4rem !important; /* Ridotto da 3rem */
+  font-size: 2.4rem !important; 
   font-weight: 700;
   color: #1d1d1f !important;
-  margin: 0 0 12px 0 !important; /* Ridotto da 16px */
+  margin: 0 0 12px 0 !important; 
   line-height: 1.1;
   letter-spacing: -0.02em;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
 }
 
 .product-tagline {
-  font-size: 1.2rem !important; /* Ridotto da 1.5rem */
+  font-size: 1.2rem !important; 
   font-weight: 400;
   color: #86868b !important;
   margin: 0 !important;
@@ -704,9 +683,8 @@ body.has-sticky-nav {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
 }
 
-/* Product Highlights - PIÙ COMPATTO */
 .product-highlights {
-  margin-bottom: 32px; /* Ridotto da 48px */
+  margin-bottom: 32px; 
   opacity: 0;
   transform: translateY(30px);
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -715,8 +693,8 @@ body.has-sticky-nav {
 .highlight-item {
   display: flex !important;
   align-items: flex-start;
-  gap: 14px; /* Ridotto da 16px */
-  margin-bottom: 24px; /* Ridotto da 32px */
+  gap: 14px;
+  margin-bottom: 24px;
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -732,13 +710,13 @@ body.has-sticky-nav {
 .highlight-item:nth-child(3) { transition-delay: 0.3s; }
 
 .highlight-icon {
-  width: 40px; /* Ridotto da 48px */
+  width: 40px; 
   height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #f5f5f7;
-  border-radius: 10px; /* Ridotto da 12px */
+  border-radius: 10px;
   color: #141414;
   flex-shrink: 0;
   transition: all 0.3s ease;
@@ -750,16 +728,16 @@ body.has-sticky-nav {
 }
 
 .highlight-content h3 {
-  font-size: 1.1rem !important; /* Ridotto da 1.25rem */
+  font-size: 1.1rem !important; 
   font-weight: 600 !important;
   color: #1d1d1f !important;
-  margin: 0 0 6px 0 !important; /* Ridotto da 8px */
+  margin: 0 0 6px 0 !important; 
   line-height: 1.2;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
 }
 
 .highlight-content p {
-  font-size: 0.9rem !important; /* Ridotto da 1rem */
+  font-size: 0.9rem !important; 
   font-weight: 400 !important;
   color: #515154 !important;
   margin: 0 !important;
@@ -767,12 +745,11 @@ body.has-sticky-nav {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
 }
 
-/* Product Metrics - PIÙ COMPATTO */
 .product-metrics {
   display: flex;
-  gap: 30px; /* Ridotto da 40px */
-  margin-bottom: 32px; /* Ridotto da 48px */
-  padding: 24px 0; /* Ridotto da 32px */
+  gap: 30px; 
+  margin-bottom: 32px; 
+  padding: 24px 0;
   border-top: 1px solid #d2d2d7;
   border-bottom: 1px solid #d2d2d7;
   opacity: 0;
@@ -787,16 +764,16 @@ body.has-sticky-nav {
 
 .metric-value {
   display: block;
-  font-size: 2rem !important; /* Ridotto da 2.5rem */
+  font-size: 2rem !important;
   font-weight: 700 !important;
   color: #1d1d1f !important;
   line-height: 1;
-  margin-bottom: 6px; /* Ridotto da 8px */
+  margin-bottom: 6px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
 }
 
 .metric-label {
-  font-size: 0.8rem !important; /* Ridotto da 0.9rem */
+  font-size: 0.8rem !important; 
   font-weight: 400 !important;
   color: #86868b !important;
   text-transform: uppercase;
@@ -804,7 +781,6 @@ body.has-sticky-nav {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
 }
 
-/* Download Section - PULSANTI MIGLIORATI */
 .download-section {
   text-align: left;
   opacity: 0;
@@ -813,37 +789,36 @@ body.has-sticky-nav {
 }
 
 .download-text {
-  font-size: 1rem !important; /* Ridotto da 1.1rem */
+  font-size: 1rem !important; 
   font-weight: 500 !important;
   color: #1d1d1f !important;
-  margin: 0 0 18px 0 !important; /* Ridotto da 24px */
+  margin: 0 0 18px 0 !important;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
 }
 
 .download-buttons {
   display: flex;
-  flex-direction: row; /* CAMBIATO: ora orizzontali */
-  gap: 12px; /* Ridotto gap */
+  flex-direction: row; 
+  gap: 12px;
 }
 
-/* PULSANTI COMPLETAMENTE RIDISEGNATI */
 .download-button {
   display: flex !important;
   align-items: center;
   justify-content: center;
-  gap: 10px; /* Ridotto da 16px */
-  padding: 12px 20px; /* Più compatto */
+  gap: 10px; 
+  padding: 12px 20px;
   background: #1d1d1f !important;
   color: #f5f5f7 !important;
-  border-radius: 8px; /* Ridotto da 12px */
+  border-radius: 8px; 
   text-decoration: none !important;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   border: 1px solid transparent !important;
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  flex: 1; /* Pulsanti della stessa larghezza */
-  min-height: 50px; /* Altezza fissa */
+  flex: 1; 
+  min-height: 50px; 
 }
 
 .download-button::before {
@@ -862,8 +837,8 @@ body.has-sticky-nav {
 }
 
 .download-button:hover {
-  transform: translateY(-3px) !important; /* Ridotto movimento */
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.18) !important; /* Ombra più leggera */
+  transform: translateY(-3px) !important;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.18) !important;
   color: #f5f5f7 !important;
   text-decoration: none !important;
 }
@@ -874,25 +849,25 @@ body.has-sticky-nav {
 
 .download-button svg {
   flex-shrink: 0;
-  width: 18px; /* Icone più piccole */
+  width: 18px; 
   height: 18px;
 }
 
 .button-text {
   display: flex;
   flex-direction: column;
-  text-align: center; /* Centrato per layout orizzontale */
+  text-align: center; 
 }
 
 .button-primary {
-  font-size: 0.95rem !important; /* Ridotto da 1.1rem */
+  font-size: 0.95rem !important; 
   font-weight: 600 !important;
   line-height: 1.2;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
 }
 
 .button-secondary {
-  font-size: 0.75rem !important; /* Ridotto da 0.9rem */
+  font-size: 0.75rem !important; 
   font-weight: 400 !important;
   opacity: 0.8;
   line-height: 1.2;
@@ -910,7 +885,6 @@ body.has-sticky-nav {
   padding-top: 0;
 }
 
-/* Manifesto Container */
 .manifesto-container {
   width: 90%;
   max-width: 1400px;
@@ -920,7 +894,6 @@ body.has-sticky-nav {
 }
 
 
-/* Manifesto Rows */
 .manifesto-row {
   margin-bottom: 60px;
   position: relative;
@@ -931,7 +904,6 @@ body.has-sticky-nav {
   margin-bottom: 80px;
 }
 
-/* Statement Content with Animation */
 .statement-content {
   position: relative;
   opacity: 0;
@@ -944,7 +916,6 @@ body.has-sticky-nav {
   transform: translateY(0);
 }
 
-/* Statement Text */
 .statement-text {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   font-size: 1.75rem;
@@ -955,20 +926,17 @@ body.has-sticky-nav {
   color: #141414;
 }
 
-/* Highlight Text */
 .highlight {
   color: #141414;
   font-weight: 700;
   position: relative;
 }
 
-/* CTA Container */
 .cta-container {
   margin-top: 30px;
   margin-bottom: 60px;
 }
 
-/* CTA Button */
 .cta-button {
   display: inline-flex;
   align-items: center;
@@ -1004,7 +972,6 @@ body.has-sticky-nav {
   transform: translateX(5px);
 }
 
-/* Animation Keyframes */
 @keyframes fadeUpIn {
   0% {
     opacity: 0;
@@ -1043,14 +1010,12 @@ footer .col-md-4.mb-md-0 {
   margin-bottom: 0;
 }
 
-/* Footer Logo */
 .footer-logo {
   filter: invert(1);
   margin-bottom: 1rem;
   display: block;
 }
 
-/* Footer Text */
 footer p {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   color: #ffffff;
@@ -1059,7 +1024,6 @@ footer p {
   line-height: 1.5;
 }
 
-/* Footer Headings */
 footer h5 {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   color: #ffffff;
@@ -1069,7 +1033,6 @@ footer h5 {
   margin-bottom: 1rem;
 }
 
-/* Footer Lists */
 footer .list-unstyled {
   padding-left: 0;
   list-style: none;
@@ -1083,7 +1046,6 @@ footer .list-unstyled li {
   margin-bottom: 0.5rem;
 }
 
-/* Social Icons */
 .social-icons {
   display: flex;
   align-items: center;
@@ -1104,13 +1066,10 @@ footer .list-unstyled li {
   margin-right: 1rem;
 }
 
-/* Footer SVG Icons */
-
 footer a:hover img[alt=""] {
   opacity: 0.7;
 }
 
-/* Footer HR */
 footer hr {
   margin-top: 2rem;
   margin-bottom: 1.5rem;
@@ -1166,27 +1125,27 @@ footer .social-icons img {
     max-width: 220px;
   }
   
-  /* Valori section - SEMPRE una colonna ma più compatta */
+  /* Valori section */
   #valori .valori-timeline {
     max-width: 900px;
     margin: 0 auto;
   }
   
   .valori-item {
-    margin-bottom: 40px; /* Ridotto da 60px */
-    padding: 0; /* Mantieni padding 0 come design originale */
+    margin-bottom: 40px; 
+    padding: 0; 
   }
   
   .valori-content h3 {
-    font-size: 1.8rem; /* Ridotto da 2.25rem */
+    font-size: 1.8rem;
   }
   
   .valori-content .lead {
-    font-size: 1.1rem; /* Leggermente ridotto */
+    font-size: 1.1rem; 
     line-height: 1.5;
   }
   
-  /* Timeline e People History - CENTRATI */
+  /* Timeline e People History */
   .container-timeline {
     display: flex;
     flex-direction: column;
@@ -1241,7 +1200,7 @@ footer .social-icons img {
     margin: 0 auto;
   }
   
-  /* Infinite carousel - RIMUOVI spazi bianchi dalle immagini */
+  /* Infinite carousel */
   .infinite-carousel {
     margin: 0;
     padding: 20px 0;
@@ -1250,7 +1209,7 @@ footer .social-icons img {
   .infinite-carousel-item {
     min-width: 220px;
     height: 180px;
-    margin-bottom: 0; /* Rimuovi margini extra */
+    margin-bottom: 0; 
     margin-top: 0;
   }
   
@@ -1259,8 +1218,8 @@ footer .social-icons img {
     height: 100%;
     object-fit: cover;
     display: block;
-    margin: 0; /* Rimuovi qualsiasi margine dalle immagini */
-    padding: 0; /* Rimuovi qualsiasi padding dalle immagini */
+    margin: 0;
+    padding: 0; 
   }
   
   /* Products section - AGGIORNATO */
@@ -1274,7 +1233,6 @@ footer .social-icons img {
     max-width: 90%;
   }
   
-  /* NASCONDE IL TAPPETINO */
   .product-stage::before {
     display: none !important;
   }
@@ -1333,13 +1291,13 @@ footer .social-icons img {
   padding-bottom: 40px;
   }
   .product-info .btn.me-2 {
-    margin: 0; /* Rimuovi margin auto */
+    margin: 0; 
     margin-bottom: 20px;
     float: left;
   }
-  /* Careers section - CTA BUTTON CORRETTO */
+  /* Careers section */
   #lavoraconnoi {
-    text-align: left; /* Forza allineamento a sinistra per tutta la sezione */
+    text-align: left; 
   }
   
   #lavoraconnoi .statement-text {
@@ -1347,11 +1305,11 @@ footer .social-icons img {
     line-height: 1.4;
     max-width: 700px;
     margin: 0 auto;
-    text-align: left; /* Testo allineato a sinistra */
+    text-align: left;
   }
   
   .cta-container {
-    text-align: left !important; /* Forza allineamento a sinistra */
+    text-align: left !important; 
     margin-top: 30px;
     margin-bottom: 60px;
     max-width: 700px;
@@ -1444,7 +1402,7 @@ footer .social-icons img {
     min-height: 120px;
   }
   
-  /* Valori section - remain single column but more compact */
+  /* Valori section */
   #valori {
     padding-top: 50px !important;
   }
@@ -1529,7 +1487,7 @@ footer .social-icons img {
   padding-bottom: 40px;
   }
   
-  /* Products section - AGGIORNATO */
+  /* Products section */
   .product-showcase {
     grid-template-columns: 1fr !important;
     gap: 35px !important;
@@ -1631,7 +1589,7 @@ footer .social-icons img {
   }
   
   .product-image img {
-    max-width: 70% !important; /* Ridotta da 85% a 60% */
+    max-width: 70% !important; 
     height: auto;
   }
   
@@ -1703,7 +1661,7 @@ footer .social-icons img {
   }
   
   .footer-logo {
-    margin: 0 auto 1rem auto; /* Centra il logo */
+    margin: 0 auto 1rem auto; 
     display: block;
   }
   
@@ -1787,13 +1745,13 @@ footer .social-icons img {
   }
 
   #about .logo-container img {
-    max-width: 180px; /* Ingrandito da 150px */
+    max-width: 180px; 
     min-width: 180px;
     min-height: 110px;
   }
   
   #about h1 {
-    font-size: 2.2rem; /* Ingrandito da 2.2rem per essere più grande dei titoli sezione */
+    font-size: 2.2rem; 
     line-height: 1.2;
   }
   
@@ -1815,7 +1773,7 @@ footer .social-icons img {
    text-align: center;
   }
   
-  /* Valori section mobile - MOLTO ridotti */
+  /* Valori section mobile */
   #valori {
     padding-top: 0px !important;
   }
@@ -1830,11 +1788,11 @@ footer .social-icons img {
   }
   
   .valori-content h3 {
-    font-size: 1.1rem !important; /* Reingrandito un po' da 1rem */
+    font-size: 1.1rem !important; 
   }
   
   .valori-content .lead {
-    font-size: 0.85rem !important; /* Reingrandito un po' da 0.8rem */
+    font-size: 0.85rem !important;
     padding: 0 5px;
     line-height: 1.4;
   }
@@ -1861,17 +1819,17 @@ footer .social-icons img {
   
   .timeline-controls {
     margin-top: 2rem;
-    padding: 0 30px; /* Più padding per allontanare frecce dai bordi */
+    padding: 0 30px; 
   }
   
   .timeline-controls button {
-    padding: 0.5rem 1.5rem; /* Più padding laterale */
+    padding: 0.5rem 1.5rem; 
     font-size: 1.2rem;
   }
   
   .timeline-track {
-    width: 200px; /* Ridotta da 300px per mobile */
-    margin: 0 25px; /* Più spazio dai bottoni */
+    width: 200px;
+    margin: 0 25px; 
   }
   
   .current-year {
@@ -1896,7 +1854,7 @@ footer .social-icons img {
     height: 200px;
   }
   
-  /* Products section mobile - AGGIORNATO */
+  /* Products section mobile */
   .product-showcase {
     grid-template-columns: 1fr !important;
     gap: 25px !important;
@@ -1908,7 +1866,6 @@ footer .social-icons img {
     max-width: 90%;
   }
   
-  /* NASCONDE IL TAPPETINO SU MOBILE */
   .product-stage::before {
     display: none !important;
   }
@@ -1992,13 +1949,13 @@ footer .social-icons img {
     font-size: 0.68rem !important;
   }
 
-  /* Products section mobile - LAYOUT CORRETTO */
+  /* Products section mobile */
   #prodotti .nostra-storia-title {
     font-size: 1.8rem !important;
   }
   
   #prodotti .row {
-    flex-direction: column; /* Immagine sopra, non reverse */
+    flex-direction: column;
   }
   
   #prodotti .col-md-6 {
@@ -2013,19 +1970,19 @@ footer .social-icons img {
   }
   
   .product-image {
-    order: 1; /* Immagine per prima */
+    order: 1; 
     text-align: center;
     margin-bottom: 1.5rem;
   }
   
   .product-image img {
-    max-width: 70% !important; /* Leggermente più grande per mobile */
+    max-width: 70% !important; 
   }
   
   .product-info {
-    order: 2; /* Info dopo */
+    order: 2;
     padding: 10px 15px;
-    text-align: center; /* Tutto centrato */
+    text-align: center; 
   }
   
   .algo-title {
@@ -2039,10 +1996,10 @@ footer .social-icons img {
   }
   
   .feature-list {
-    text-align: left !important; /* TORNATO A SINISTRA solo le feature */
+    text-align: left !important; 
     max-width: 300px;
     margin: 0 auto;
-    list-style: disc; /* Riportato i bullet points */
+    list-style: disc;
     padding-left: 1.2rem;
   }
   
@@ -2059,20 +2016,20 @@ footer .social-icons img {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.75rem; /* Aumentato gap per centrare meglio */
+    gap: 0.75rem;
   }
   
   .product-info .btn {
     font-size: 0.85rem;
-    padding: 12px 24px; /* Padding più uniforme */
+    padding: 12px 24px; 
     margin: 0;
-    display: inline-block; /* Cambiato da block */
-    width: auto; /* Cambiato da fit-content */
-    min-width: 160px; /* Leggermente più largo */
+    display: inline-block; 
+    width: auto; 
+    min-width: 160px; 
   }
   
   .product-info .btn.me-2 {
-    margin: 0; /* Rimuovi margin auto */
+    margin: 0; 
     margin-bottom: 20px;
   }
   
@@ -2087,7 +2044,7 @@ footer .social-icons img {
   .cta-container {
     padding: 0 1rem;
     max-width: 100%;
-    text-align: center !important; /* Forza centramento */
+    text-align: center !important; 
     display: flex;
     justify-content: center;
   }
@@ -2095,10 +2052,10 @@ footer .social-icons img {
   .cta-button {
     padding: 1rem 2rem;
     font-size: 1rem;
-    display: inline-flex; /* ← Change from inline-block to inline-flex */
-    align-items: center;   /* ← Add this back */
-    width: auto; /* Rimosso width fit-content */
-    margin: 0; /* Rimosso margin auto */
+    display: inline-flex; 
+    align-items: center;  
+    width: auto;
+    margin: 0; 
   }
   
   /* Footer mobile */
@@ -2130,3 +2087,5 @@ footer .social-icons img {
     margin-left: 18px;
   }
 }
+
+
