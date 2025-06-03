@@ -351,6 +351,7 @@ function initializeOptimizedCarousel() {
   
   addCarouselStyles();
   setupCarouselVisibilityControl(carousel);
+  setupCarouselHoverControls(carousel);
   optimizeCarouselForMobile(carousel);
 }
 
@@ -404,6 +405,11 @@ function setupCarouselVisibilityControl(carousel) {
   }, { threshold: 0.1 });
   
   carouselObserver.observe(carousel);
+}
+
+function setupCarouselHoverControls(carousel) {
+  // Funzione vuota - niente più pausa al hover
+  return;
 }
 
 function optimizeCarouselForMobile(carousel) {
@@ -596,11 +602,18 @@ function resetHighlights(container) {
 function resetMetrics(container) {
   const metrics = container.querySelectorAll('.metric-value');
   metrics.forEach(metric => {
+    // Cancella timer se attivo
+    if (metric.dataset.timerId) {
+      clearInterval(parseInt(metric.dataset.timerId));
+      metric.dataset.timerId = '';
+    }
+    metric.dataset.animating = 'false';
+    
+    // Reset del testo
     const originalText = metric.getAttribute('data-original-text');
     if (originalText) {
       metric.textContent = originalText;
     }
-    metric.removeAttribute('data-animating');
   });
 }
 
@@ -723,82 +736,60 @@ function animateDownloadSection(element) {
 }
 
 function animateCounterNumber(element, isMobile = false) {
-  // Previeni animazioni multiple simultanee
-  if (element.getAttribute('data-animating') === 'true') return;
-  element.setAttribute('data-animating', 'true');
+  // Previeni animazioni multiple
+  if (element.dataset.animating === 'true') return;
+  element.dataset.animating = 'true';
   
-  const originalText = element.getAttribute('data-original-text') || element.textContent.trim();
-  const targetNumber = parseFloat(element.getAttribute('data-target-number') || '0');
+  const text = element.textContent.trim();
   
-  if (!targetNumber) {
-    element.removeAttribute('data-animating');
+  // Trova il numero nel testo
+  const match = text.match(/(\d+(?:\.\d+)?)/);
+  if (!match) {
+    element.dataset.animating = 'false';
     return;
   }
   
-  // Estrai il suffisso dal testo originale
-  const suffix = originalText.replace(/^\d+(?:\.\d+)?/, '');
-  const hasDecimal = originalText.includes('.');
-  const isLargeNumber = targetNumber >= 1000;
+  const targetNumber = parseFloat(match[1]);
+  const suffix = text.replace(match[1], '');
+  const hasDecimal = text.includes('.');
   
   const duration = isMobile ? 1500 : 2000;
-  const startTime = performance.now();
-  const easeOutQuart = t => 1 - Math.pow(1 - t, 4);
+  const steps = 60;
+  const stepDuration = duration / steps;
+  const increment = targetNumber / steps;
   
-  // ID univoco per questa animazione
-  const animationId = 'anim_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-  element.setAttribute('data-animation-id', animationId);
+  let currentNumber = 0;
+  let currentStep = 0;
   
-  let animationFrame;
-  
-  function updateNumber(currentTime) {
-    // Verifica se l'animazione è stata cancellata
-    if (element.getAttribute('data-animation-id') !== animationId) {
-      return;
-    }
+  const timer = setInterval(() => {
+    currentStep++;
+    currentNumber = (targetNumber / steps) * currentStep;
     
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const easedProgress = easeOutQuart(progress);
-    const currentNumber = targetNumber * easedProgress;
-    
-    let displayNumber;
-    if (hasDecimal) {
-      displayNumber = currentNumber.toFixed(1);
-    } else if (isLargeNumber) {
-      displayNumber = Math.floor(currentNumber).toLocaleString();
-    } else {
-      displayNumber = Math.floor(currentNumber);
-    }
-    
-    element.textContent = displayNumber + suffix;
-    
-    if (progress < 1) {
-      animationFrame = requestAnimationFrame(updateNumber);
-    } else {
-      // Assicurati che il valore finale sia esatto
-      let finalDisplay;
+    if (currentStep >= steps) {
+      // Valore finale esatto
       if (hasDecimal) {
-        finalDisplay = targetNumber.toFixed(1);
-      } else if (isLargeNumber) {
-        finalDisplay = Math.floor(targetNumber).toLocaleString();
+        element.textContent = targetNumber.toFixed(1) + suffix;
+      } else if (targetNumber >= 1000) {
+        element.textContent = Math.floor(targetNumber).toLocaleString() + suffix;
       } else {
-        finalDisplay = Math.floor(targetNumber);
+        element.textContent = Math.floor(targetNumber) + suffix;
       }
-      
-      element.textContent = finalDisplay + suffix;
-      element.removeAttribute('data-animating');
-      element.removeAttribute('data-animation-id');
+      clearInterval(timer);
+      element.dataset.animating = 'false';
+    } else {
+      // Valore corrente
+      if (hasDecimal) {
+        element.textContent = currentNumber.toFixed(1) + suffix;
+      } else if (targetNumber >= 1000) {
+        element.textContent = Math.floor(currentNumber).toLocaleString() + suffix;
+      } else {
+        element.textContent = Math.floor(currentNumber) + suffix;
+      }
     }
-  }
+  }, stepDuration);
   
-  animationFrame = requestAnimationFrame(updateNumber);
-  
-  // Salva il riferimento per poterlo cancellare se necessario
-  const metricId = generateElementId(element);
-  if (!activeAnimations.has(metricId)) {
-    activeAnimations.set(metricId, []);
-  }
-  activeAnimations.get(metricId).push(animationFrame);
+  // Salva il timer per poterlo cancellare
+  element.dataset.timerId = timer;
 }
 
 function setupProductInteractions() {
@@ -923,26 +914,4 @@ function addFeedbackStyles() {
     }
   `;
   document.head.appendChild(style);
-  // Gestione touch per carosello ibrido mobile
-    if (window.innerWidth <= 768) {
-    const carousel = document.querySelector('.infinite-carousel');
-    if (carousel) {
-        let scrollTimeout;
-        
-        // Pausa animazione quando l'utente inizia a scrollare
-        carousel.addEventListener('touchstart', () => {
-        carousel.classList.add('user-scrolling');
-        });
-        
-        carousel.addEventListener('scroll', () => {
-        carousel.classList.add('user-scrolling');
-        
-        // Riprendi l'animazione dopo 2 secondi di inattività
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-            carousel.classList.remove('user-scrolling');
-        }, 30);
-        });
-    }
-    }
 }
