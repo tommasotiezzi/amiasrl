@@ -2116,9 +2116,9 @@ footer .social-icons img {
 }
 
 
-/* Carosello ibrido: infinito + controllabile su mobile */
+/* Carosello scrollabile SOLO nella sezione bootcamp */
 @media (max-width: 768px) {
-  #persone .infinite-carousel {
+  .bootcamp-section .infinite-carousel {
     overflow-x: auto !important;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
@@ -2126,22 +2126,22 @@ footer .social-icons img {
     -ms-overflow-style: none;
   }
   
-  #persone .infinite-carousel::-webkit-scrollbar {
+  .bootcamp-section .infinite-carousel::-webkit-scrollbar {
     display: none;
   }
   
-  #persone .infinite-carousel-wrapper {
+  .bootcamp-section .infinite-carousel-wrapper {
     animation-play-state: running !important;
     transition: animation-play-state 0.3s ease;
   }
   
-  /* Pausa l'animazione quando l'utente tocca */
-  #persone .infinite-carousel.user-scrolling .infinite-carousel-wrapper {
+  .bootcamp-section .infinite-carousel.user-scrolling .infinite-carousel-wrapper {
     animation-play-state: paused !important;
   }
   
-  #persone .infinite-carousel-item {
+  .bootcamp-section .infinite-carousel-item {
     scroll-snap-align: center;
     scroll-snap-stop: always;
   }
 }
+
