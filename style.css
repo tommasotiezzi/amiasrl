@@ -559,6 +559,32 @@ body.has-sticky-nav {
   }
 }
 
+/* Nascondi scrollbar completamente su tutti i browser */
+.infinite-carousel {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* Internet Explorer 10+ */
+  scrollbar-color: transparent transparent !important;
+
+}
+
+/* Nascondi scrollbar su Webkit (Chrome, Safari, Edge) */
+.infinite-carousel::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+.infinite-carousel::-webkit-scrollbar-track {
+  display: none !important;
+}
+
+.infinite-carousel::-webkit-scrollbar-thumb {
+  display: none !important;
+}
+
 /* ===================================
    SEZIONE PRODUCTS/PRODOTTI - REDESIGN OTTIMIZZATO
    =================================== */
@@ -1487,6 +1513,7 @@ footer .social-icons img {
   padding-bottom: 40px;
   }
   
+  
   /* Products section */
   .product-showcase {
     grid-template-columns: 1fr !important;
@@ -2089,3 +2116,32 @@ footer .social-icons img {
 }
 
 
+/* Carosello ibrido: infinito + controllabile su mobile */
+@media (max-width: 768px) {
+  .infinite-carousel {
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .infinite-carousel::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .infinite-carousel-wrapper {
+    animation-play-state: running !important;
+    transition: animation-play-state 0.3s ease;
+  }
+  
+  /* Pausa l'animazione quando l'utente tocca */
+  .infinite-carousel.user-scrolling .infinite-carousel-wrapper {
+    animation-play-state: paused !important;
+  }
+  
+  .infinite-carousel-item {
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+  }
+}

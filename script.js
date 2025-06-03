@@ -351,7 +351,6 @@ function initializeOptimizedCarousel() {
   
   addCarouselStyles();
   setupCarouselVisibilityControl(carousel);
-  setupCarouselHoverControls(carousel);
   optimizeCarouselForMobile(carousel);
 }
 
@@ -407,24 +406,6 @@ function setupCarouselVisibilityControl(carousel) {
   carouselObserver.observe(carousel);
 }
 
-function setupCarouselHoverControls(carousel) {
-  if (window.innerWidth <= 768) return;
-  
-  carousel.addEventListener('mouseenter', function() {
-    const wrapper = this.querySelector('.infinite-carousel-wrapper');
-    if (wrapper) {
-      wrapper.style.animationPlayState = 'paused';
-    }
-  });
-  
-  carousel.addEventListener('mouseleave', function() {
-    const wrapper = this.querySelector('.infinite-carousel-wrapper');
-    if (wrapper) {
-      wrapper.style.animationPlayState = 'running';
-    }
-  });
-}
-
 function optimizeCarouselForMobile(carousel) {
   if (window.innerWidth > 768) return;
   
@@ -435,8 +416,11 @@ function optimizeCarouselForMobile(carousel) {
 }
 
 // =============================================
-// SEZIONE PRODOTTI
+// SEZIONE PRODOTTI - SISTEMA MIGLIORATO
 // =============================================
+
+// Tracciamento globale delle animazioni attive
+const activeAnimations = new Map();
 
 function initializeProductsSection() {
   setupProductAnimations();
@@ -475,20 +459,7 @@ function setupMobileProductAnimations(productElements) {
           animateMetricsMobile(element);
         }
       } else {
-        // Reset quando esce dalla vista
-        const element = entry.target;
-        element.style.opacity = '0';
-        element.style.transform = 'translateY(15px)';
-        
-        // Reset degli highlights
-        if (element.classList.contains('product-highlights')) {
-          const highlights = element.querySelectorAll('.highlight-item');
-          highlights.forEach(highlight => {
-            highlight.style.opacity = '0';
-            highlight.style.transform = 'translateY(15px)';
-            highlight.classList.remove('animate');
-          });
-        }
+        handleElementExit(entry.target, true);
       }
     });
   }, { 
@@ -497,9 +468,7 @@ function setupMobileProductAnimations(productElements) {
   });
   
   productElements.forEach(element => {
-    element.style.opacity = '0';
-    element.style.transform = 'translateY(15px)';
-    element.style.transition = 'all 0.5s ease-out';
+    initializeElementForAnimation(element);
     mobileObserver.observe(element);
   });
 }
@@ -520,29 +489,7 @@ function setupDesktopProductAnimations(productElements) {
           animateDownloadSection(element);
         }
       } else {
-        // Reset quando esce dalla vista
-        const element = entry.target;
-        element.style.opacity = '0';
-        element.style.transform = 'translateY(30px)';
-        
-        // Reset specifici per tipo di elemento
-        if (element.classList.contains('product-highlights')) {
-          const highlights = element.querySelectorAll('.highlight-item');
-          highlights.forEach(highlight => {
-            highlight.style.opacity = '0';
-            highlight.style.transform = 'translateY(15px)';
-            highlight.classList.remove('animate');
-          });
-        } else if (element.classList.contains('product-metrics')) {
-          const metrics = element.querySelectorAll('.metric-value');
-          metrics.forEach(metric => {
-            // Reset del testo originale se necessario
-            const originalText = metric.getAttribute('data-original-text');
-            if (originalText) {
-              metric.textContent = originalText;
-            }
-          });
-        }
+        handleElementExit(entry.target, false);
       }
     });
   }, {
@@ -551,52 +498,164 @@ function setupDesktopProductAnimations(productElements) {
   });
   
   productElements.forEach(element => {
-    element.style.opacity = '0';
-    element.style.transform = 'translateY(30px)';
-    element.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    initializeElementForAnimation(element);
     
-    // Salva il testo originale delle metriche per il reset
+    // Prepara i dati originali per le metriche
     if (element.classList.contains('product-metrics')) {
-      const metrics = element.querySelectorAll('.metric-value');
-      metrics.forEach(metric => {
-        if (!metric.getAttribute('data-original-text')) {
-          metric.setAttribute('data-original-text', metric.textContent.trim());
-        }
-      });
+      prepareMetricsData(element);
     }
     
     desktopObserver.observe(element);
   });
 }
 
-function animateHighlightsMobile(container) {
+function initializeElementForAnimation(element) {
+  element.style.opacity = '0';
+  element.style.transform = 'translateY(30px)';
+  element.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+  
+  // Marca l'elemento come non animato
+  element.setAttribute('data-animation-state', 'inactive');
+}
+
+function prepareMetricsData(container) {
+  const metrics = container.querySelectorAll('.metric-value');
+  metrics.forEach(metric => {
+    if (!metric.getAttribute('data-original-text')) {
+      const originalText = metric.textContent.trim();
+      metric.setAttribute('data-original-text', originalText);
+      
+      // Estrai il numero target per le animazioni
+      const matches = originalText.match(/(\d+(?:\.\d+)?)/);
+      if (matches) {
+        metric.setAttribute('data-target-number', matches[1]);
+      }
+    }
+  });
+}
+
+function handleElementExit(element, isMobile) {
+  // Cancella tutte le animazioni attive per questo elemento
+  clearElementAnimations(element);
+  
+  // Reset visivo
+  element.style.opacity = '0';
+  element.style.transform = isMobile ? 'translateY(15px)' : 'translateY(30px)';
+  element.setAttribute('data-animation-state', 'inactive');
+  
+  // Reset specifici per tipo di elemento
+  if (element.classList.contains('product-highlights')) {
+    resetHighlights(element);
+  } else if (element.classList.contains('product-metrics')) {
+    resetMetrics(element);
+  }
+}
+
+function clearElementAnimations(element) {
+  // Trova e cancella tutte le animazioni associate a questo elemento
+  const elementId = element.dataset.elementId || generateElementId(element);
+  
+  if (activeAnimations.has(elementId)) {
+    const animations = activeAnimations.get(elementId);
+    animations.forEach(animationId => {
+      clearTimeout(animationId);
+    });
+    activeAnimations.delete(elementId);
+  }
+  
+  // Cancella anche le animazioni dei figli
+  const childMetrics = element.querySelectorAll('.metric-value');
+  childMetrics.forEach(metric => {
+    const metricId = metric.dataset.animationId;
+    if (metricId && activeAnimations.has(metricId)) {
+      const animations = activeAnimations.get(metricId);
+      animations.forEach(animationId => {
+        clearTimeout(animationId);
+      });
+      activeAnimations.delete(metricId);
+    }
+  });
+}
+
+function generateElementId(element) {
+  if (!element.dataset.elementId) {
+    element.dataset.elementId = 'elem_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
+  return element.dataset.elementId;
+}
+
+function resetHighlights(container) {
   const highlights = container.querySelectorAll('.highlight-item');
+  highlights.forEach(highlight => {
+    highlight.style.opacity = '0';
+    highlight.style.transform = 'translateY(15px)';
+    highlight.classList.remove('animate');
+  });
+}
+
+function resetMetrics(container) {
+  const metrics = container.querySelectorAll('.metric-value');
+  metrics.forEach(metric => {
+    const originalText = metric.getAttribute('data-original-text');
+    if (originalText) {
+      metric.textContent = originalText;
+    }
+    metric.removeAttribute('data-animating');
+  });
+}
+
+function animateHighlightsMobile(container) {
+  if (container.getAttribute('data-animation-state') === 'active') return;
+  container.setAttribute('data-animation-state', 'active');
+  
+  const highlights = container.querySelectorAll('.highlight-item');
+  const elementId = generateElementId(container);
+  const timeouts = [];
   
   highlights.forEach((highlight, index) => {
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       highlight.style.opacity = '1';
       highlight.style.transform = 'translateY(0)';
       highlight.classList.add('animate');
     }, index * 80);
+    
+    timeouts.push(timeoutId);
   });
+  
+  activeAnimations.set(elementId, timeouts);
 }
 
 function animateMetricsMobile(container) {
+  if (container.getAttribute('data-animation-state') === 'active') return;
+  container.setAttribute('data-animation-state', 'active');
+  
   const metrics = container.querySelectorAll('.metric-value');
+  const elementId = generateElementId(container);
+  const timeouts = [];
   
   metrics.forEach((metric, index) => {
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       animateCounterNumber(metric, true);
     }, index * 100);
+    
+    timeouts.push(timeoutId);
   });
+  
+  activeAnimations.set(elementId, timeouts);
 }
 
 function animateProductIntro(element) {
+  if (element.getAttribute('data-animation-state') === 'active') return;
+  element.setAttribute('data-animation-state', 'active');
+  
   element.style.opacity = '1';
   element.style.transform = 'translateY(0)';
 }
 
 function animateProductHighlights(container) {
+  if (container.getAttribute('data-animation-state') === 'active') return;
+  container.setAttribute('data-animation-state', 'active');
+  
   const isMobile = window.innerWidth <= 768;
   
   container.style.opacity = '1';
@@ -605,6 +664,9 @@ function animateProductHighlights(container) {
   const highlights = container.querySelectorAll('.highlight-item');
   if (highlights.length === 0) return;
   
+  const elementId = generateElementId(container);
+  const timeouts = [];
+  
   highlights.forEach((highlight, index) => {
     highlight.style.opacity = '0';
     highlight.style.transform = 'translateY(15px)';
@@ -612,15 +674,22 @@ function animateProductHighlights(container) {
     
     const delay = isMobile ? index * 100 : index * 150;
     
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       highlight.style.opacity = '1';
       highlight.style.transform = 'translateY(0)';
       highlight.classList.add('animate');
     }, delay);
+    
+    timeouts.push(timeoutId);
   });
+  
+  activeAnimations.set(elementId, timeouts);
 }
 
 function animateProductMetrics(container) {
+  if (container.getAttribute('data-animation-state') === 'active') return;
+  container.setAttribute('data-animation-state', 'active');
+  
   const isMobile = window.innerWidth <= 768;
   
   container.style.opacity = '1';
@@ -629,45 +698,73 @@ function animateProductMetrics(container) {
   const metrics = container.querySelectorAll('.metric-value');
   if (metrics.length === 0) return;
   
+  const elementId = generateElementId(container);
+  const timeouts = [];
+  
   metrics.forEach((metric, index) => {
     const delay = isMobile ? index * 150 : index * 200;
     
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       animateCounterNumber(metric, isMobile);
     }, delay);
+    
+    timeouts.push(timeoutId);
   });
+  
+  activeAnimations.set(elementId, timeouts);
 }
 
 function animateDownloadSection(element) {
+  if (element.getAttribute('data-animation-state') === 'active') return;
+  element.setAttribute('data-animation-state', 'active');
+  
   element.style.opacity = '1';
   element.style.transform = 'translateY(0)';
 }
 
 function animateCounterNumber(element, isMobile = false) {
-  const text = element.textContent.trim();
-  const hasNumber = /\d/.test(text);
-  if (!hasNumber) return;
+  // Previeni animazioni multiple simultanee
+  if (element.getAttribute('data-animating') === 'true') return;
+  element.setAttribute('data-animating', 'true');
   
-  const matches = text.match(/(\d+(?:\.\d+)?)\s*(.*)$/);
-  if (!matches) return;
+  const originalText = element.getAttribute('data-original-text') || element.textContent.trim();
+  const targetNumber = parseFloat(element.getAttribute('data-target-number') || '0');
   
-  const targetNumber = parseFloat(matches[1]);
-  const suffix = matches[2];
+  if (!targetNumber) {
+    element.removeAttribute('data-animating');
+    return;
+  }
+  
+  // Estrai il suffisso dal testo originale
+  const suffix = originalText.replace(/^\d+(?:\.\d+)?/, '');
+  const hasDecimal = originalText.includes('.');
+  const isLargeNumber = targetNumber >= 1000;
+  
   const duration = isMobile ? 1500 : 2000;
   const startTime = performance.now();
-  
   const easeOutQuart = t => 1 - Math.pow(1 - t, 4);
   
+  // ID univoco per questa animazione
+  const animationId = 'anim_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  element.setAttribute('data-animation-id', animationId);
+  
+  let animationFrame;
+  
   function updateNumber(currentTime) {
+    // Verifica se l'animazione è stata cancellata
+    if (element.getAttribute('data-animation-id') !== animationId) {
+      return;
+    }
+    
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / duration, 1);
     const easedProgress = easeOutQuart(progress);
     const currentNumber = targetNumber * easedProgress;
     
     let displayNumber;
-    if (text.includes('.')) {
+    if (hasDecimal) {
       displayNumber = currentNumber.toFixed(1);
-    } else if (targetNumber >= 1000) {
+    } else if (isLargeNumber) {
       displayNumber = Math.floor(currentNumber).toLocaleString();
     } else {
       displayNumber = Math.floor(currentNumber);
@@ -676,11 +773,32 @@ function animateCounterNumber(element, isMobile = false) {
     element.textContent = displayNumber + suffix;
     
     if (progress < 1) {
-      requestAnimationFrame(updateNumber);
+      animationFrame = requestAnimationFrame(updateNumber);
+    } else {
+      // Assicurati che il valore finale sia esatto
+      let finalDisplay;
+      if (hasDecimal) {
+        finalDisplay = targetNumber.toFixed(1);
+      } else if (isLargeNumber) {
+        finalDisplay = Math.floor(targetNumber).toLocaleString();
+      } else {
+        finalDisplay = Math.floor(targetNumber);
+      }
+      
+      element.textContent = finalDisplay + suffix;
+      element.removeAttribute('data-animating');
+      element.removeAttribute('data-animation-id');
     }
   }
   
-  requestAnimationFrame(updateNumber);
+  animationFrame = requestAnimationFrame(updateNumber);
+  
+  // Salva il riferimento per poterlo cancellare se necessario
+  const metricId = generateElementId(element);
+  if (!activeAnimations.has(metricId)) {
+    activeAnimations.set(metricId, []);
+  }
+  activeAnimations.get(metricId).push(animationFrame);
 }
 
 function setupProductInteractions() {
@@ -805,4 +923,26 @@ function addFeedbackStyles() {
     }
   `;
   document.head.appendChild(style);
+  // Gestione touch per carosello ibrido mobile
+    if (window.innerWidth <= 768) {
+    const carousel = document.querySelector('.infinite-carousel');
+    if (carousel) {
+        let scrollTimeout;
+        
+        // Pausa animazione quando l'utente inizia a scrollare
+        carousel.addEventListener('touchstart', () => {
+        carousel.classList.add('user-scrolling');
+        });
+        
+        carousel.addEventListener('scroll', () => {
+        carousel.classList.add('user-scrolling');
+        
+        // Riprendi l'animazione dopo 2 secondi di inattività
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            carousel.classList.remove('user-scrolling');
+        }, 30);
+        });
+    }
+    }
 }
