@@ -115,6 +115,93 @@ body.has-sticky-nav {
 }
 
 /* ===================================
+   Language switcher SECTION
+   =================================== */
+/* Language Switcher Styles */
+.language-switcher {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    z-index: 9999;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.language-switcher.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+
+.flag-button {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 3px solid #ffffff;
+    background: #ffffff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.flag-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+}
+
+.flag-button:active {
+    transform: scale(0.95);
+}
+
+.flag-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.language-switcher::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    margin-bottom: 10px;
+}
+
+.language-switcher:hover::after {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .language-switcher {
+        bottom: 20px;
+        left: 20px;
+    }
+    
+    .flag-button {
+        width: 25px;
+        height: 25px;
+    }
+}
+
+/* ===================================
    HERO/ABOUT SECTION
    =================================== */
 
