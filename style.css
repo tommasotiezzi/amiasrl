@@ -1490,7 +1490,13 @@ footer .social-icons img {
   #about {
     padding-top: 20px !important;
   }
-  
+  .container2 h1 .glow {
+  color: #141414;
+  position: relative;
+  display: inline-block;
+  padding: 0;
+  margin-left: 7px;
+   }
   #about .container2 {
     max-width: 500px;
   }
@@ -1836,7 +1842,13 @@ footer .social-icons img {
   #about {
     padding-top: 15px !important;
   }
-  
+  .container2 h1 .glow {
+  color: #141414;
+  position: relative;
+  display: inline-block;
+  padding: 0;
+  margin-left: 7px;
+  }
   #about .container2 {
     gap: 1.5rem;
     max-width: 100%;
