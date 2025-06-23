@@ -927,12 +927,6 @@ function addFeedbackStyles() {
 // LANGUAGE SWITCHER
 // =============================================
 
-// SIMPLE & RELIABLE TRANSLATION SYSTEM
-// =============================================
-
-// SIMPLE DIRECT TRANSLATION - NO BULLSHIT
-// =============================================
-
 let isEnglish = false;
 
 function initializeLanguageSwitcher() {
@@ -964,18 +958,15 @@ function initializeLanguageSwitcher() {
 }
 
 function translateToEnglish() {
-  // Navigation
   document.querySelector('a[href="#about"]').textContent = 'About Us';
   document.querySelector('a[href="#valori"]').textContent = 'Values';
   document.querySelector('a[href="#persone"]').textContent = 'People';
   document.querySelector('a[href="#prodotti"]').textContent = 'Products';
   document.querySelector('a[href="#lavoraconnoi"]').textContent = 'Work with us';
   
-  // Hero Section
   document.querySelector('.heading-container h1').innerHTML = 'Innovate Today,<span class="glow">Shape Tomorrow</span>';
   document.querySelector('.about-text .lead').textContent = 'Our mission is to improve people\'s life experiences by offering intuitive and high-quality solutions, guided by data, passion for innovation and commitment to attention to detail';
   
-  // Values Section
   document.querySelector('#valori .title-section').textContent = 'Our Values';
   
   const valoriTitles = document.querySelectorAll('#valori .valori-content h3');
@@ -999,12 +990,10 @@ function translateToEnglish() {
   valoriTitles[5].textContent = 'Fun';
   valoriDescriptions[5].textContent = 'We work hard, but we have fun. Because we do it in what we are passionate about and what gives us the most satisfaction.';
   
-  // People Section
   document.querySelector('#persone .nostra-storia-title').innerHTML = 'Amia, a story of <br>people';
   document.querySelector('.bootcamp-section .nostra-storia-title').textContent = 'Growing & Having Fun, together';
   document.querySelector('.bootcamp-subtitle').textContent = 'Our first bootcamp, July 2024';
   
-  // Timeline descriptions
   const timelineDescriptions = document.querySelectorAll('.timeline-description');
   const englishDescriptions = [
     'Everything begins in 2020 with the birth of Fantatia, the page created by Mattia to talk about fantasy football. Amia? Algo? They are still distant dreams.',
@@ -1026,7 +1015,6 @@ function translateToEnglish() {
     }
   });
   
-  // Products Section
   document.querySelector('#prodotti .nostra-storia-title').textContent = 'Our Products';
   document.querySelector('.product-tagline').textContent = 'Our first app, transforms data into fantasy football choices.';
   
@@ -1040,7 +1028,6 @@ function translateToEnglish() {
   highlightItems[2].querySelector('h3').textContent = 'Quality';
   highlightItems[2].querySelector('p').textContent = 'In line with our values, we are building a product that reflects our high expectations.';
   
-  // Metrics
   const metricLabels = document.querySelectorAll('.metric-label');
   metricLabels[0].textContent = 'Downloads';
   metricLabels[1].innerHTML = 'Average Rating<br>';
@@ -1050,7 +1037,6 @@ function translateToEnglish() {
   document.querySelectorAll('.button-secondary')[0].textContent = 'for iOS';
   document.querySelectorAll('.button-secondary')[1].textContent = 'for Android';
   
-  // Career Section
   const statements = document.querySelectorAll('.statement-text');
   statements[0].innerHTML = 'We have a forbidden dream: <span class="highlight">that sooner or later everyone has at least one Amia app on their phone.</span><br> It\'s our most ambitious goal.';
   statements[1].innerHTML = 'There\'s only one way to get there: <span class="highlight">create products that people really love.</span> Products crafted down to the smallest details, even those you can\'t see.';
@@ -1059,27 +1045,22 @@ function translateToEnglish() {
   
   document.querySelector('.cta-text').textContent = 'Join the team';
   
-  // Footer
   document.querySelector('footer h5').textContent = 'Contacts';
   document.querySelectorAll('footer h5')[1].textContent = 'Follow us';
   
-  // Update current year if timeline is active
   updateCurrentYear();
 }
 
 function translateToItalian() {
-  // Navigation
   document.querySelector('a[href="#about"]').textContent = 'Chi siamo';
   document.querySelector('a[href="#valori"]').textContent = 'Valori';
   document.querySelector('a[href="#persone"]').textContent = 'Persone';
   document.querySelector('a[href="#prodotti"]').textContent = 'Prodotti';
   document.querySelector('a[href="#lavoraconnoi"]').textContent = 'Lavora con noi';
   
-  // Hero Section
   document.querySelector('.heading-container h1').innerHTML = 'Innova oggi,<span class="glow">transforma domani</span>';
   document.querySelector('.about-text .lead').textContent = 'La nostra missione è migliorare l\'esperienza di attimi di vita delle persone, offrendo soluzioni intuitive e di alta qualità, guidati dai dati, dalla passione per l\'innovazione e dall\'impegno nella cura dei particolari';
   
-  // Values Section
   document.querySelector('#valori .title-section').textContent = 'I Nostri Valori';
   
   const valoriTitles = document.querySelectorAll('#valori .valori-content h3');
@@ -1103,12 +1084,10 @@ function translateToItalian() {
   valoriTitles[5].textContent = 'Divertimento';
   valoriDescriptions[5].textContent = 'Lavoriamo tanto, ma ci divertiamo. Perché lo facciamo in ciò che ci appassiona e ci dà più soddisfazione.';
   
-  // People Section
   document.querySelector('#persone .nostra-storia-title').innerHTML = 'Amia, una storia di <br>persone';
   document.querySelector('.bootcamp-section .nostra-storia-title').textContent = 'Crescere & Divertirsi, insieme';
   document.querySelector('.bootcamp-subtitle').textContent = 'Il nostro primo bootcamp, Luglio 2024';
   
-  // Timeline descriptions
   const timelineDescriptions = document.querySelectorAll('.timeline-description');
   const italianDescriptions = [
     'Tutto comincia nel 2020 con la nascita di Fantatia, la pagina creata da Mattia per parlare di fantacalcio. Amia? Algo? Sono ancora sogni lontani.',
@@ -1130,7 +1109,6 @@ function translateToItalian() {
     }
   });
   
-  // Products Section
   document.querySelector('#prodotti .nostra-storia-title').textContent = 'I Nostri Prodotti';
   document.querySelector('.product-tagline').textContent = 'La nostra prima app, trasforma dati in scelte fantacalcistiche.';
   
@@ -1144,7 +1122,6 @@ function translateToItalian() {
   highlightItems[2].querySelector('h3').textContent = 'Qualità';
   highlightItems[2].querySelector('p').textContent = 'In linea con i nostri valori, stiamo costruendo un prodotto che rispecchi le nostre, alte, aspettative.';
   
-  // Metrics
   const metricLabels = document.querySelectorAll('.metric-label');
   metricLabels[0].textContent = 'Download';
   metricLabels[1].innerHTML = 'Rating medio<br>';
@@ -1154,7 +1131,6 @@ function translateToItalian() {
   document.querySelectorAll('.button-secondary')[0].textContent = 'per iOS';
   document.querySelectorAll('.button-secondary')[1].textContent = 'per Android';
   
-  // Career Section
   const statements = document.querySelectorAll('.statement-text');
   statements[0].innerHTML = 'Abbiamo un sogno proibito: <span class="highlight">che prima o poi tutti abbiano almeno un\'app di Amia sul telefono.</span><br> È il nostro obiettivo più ambizioso.';
   statements[1].innerHTML = 'La strada per arrivarci è una sola: <span class="highlight">creare prodotti che le persone amino davvero.</span> Prodotti curati fin nei minimi dettagli, anche quelli che non si vedono.';
@@ -1167,7 +1143,6 @@ function translateToItalian() {
   document.querySelector('footer h5').textContent = 'Contatti';
   document.querySelectorAll('footer h5')[1].textContent = 'Seguici';
   
-  // Update current year if timeline is active
   updateCurrentYear();
 }
 
@@ -1220,7 +1195,6 @@ function updateTooltip() {
   }
 }
 
-// TIMELINE CAROUSEL - UPDATED TO WORK WITH TRANSLATIONS
 function initializeTimelineCarousel() {
   const timelineItems = document.querySelectorAll('.timeline-item');
   const prevButton = document.querySelector('.timeline-controls .prev');
@@ -1235,7 +1209,6 @@ function initializeTimelineCarousel() {
     timelineItems.forEach(item => item.classList.remove('active'));
     timelineItems[currentIndex].classList.add('active');
     
-    // Update the year display based on current language
     updateCurrentYear();
     
     prevButton.disabled = currentIndex === 0;
