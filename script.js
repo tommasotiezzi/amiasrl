@@ -972,45 +972,41 @@ const englishTranslations = {
 'Lavoriamo tanto, ma ci divertiamo. Perché lo facciamo in ciò che ci appassiona e ci dà più soddisfazione.': 
 'We work hard, but we have fun. Because we do it in what we are passionate about and what gives us the most satisfaction.',
 
-'Maggio 2020':
-'May 2020',
-
-
 'Tutto comincia nel 2020 con la nascita di Fantatia, la pagina creata da Mattia per parlare di fantacalcio. Amia? Algo? Sono ancora sogni lontani.': 
 'Everything begins in 2020 with the birth of Fantatia, the page created by Mattia to talk about fantasy football. Amia? Algo? They are still distant dreams.',
 
-'Dicembre 2020':
-'December 2020',
+'Maggio 2020':
+'May 2020',
 
 'Durante una live su Twitch, Abba si propone per aiutare Mattia con la comunicazione. È il primo a salire sulla barca e oggi è ancora con noi come Customer Success Manager.': 
 'During a live on Twitch, Abba proposes to help Mattia with communication. He is the first to get on the boat and today he is still with us as Customer Success Manager.',
 
-'Marzo 2021':
-'March 2021',
+'Dicembre 2020':
+'December 2020',
 
 'Mattia intuisce che ai fantallenatori manca uno strumento di supporto strategico. Con Tancredi crea la prima versione di Algo su Excel! Agli utenti interessa e iniziano ad abbonarsi.': 
 'Mattia realizes that fantasy coaches lack a strategic support tool. With Tancredi he creates the first version of Algo on Excel! Users are interested and start subscribing.',
 
-'Agosto 2022':
-'August 2022',
+'Marzo 2021':
+'March 2021',
 
-'Dopo la prima stagione conosciamo Paolo, che si unisce al team con nuove idee per migliorare l\'algoritmo. Il file Excel non basta più. Nasce fantatia.com.': 
+'Dopo la prima stagione conosciamo Paolo, che si unisce al team con nuove idee per migliorare l’algoritmo. Il file Excel non basta più. Nasce fantatia.com.': 
 'After the first season we meet Paolo, who joins the team with new ideas to improve the algorithm. The Excel file is no longer enough. fantatia.com is born.',
 
-'Marzo 2023':
-'March 2023',
+'Agosto 2022':
+'August 2022',
 
 'Algo cresce, serve un team più solido. Arrivano Andrea (Backend), Leonardo (Frontend) e Tommaso (Business Analyst). Amia comincia a prendere forma.': 
 'Algo grows, we need a more solid team. Andrea (Backend), Leonardo (Frontend) and Tommaso (Business Analyst) arrive. Amia begins to take shape.',
 
-'Agosto 2023':
-'August 2023',
+'Marzo 2023':
+'March 2023',
 
-'Nasce ufficialmente Amia. Ma nell\'agosto 2023 l\'uscita di Algo fallisce, non siamo pronti. Torniamo su fantatia.com e ci riorganizziamo.': 
+'Nasce ufficialmente Amia. Ma nell’agosto 2023 l’uscita di Algo fallisce, non siamo pronti. Torniamo su fantatia.com e ci riorganizziamo.': 
 'Amia is officially born. But in August 2023 the release of Algo fails, we are not ready. We go back to fantatia.com and reorganize.',
 
-'Maggio 2020':
-'May 2020',
+'Agosto 2023':
+'August 2023',
 
 'Non ci fermiamo, siamo motivati. Il team si amplia: Michele (Product Designer), Luca (App Developer) e Giampaolo (Cloud & DevOps). Si riparte, all in. Investiamo tutto.': 
 'We don\'t stop, we are motivated. The team expands: Michele (Product Designer), Luca (App Developer) and Giampaolo (Cloud & DevOps). We start again, all in. We invest everything.',
