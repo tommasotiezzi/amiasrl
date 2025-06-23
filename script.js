@@ -957,7 +957,7 @@ const englishTranslations = {
 'La verità è nei dati': 
 'The truth is in the data',
 
-'Sono la bussola per navigare l\'incertezza. Li raccogliamo, li valorizziamo e li trasformiamo in strumenti per decisioni interne o per creare opportunità all\'esterno.': 
+'Sono la bussola per navigare l\'incertezza. Li raccogliamo, li valorizziamo e li trasformiamo in strumenti per decisioni interne o per creare opportunità all\’esterno.': 
 'They are the compass to navigate uncertainty. We collect them, enhance them and transform them into tools for internal decisions or to create opportunities externally.',
 
 'Inquietudine conoscitiva': 
