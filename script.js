@@ -927,17 +927,11 @@ function addFeedbackStyles() {
 // LANGUAGE SWITCHER
 // =============================================
 
-// FIXED LANGUAGE SWITCHER
-// =============================================
-
-// NEW TRANSLATION SYSTEM - MUCH CLEANER APPROACH
+// SIMPLE & RELIABLE TRANSLATION SYSTEM
 // =============================================
 
 let isEnglish = false;
-const originalTexts = new Map();
-const originalHTML = new Map();
 
-// Complete translations object
 const translations = {
   // Navigation
   'Chi siamo': 'About Us',
@@ -947,8 +941,6 @@ const translations = {
   'Lavora con noi': 'Work with us',
 
   // Hero section
-  'Innova oggi,': 'Innovate Today,',
-  'transforma domani': 'Shape Tomorrow',
   'La nostra missione è migliorare l\'esperienza di attimi di vita delle persone, offrendo soluzioni intuitive e di alta qualità, guidati dai dati, dalla passione per l\'innovazione e dall\'impegno nella cura dei particolari': 
   'Our mission is to improve people\'s life experiences by offering intuitive and high-quality solutions, guided by data, passion for innovation and commitment to attention to detail',
 
@@ -1040,40 +1032,11 @@ const translations = {
   'Seguici': 'Follow us'
 };
 
-// Special cases that need HTML handling
-const specialTranslations = {
-  heroTitle: {
-    italian: 'Innova oggi,<span class="glow">transforma domani</span>',
-    english: 'Innovate Today,<span class="glow">Shape Tomorrow</span>'
-  },
-  peopleTitle: {
-    italian: 'Amia, una storia di <br>persone',
-    english: 'Amia, a story of <br>people'
-  },
-  statements: {
-    italian: [
-      'Abbiamo un sogno proibito: <span class="highlight">che prima o poi tutti abbiano almeno un\'app di Amia sul telefono.</span><br> È il nostro obiettivo più ambizioso.',
-      'La strada per arrivarci è una sola: <span class="highlight">creare prodotti che le persone amino davvero.</span> Prodotti curati fin nei minimi dettagli, anche quelli che non si vedono.',
-      'Ma tra il dire e il fare <span class="highlight">c\'è di mezzo il fare.</span>',
-      'E allora facciamolo. Costruiamo il nostro futuro <span class="highlight">insieme.</span>'
-    ],
-    english: [
-      'We have a forbidden dream: <span class="highlight">that sooner or later everyone has at least one Amia app on their phone.</span><br> It\'s our most ambitious goal.',
-      'There\'s only one way to get there: <span class="highlight">create products that people really love.</span> Products crafted down to the smallest details, even those you can\'t see.',
-      'But between saying and doing <span class="highlight">there\'s doing.</span>',
-      'So let\'s do it. Let\'s build our future <span class="highlight">together.</span>'
-    ]
-  }
-};
-
 function initializeLanguageSwitcher() {
   const switcher = document.getElementById('languageSwitcher');
   const flagIcon = document.getElementById('flagIcon');
   
   if (!switcher || !flagIcon) return;
-  
-  // Store all original content first
-  storeAllOriginalContent();
   
   window.addEventListener('scroll', () => {
     if (window.scrollY > 100) {
@@ -1085,143 +1048,93 @@ function initializeLanguageSwitcher() {
   
   switcher.addEventListener('click', () => {
     isEnglish = !isEnglish;
-    updateAllContent();
+    
+    if (isEnglish) {
+      translateToEnglish();
+    } else {
+      // Just reload the page to get back to Italian
+      location.reload();
+    }
+    
     updateFlag();
   });
 }
 
-function storeAllOriginalContent() {
-  // Store all text elements
-  document.querySelectorAll('*').forEach(element => {
-    if (element.children.length === 0 && element.textContent.trim()) {
-      const key = generateUniqueKey(element);
-      originalTexts.set(key, element.textContent.trim());
+function translateToEnglish() {
+  // 1. Handle hero title with HTML
+  const heroTitle = document.querySelector('.heading-container h1');
+  if (heroTitle) {
+    heroTitle.innerHTML = 'Innovate Today,<span class="glow">Shape Tomorrow</span>';
+  }
+  
+  // 2. Handle people section title with HTML
+  const peopleTitle = document.querySelector('#persone .nostra-storia-title');
+  if (peopleTitle) {
+    peopleTitle.innerHTML = 'Amia, a story of <br>people';
+  }
+  
+  // 3. Handle career statements with HTML
+  const statements = document.querySelectorAll('.statement-text');
+  const englishStatements = [
+    'We have a forbidden dream: <span class="highlight">that sooner or later everyone has at least one Amia app on their phone.</span><br> It\'s our most ambitious goal.',
+    'There\'s only one way to get there: <span class="highlight">create products that people really love.</span> Products crafted down to the smallest details, even those you can\'t see.',
+    'But between saying and doing <span class="highlight">there\'s doing.</span>',
+    'So let\'s do it. Let\'s build our future <span class="highlight">together.</span>'
+  ];
+  
+  statements.forEach((statement, index) => {
+    if (englishStatements[index]) {
+      statement.innerHTML = englishStatements[index];
     }
   });
   
-  // Store special HTML elements
-  const heroTitle = document.querySelector('.heading-container h1');
-  if (heroTitle) {
-    originalHTML.set('heroTitle', heroTitle.innerHTML);
-  }
+  // 4. Translate ALL other text elements
+  translateAllTextElements();
   
-  const peopleTitle = document.querySelector('#persone .nostra-storia-title');
-  if (peopleTitle) {
-    originalHTML.set('peopleTitle', peopleTitle.innerHTML);
-  }
+  // 5. Update timeline
+  updateTimelineLanguage();
   
-  const statements = document.querySelectorAll('.statement-text');
-  statements.forEach((statement, index) => {
-    originalHTML.set(`statement${index}`, statement.innerHTML);
-  });
-}
-
-function generateUniqueKey(element) {
-  const tagName = element.tagName.toLowerCase();
-  const classes = element.className ? `.${element.className.split(' ').join('.')}` : '';
-  const text = element.textContent.trim().substring(0, 50);
-  return `${tagName}${classes}_${text}`;
-}
-
-function updateAllContent() {
-  if (isEnglish) {
-    translateToEnglish();
-  } else {
-    revertToItalian();
-  }
-  
-  // Update timeline after content change
-  setTimeout(() => {
-    updateTimelineDisplay();
-  }, 50);
-  
-  // Update tooltip
+  // 6. Update tooltip
   const switcher = document.getElementById('languageSwitcher');
   if (switcher) {
-    switcher.setAttribute('data-tooltip', isEnglish ? 'Passa all\'italiano' : 'Switch to English');
+    switcher.setAttribute('data-tooltip', 'Passa all\'italiano');
   }
 }
 
-function translateToEnglish() {
-  // Translate regular text elements
-  document.querySelectorAll('*').forEach(element => {
-    if (element.children.length === 0 && element.textContent.trim()) {
-      const text = element.textContent.trim();
-      if (translations[text]) {
-        element.textContent = translations[text];
-      }
+function translateAllTextElements() {
+  // Get ALL elements that contain only text (no child elements)
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    null,
+    false
+  );
+  
+  const textNodes = [];
+  let node;
+  
+  while (node = walker.nextNode()) {
+    if (node.textContent.trim()) {
+      textNodes.push(node);
     }
-  });
-  
-  // Handle special cases with HTML
-  const heroTitle = document.querySelector('.heading-container h1');
-  if (heroTitle) {
-    heroTitle.innerHTML = specialTranslations.heroTitle.english;
   }
   
-  const peopleTitle = document.querySelector('#persone .nostra-storia-title');
-  if (peopleTitle) {
-    peopleTitle.innerHTML = specialTranslations.peopleTitle.english;
-  }
-  
-  const statements = document.querySelectorAll('.statement-text');
-  statements.forEach((statement, index) => {
-    if (specialTranslations.statements.english[index]) {
-      statement.innerHTML = specialTranslations.statements.english[index];
+  // Translate each text node
+  textNodes.forEach(textNode => {
+    const text = textNode.textContent.trim();
+    if (translations[text]) {
+      textNode.textContent = translations[text];
     }
   });
 }
 
-function revertToItalian() {
-  // Revert regular text elements
-  document.querySelectorAll('*').forEach(element => {
-    if (element.children.length === 0 && element.textContent.trim()) {
-      const key = generateUniqueKey(element);
-      if (originalTexts.has(key)) {
-        element.textContent = originalTexts.get(key);
-      }
-    }
-  });
-  
-  // Revert special HTML elements
-  const heroTitle = document.querySelector('.heading-container h1');
-  if (heroTitle && originalHTML.has('heroTitle')) {
-    heroTitle.innerHTML = originalHTML.get('heroTitle');
-  }
-  
-  const peopleTitle = document.querySelector('#persone .nostra-storia-title');
-  if (peopleTitle && originalHTML.has('peopleTitle')) {
-    peopleTitle.innerHTML = originalHTML.get('peopleTitle');
-  }
-  
-  const statements = document.querySelectorAll('.statement-text');
-  statements.forEach((statement, index) => {
-    if (originalHTML.has(`statement${index}`)) {
-      statement.innerHTML = originalHTML.get(`statement${index}`);
-    }
-  });
-}
-
-function updateTimelineDisplay() {
+function updateTimelineLanguage() {
+  // Update current year display
   const currentYearElement = document.querySelector('.current-year');
-  const timelineItems = document.querySelectorAll('.timeline-item');
-  
-  if (!currentYearElement || !timelineItems.length) return;
-  
-  // Find active timeline item
-  let activeItem = null;
-  timelineItems.forEach(item => {
-    if (item.classList.contains('active')) {
-      activeItem = item;
-    }
-  });
-  
-  if (activeItem) {
-    const yearText = activeItem.getAttribute('data-year');
-    if (isEnglish && translations[yearText]) {
-      currentYearElement.textContent = translations[yearText];
-    } else {
-      currentYearElement.textContent = yearText;
+  if (currentYearElement) {
+    const currentText = currentYearElement.textContent.trim();
+    if (translations[currentText]) {
+      currentYearElement.textContent = translations[currentText];
     }
   }
 }
@@ -1239,7 +1152,7 @@ function updateFlag() {
   }
 }
 
-// MODIFIED TIMELINE CAROUSEL TO WORK WITH TRANSLATIONS
+// TIMELINE CAROUSEL - UPDATED TO WORK WITH TRANSLATIONS
 function initializeTimelineCarousel() {
   const timelineItems = document.querySelectorAll('.timeline-item');
   const prevButton = document.querySelector('.timeline-controls .prev');
@@ -1255,13 +1168,14 @@ function initializeTimelineCarousel() {
     timelineItems[currentIndex].classList.add('active');
     
     const currentItem = timelineItems[currentIndex];
-    const yearText = currentItem.getAttribute('data-year');
+    let yearText = currentItem.getAttribute('data-year');
     
+    // Translate if in English mode
     if (isEnglish && translations[yearText]) {
-      currentYearElement.textContent = translations[yearText];
-    } else {
-      currentYearElement.textContent = yearText;
+      yearText = translations[yearText];
     }
+    
+    currentYearElement.textContent = yearText;
     
     prevButton.disabled = currentIndex === 0;
     nextButton.disabled = currentIndex === timelineItems.length - 1;
