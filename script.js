@@ -2,24 +2,20 @@
 // =============================================
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Elementi DOM principali
   const header = document.getElementById('header');
   const body = document.body;
   const menuButton = document.querySelector('.navbar-toggler');
   const navbarCollapse = document.querySelector('#navbarNav');
   const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
   
-  // Inizializza funzioni base
   initializeHeader(header, body);
   initializeMobileMenu(menuButton, navbarCollapse);
   initializeNavigation(navLinks, header, navbarCollapse);
   
-  // Carica funzioni avanzate con delay per performance
   setTimeout(() => {
     initializeAdvancedFeatures();
   }, 50);
   
-  // Initialize language switcher
   setTimeout(() => {
     initializeLanguageSwitcher();
   }, 500);
@@ -453,7 +449,6 @@ function setupMobileProductAnimations(productElements) {
       if (entry.isIntersecting) {
         const element = entry.target;
         
-        // Only animate if not already animated
         if (element.getAttribute('data-animation-state') !== 'active') {
           element.style.opacity = '1';
           element.style.transform = 'translateY(0)';
@@ -465,14 +460,13 @@ function setupMobileProductAnimations(productElements) {
           }
         }
       } else {
-        // Only reset if the element is completely out of view
         if (entry.intersectionRatio === 0) {
           handleElementExit(entry.target, true);
         }
       }
     });
   }, { 
-    threshold: [0, 0.15],  // Multiple thresholds
+    threshold: [0, 0.15],
     rootMargin: '0px 0px -30px 0px' 
   });
   
@@ -488,7 +482,6 @@ function setupDesktopProductAnimations(productElements) {
       if (entry.isIntersecting) {
         const element = entry.target;
         
-        // Only animate if not already animated
         if (element.getAttribute('data-animation-state') !== 'active') {
           if (element.classList.contains('product-intro')) {
             animateProductIntro(element);
@@ -501,14 +494,13 @@ function setupDesktopProductAnimations(productElements) {
           }
         }
       } else {
-        // Only reset if the element is completely out of view
         if (entry.intersectionRatio === 0) {
           handleElementExit(entry.target, false);
         }
       }
     });
   }, {
-    threshold: [0, 0.3],  // Multiple thresholds to better track visibility
+    threshold: [0, 0.3],  
     rootMargin: '0px 0px -50px 0px'
   });
   
@@ -609,7 +601,6 @@ function resetMetrics(container) {
     }
     metric.dataset.animating = 'false';
     
-    // Always reset to original text, don't depend on current state
     const originalText = metric.getAttribute('data-original-text');
     if (originalText) {
       metric.textContent = originalText;
@@ -737,7 +728,6 @@ function animateDownloadSection(element) {
 
 // FIXED COUNTER ANIMATION FUNCTION
 function animateCounterNumber(element, isMobile = false) {
-  // Clear any existing animation first
   if (element.dataset.timerId) {
     clearInterval(parseInt(element.dataset.timerId));
     element.dataset.timerId = '';
@@ -749,7 +739,6 @@ function animateCounterNumber(element, isMobile = false) {
   
   element.dataset.animating = 'true';
   
-  // Get target number from data attribute if available, otherwise parse from text
   let targetNumber;
   let suffix = '';
   let hasDecimal = false;
@@ -780,13 +769,11 @@ function animateCounterNumber(element, isMobile = false) {
   const timer = setInterval(() => {
     currentStep++;
     
-    // Use easing function for smoother animation
     const progress = currentStep / steps;
-    const easedProgress = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+    const easedProgress = 1 - Math.pow(1 - progress, 3); 
     const currentNumber = targetNumber * easedProgress;
     
     if (currentStep >= steps || !element.dataset.animating) {
-      // Ensure we always show the final number
       if (hasDecimal) {
         element.textContent = targetNumber.toFixed(1) + suffix;
       } else if (targetNumber >= 1000) {
@@ -943,50 +930,137 @@ function addFeedbackStyles() {
 let isEnglish = false;
 
 const englishTranslations = {
-    'About Us': 'About Us',
-    'Valori': 'Values',
-    'People': 'People',
-    'Prodotti': 'Products', 
-    'Careers': 'Careers',
+'La nostra missione è migliorare l\'esperienza di attimi di vita delle persone, offrendo soluzioni intuitive e di alta qualità, guidati dai dati, dalla passione per l\'innovazione e dall\'impegno nella cura dei particolari': 
+'Our mission is to improve people\'s life experiences by offering intuitive and high-quality solutions, guided by data, passion for innovation and commitment to attention to detail',
     
-    'La nostra missione è migliorare l\'esperienza di attimi di vita delle persone, offrendo soluzioni intuitive e di alta qualità, guidati dai dati, dalla passione per l\'innovazione e dall\'impegno nella cura dei particolari': 'Our mission is to improve people\'s life experiences by offering intuitive and high-quality solutions, guided by data, passion for innovation and commitment to attention to detail',
-    
-    'I Nostri Valori': 'Our Values',
-    'Le persone, al centro': 'People, at the center',
-    'Mettiamo le persone al centro. Il nostro scopo è quello avere un impatto positivo nella vita delle persone.': 'We put people at the center. Our purpose is to have a positive impact on people\'s lives.',
-    'Innoviamo si, Rinnoviamo anche': 'We innovate yes, we also renew',
-    'Vogliamo essere capaci di creare il nuovo ma anche di migliorare l\'esistente trasformando i limiti in opportunità.': 'We want to be able to create the new but also to improve the existing by transforming limits into opportunities.',
-    'Perfezione come mezzo, non come fine': 'Perfection as a means, not as an end',
-    'La cura per i dettagli ci guida oltre gli standard. Cerchiamo l\'equilibrio perfetto tra qualità e funzionalità.': 'Attention to detail guides us beyond standards. We seek the perfect balance between quality and functionality.',
-    'La verità è nei dati': 'The truth is in the data',
-    'I dati sono la nostra bussola per navigare l\'incertezza e trasformare intuizioni in certezze.': 'Data is our compass to navigate uncertainty and transform insights into certainties.',
-    'Inquietudine conoscitiva': 'Cognitive restlessness',
-    'Ciò che sappiamo non ci basta. La curiosità il nostro motore per crescere e migliorare.': 'What we know is not enough. Curiosity is our engine to grow and improve.',
-    'Divertimento': 'Fun',
-    'Nella vita bisogna divertirsi. E noi non vogliamo lavorare neanche un giorno della nostra vita.': 'In life you have to have fun. And we don\'t want to work a single day of our lives.',
-    
-    'Crescere & Divertirsi, insieme': 'Growing & Having Fun, together',
-    'Il nostro primo bootcamp, Luglio 2024': 'Our first bootcamp, July 2024',
-    
-    'I Nostri Prodotti': 'Our Products',
-    'La nostra prima app, trasforma dati in scelte fantacalcistiche.': 'Our first app, transforms data into fantasy football choices.',
-    'Algoritmo Proprietario': 'Proprietary Algorithm',
-    'Sviluppato internamente per massimizzare le tue probabilità di vittoria.': 'Developed internally to maximize your chances of winning.',
-    '150k+ Utenti Attivi': '150k+ Active Users',
-    'Più di 150mila utenti a meno di un anno dal rilascio. Una community in continua crescita.': 'More than 150 thousand users in less than a year from release. A growing community.',
-    'Qualità': 'Quality',
-    'In linea con i nostri valori, stiamo costruendo un prodotto che rispecchi le nostre, alte, aspettative.': 'In line with our values, we are building a product that reflects our high expectations.',
-    'Download': 'Downloads',
-    'Rating medio': 'Average Rating',
-    'Reviews': 'Reviews',
-    'Disponibile su': 'Available on',
-    'per iOS': 'for iOS',
-    'per Android': 'for Android',
-    
-    'Unisciti al team': 'Join the team',
-    
-    'Contatti': 'Contacts',
-    'Seguici': 'Follow us'
+'I Nostri Valori': 
+'Our Values',
+
+'Le persone, al centro': 
+'People, at the center',
+
+'Devono essere felici quando usano un nostro prodotto.Il nostro obiettivo è avere, a prescindere dalla forma, un impatto concreto e positivo.': 
+'They must be happy when using our product. Our goal is to have a concrete and positive impact, regardless of the form.',
+
+'Innoviamo si, Rinnoviamo anche': 
+'We innovate yes, we also renew',
+
+'Vogliamo saper creare il nuovo, ma anche riconoscere ciò che può essere migliorato trasformando i limiti in opportunità.': 
+'We want to know how to create the new, but also recognize what can be improved by transforming limitations into opportunities.',
+
+'Perfezione come mezzo, non come fine': 
+'Perfection as a means, not as an end',
+
+'La cura nei dettagli ci guida oltre gli standard. Cerchiamo l\'equilibrio perfetto tra qualità, velocità e funzionalità.': 
+'Attention to detail guides us beyond standards. We seek the perfect balance between quality and functionality.',
+
+'La verità è nei dati': 
+'The truth is in the data',
+
+'Sono la bussola per navigare l\'incertezza. Li raccogliamo, li valorizziamo e li trasformiamo in strumenti per decisioni interne o per creare opportunità all\'esterno.': 
+'They are the compass to navigate uncertainty. We collect them, enhance them and transform them into tools for internal decisions or to create opportunities externally.',
+
+'Inquietudine conoscitiva': 
+'Cognitive restlessness',
+
+'Ciò che sappiamo non ci basta. La curiosità e la costante voglia di migliorare sono il nostro motore per crescere.': 
+'What we know is not enough for us. Curiosity and the constant desire to improve are our engine for growth.',
+
+'Divertimento': 
+'Fun',
+
+'Lavoriamo tanto, ma ci divertiamo. Perché lo facciamo in ciò che ci appassiona e ci dà più soddisfazione.': 
+'We work hard, but we have fun. Because we do it in what we are passionate about and what gives us the most satisfaction.',
+
+'Tutto comincia nel 2020 con la nascita di Fantatia, la pagina creata da Mattia per parlare di fantacalcio. Amia? Algo? Sono ancora sogni lontani.': 
+'Everything begins in 2020 with the birth of Fantatia, the page created by Mattia to talk about fantasy football. Amia? Algo? They are still distant dreams.',
+
+'Durante una live su Twitch, Abba si propone per aiutare Mattia con la comunicazione. È il primo a salire sulla barca e oggi è ancora con noi come Customer Success Manager.': 
+'During a live on Twitch, Abba proposes to help Mattia with communication. He is the first to get on the boat and today he is still with us as Customer Success Manager.',
+
+'Mattia intuisce che ai fantallenatori manca uno strumento di supporto strategico. Con Tancredi crea la prima versione di Algo su Excel! Agli utenti interessa e iniziano ad abbonarsi.': 
+'Mattia realizes that fantasy coaches lack a strategic support tool. With Tancredi he creates the first version of Algo on Excel! Users are interested and start subscribing.',
+
+'Dopo la prima stagione conosciamo Paolo, che si unisce al team con nuove idee per migliorare l\'algoritmo. Il file Excel non basta più. Nasce fantatia.com.': 
+'After the first season we meet Paolo, who joins the team with new ideas to improve the algorithm. The Excel file is no longer enough. fantatia.com is born.',
+
+'Algo cresce, serve un team più solido. Arrivano Andrea (Backend), Leonardo (Frontend) e Tommaso (Business Analyst). Amia comincia a prendere forma.': 
+'Algo grows, we need a more solid team. Andrea (Backend), Leonardo (Frontend) and Tommaso (Business Analyst) arrive. Amia begins to take shape.',
+
+'Nasce ufficialmente Amia. Ma nell\'agosto 2023 l\'uscita di Algo fallisce, non siamo pronti. Torniamo su fantatia.com e ci riorganizziamo.': 
+'Amia is officially born. But in August 2023 the release of Algo fails, we are not ready. We go back to fantatia.com and reorganize.',
+
+'Non ci fermiamo, siamo motivati. Il team si amplia: Michele (Product Designer), Luca (App Developer) e Giampaolo (Cloud & DevOps). Si riparte, all in. Investiamo tutto.': 
+'We don\'t stop, we are motivated. The team expands: Michele (Product Designer), Luca (App Developer) and Giampaolo (Cloud & DevOps). We start again, all in. We invest everything.',
+
+'Contemporaneamente nasce anche il team comunicazione a supporto di Tia e delle pagine social di Algo. Entrano Matteo (Social Media Manager) e Nicola (Graphic Designer).': 
+'At the same time, the communication team is also born to support Tia and Algo\'s social pages. Matteo (Social Media Manager) and Nicola (Graphic Designer) join.',
+
+'Dopo mesi di lavoro e un estate passata a scrivere codice Algo Fantacalcio è live sugli store! Il primo prodotto ufficiale di Amia.': 
+'After months of work and a summer spent writing code Algo Fantacalcio is live on the stores! Amia\'s first official product.',
+
+'Il team cambia volto. Luca e Leonardo lasciano, ma entrano Chris (App Developer) e Mika (Backend), che si affianca ad Andrea.': 
+'The team changes face. Luca and Leonardo leave, but Chris (App Developer) and Mika (Backend) join, working alongside Andrea.',
+
+'Il primo anno di Algo ci ha insegnato tanto. Tante difficoltà, ma anche tante soddisfazioni: oltre 150.000 download e moltissimi fantallenatori felici. Ora Amia è pronta a crescere. E no, non faremo solo fantacalcio': 
+'The first year of Algo taught us a lot. Many difficulties, but also many satisfactions: over 150,000 downloads and many happy fantasy coaches. Now Amia is ready to grow. And no, we won\'t only do fantasy football',
+
+'Crescere & Divertirsi, insieme': 
+'Growing & Having Fun, together',
+
+'Il nostro primo bootcamp, Luglio 2024': 
+'Our first bootcamp, July 2024',
+
+'I Nostri Prodotti': 
+'Our Products',
+
+'La nostra prima app, trasforma dati in scelte fantacalcistiche.': 
+'Our first app, transforms data into fantasy football choices.',
+
+'Algoritmo Proprietario': 
+'Proprietary Algorithm',
+
+'Sviluppato internamente per massimizzare le tue probabilità di vittoria.': 
+'Developed internally to maximize your chances of winning.',
+
+'150k+ Utenti Attivi': 
+'150k+ Active Users',
+
+'Più di 150mila utenti a meno di un anno dal rilascio. Una community in continua crescita.': 
+'More than 150 thousand users in less than a year from release. A growing community.',
+
+'Qualità': 
+'Quality',
+
+'In linea con i nostri valori, stiamo costruendo un prodotto che rispecchi le nostre, alte, aspettative.': 
+'In line with our values, we are building a product that reflects our high expectations.',
+
+'Download': 
+'Downloads',
+
+'Rating medio': 
+'Average Rating',
+
+'Reviews': 
+'Reviews',
+
+'Disponibile su': 
+'Available on',
+
+'per iOS': 
+'for iOS',
+
+'per Android': 
+'for Android',
+
+'Unisciti al team': 
+'Join the team',
+
+'Contatti': 
+'Contacts',
+
+'Seguici': 
+'Follow us'
 };
 
 function initializeLanguageSwitcher() {
