@@ -1,5 +1,5 @@
 /* ===================================
-   1. RESET E BASI GENERALI
+   BASI GENERALI
    =================================== */
 .animated {
   opacity: 1 !important;
@@ -22,7 +22,7 @@ body {
    HEADER E NAVIGAZIONE
    =================================== */
 
-/* Container per header */
+
 .container {
   width: 100%;
   max-width: 1400px;
@@ -117,7 +117,7 @@ body.has-sticky-nav {
 /* ===================================
    Language switcher SECTION
    =================================== */
-/* Language Switcher Styles */
+
 .language-switcher {
     position: fixed;
     bottom: 30px;
@@ -646,7 +646,6 @@ body.has-sticky-nav {
   }
 }
 
-/* Nascondi scrollbar completamente su tutti i browser */
 .infinite-carousel {
   overflow-x: auto !important;
   overflow-y: hidden !important;
@@ -656,7 +655,6 @@ body.has-sticky-nav {
 
 }
 
-/* Nascondi scrollbar su Webkit (Chrome, Safari, Edge) */
 .infinite-carousel::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
@@ -1199,7 +1197,6 @@ footer .social-icons img {
    =================================== */
 
 @media (min-width: 768px) and (max-width: 1199px) {
-  /* Navbar adjustments for medium screens */
   .navbar-nav .nav-link {
     padding-left: 12px;
     padding-right: 12px;
@@ -1214,7 +1211,6 @@ footer .social-icons img {
     height: 35px;
   }
   
-  /* About section - balanced sizing */
   #about .container2 {
     max-width: 700px;
   }
@@ -1258,7 +1254,6 @@ footer .social-icons img {
     line-height: 1.5;
   }
   
-  /* Timeline e People History */
   .container-timeline {
     display: flex;
     flex-direction: column;
@@ -1302,7 +1297,6 @@ footer .social-icons img {
     text-align: center;
   }
   
-  /* Bootcamp section centrata */
   .bootcamp-section {
     text-align: center;
   }
@@ -1313,7 +1307,6 @@ footer .social-icons img {
     margin: 0 auto;
   }
   
-  /* Infinite carousel */
   .infinite-carousel {
     margin: 0;
     padding: 20px 0;
@@ -1335,7 +1328,6 @@ footer .social-icons img {
     padding: 0; 
   }
   
-  /* Products section - AGGIORNATO */
   .product-showcase {
     gap: 45px !important;
     padding: 35px 0 !important;
@@ -1408,7 +1400,7 @@ footer .social-icons img {
     margin-bottom: 20px;
     float: left;
   }
-  /* Careers section */
+
   #lavoraconnoi {
     text-align: left; 
   }
@@ -1435,14 +1427,12 @@ footer .social-icons img {
     font-size: 1.1rem;
   }
   
-  /* Titles for medium screens */
   .title-section, .nostra-storia-title {
     font-size: 2.8rem !important;
     margin-bottom: 3rem !important;
     text-align: center;
   }
   
-  /* Footer adjustments */
   footer {
     padding-left: 20px;
     padding-right: 20px;
@@ -1463,7 +1453,6 @@ footer .social-icons img {
    =================================== */
 
 @media (min-width: 576px) and (max-width: 767px) {
-  /* General spacing adjustments */
   .item-valori{
     padding-left: 9.6px !important;
   }
@@ -1471,7 +1460,6 @@ footer .social-icons img {
     padding-top: 60px !important;
   }
   
-  /* Header adjustments */
   #header {
     padding: 0.75rem 0;
   }
@@ -1486,7 +1474,6 @@ footer .social-icons img {
     padding: 0.4rem 0.6rem;
   }
   
-  /* About section */
   #about {
     padding-top: 20px !important;
   }
@@ -1521,7 +1508,6 @@ footer .social-icons img {
     min-height: 120px;
   }
   
-  /* Valori section */
   #valori {
     padding-top: 50px !important;
   }
@@ -1546,7 +1532,6 @@ footer .social-icons img {
     line-height: 1.5;
   }
   
-  /* People section */
   .nostra-storia-title {
     font-size: 2.5rem !important;
     margin-bottom: 2.5rem !important;
@@ -1582,14 +1567,12 @@ footer .social-icons img {
     font-size: 2rem;
   }
   
-  /* Bootcamp section */
   .bootcamp-subtitle {
     font-size: 1rem;
     max-width: 500px;
     margin: 0 auto;
   }
   
-  /* Infinite carousel */
   .infinite-carousel-item {
     min-width: 250px;
     height: 250px;
@@ -1607,7 +1590,6 @@ footer .social-icons img {
   }
   
   
-  /* Products section */
   .product-showcase {
     grid-template-columns: 1fr !important;
     gap: 35px !important;
@@ -1619,7 +1601,6 @@ footer .social-icons img {
     max-width: 90%;
   }
   
-  /* NASCONDE IL TAPPETINO */
   .product-stage::before {
     display: none !important;
   }
@@ -1804,7 +1785,6 @@ footer .social-icons img {
    =================================== */
 
 @media (max-width: 575px) {
-  /* General containers */
   .container {
     padding-left: 15px;
     padding-right: 15px;
@@ -1812,12 +1792,10 @@ footer .social-icons img {
   .item-valori{
     padding-left: 8px !important;
   }
-  /* General spacing */
   .marginSection {
     padding-top: 50px !important;
   }
   
-  /* Header mobile */
   #header {
     padding: 0.5rem 0;
   }
@@ -1827,7 +1805,6 @@ footer .social-icons img {
     height: 30px;
   }
   
-  /* Mobile menu button */
   .navbar-toggler {
     padding: 0.25rem 0.5rem;
     font-size: 1rem;
@@ -1838,7 +1815,6 @@ footer .social-icons img {
     padding: 0.4rem 0.5rem;
   }
   
-  /* About section mobile */
   #about {
     padding-top: 15px !important;
   }
@@ -1899,7 +1875,6 @@ footer .social-icons img {
    text-align: center;
   }
   
-  /* Valori section mobile */
   #valori {
     padding-top: 0px !important;
   }
@@ -1923,7 +1898,6 @@ footer .social-icons img {
     line-height: 1.4;
   }
   
-  /* People section mobile */
   .timeline-item {
     max-width: 280px;
     margin: 0 auto 2rem auto;
