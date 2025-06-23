@@ -927,6 +927,9 @@ function addFeedbackStyles() {
 // LANGUAGE SWITCHER
 // =============================================
 
+// FIXED LANGUAGE SWITCHER
+// =============================================
+
 let isEnglish = false;
 
 const englishTranslations = {
@@ -1003,8 +1006,8 @@ const englishTranslations = {
 'Il team cambia volto.\nLuca e Leonardo lasciano, ma entrano Chris (App Developer) e Mika (Backend), che si affianca ad Andrea.': 
 'The team changes face.\nLuca e Leonardo leave, but Chris (App Developer) and Mika (Backend) join, working alongside Andrea.',
 
-'Il primo anno di Algo ci ha insegnato tanto. Tante difficoltà, ma anche tante soddisfazioni: oltre 150.000 download e moltissimi fantallenatori felici. Ora Amia è pronta a crescere. E no, non faremo solo fantacalcio.': 
-'The first year of Algo taught us a lot. Many difficulties, but also many satisfactions: over 150,000 downloads and many happy fantasy coaches. Now Amia is ready to grow. And no, we won\'t only do fantasy football',
+'Il primo anno di Algo ci ha insegnato tanto. Tante difficoltà, ma anche tante soddisfazioni:\noltre 150.000 download e moltissimi fantallenatori felici.\nOra Amia è pronta a crescere. E no, non faremo solo fantacalcio': 
+'The first year of Algo taught us a lot. Many difficulties, but also many satisfactions:\nover 150,000 downloads and many happy fantasy coaches.\nNow Amia is ready to grow. And no, we won\'t only do fantasy football',
 
 // MONTH TRANSLATIONS
 'Maggio 2020': 'May 2020',
@@ -1172,6 +1175,9 @@ function updateLanguage() {
                 statement.innerHTML = englishStatements[index];
             }
         });
+
+        // FORCE UPDATE TIMELINE MONTHS - this is the key fix!
+        updateTimelineLanguage();
         
     } else {
         // Revert to original Italian content
@@ -1218,4 +1224,83 @@ function updateFlag() {
         flagIcon.src = 'https://flagcdn.com/w40/it.png';
         flagIcon.alt = 'Italian Flag';
     }
+}
+
+// NEW FUNCTION TO HANDLE TIMELINE LANGUAGE UPDATES
+function updateTimelineLanguage() {
+    // Update the current displayed year in timeline
+    const currentYearElement = document.querySelector('.current-year');
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    
+    if (!currentYearElement || !timelineItems.length) return;
+    
+    // Find the active timeline item
+    let activeIndex = 0;
+    timelineItems.forEach((item, index) => {
+        if (item.classList.contains('active')) {
+            activeIndex = index;
+        }
+    });
+    
+    // Get the current Italian year text and translate it
+    const currentItalianYear = currentYearElement.textContent.trim();
+    if (englishTranslations[currentItalianYear]) {
+        currentYearElement.textContent = englishTranslations[currentItalianYear];
+    }
+    
+    // Also update data-year attributes if needed for future navigation
+    timelineItems.forEach(item => {
+        const italianYear = item.getAttribute('data-year');
+        if (italianYear && englishTranslations[italianYear]) {
+            item.setAttribute('data-year-en', englishTranslations[italianYear]);
+        }
+    });
+}
+
+// MODIFY TIMELINE CAROUSEL TO WORK WITH TRANSLATIONS
+function initializeTimelineCarousel() {
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    const prevButton = document.querySelector('.timeline-controls .prev');
+    const nextButton = document.querySelector('.timeline-controls .next');
+    const currentYearElement = document.querySelector('.current-year');
+    
+    if (!timelineItems.length || !prevButton || !nextButton || !currentYearElement) return;
+    
+    let currentIndex = 0;
+    
+    function updateTimelineDisplay() {
+        timelineItems.forEach(item => item.classList.remove('active'));
+        timelineItems[currentIndex].classList.add('active');
+        
+        const currentItem = timelineItems[currentIndex];
+        let currentYear = currentItem.getAttribute('data-year');
+        
+        // Check if we're in English mode and have English translation
+        if (isEnglish && currentItem.getAttribute('data-year-en')) {
+            currentYear = currentItem.getAttribute('data-year-en');
+        } else if (isEnglish && englishTranslations[currentYear]) {
+            currentYear = englishTranslations[currentYear];
+        }
+        
+        currentYearElement.textContent = currentYear;
+        
+        prevButton.disabled = currentIndex === 0;
+        nextButton.disabled = currentIndex === timelineItems.length - 1;
+    }
+    
+    prevButton.addEventListener('click', function() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            updateTimelineDisplay();
+        }
+    });
+    
+    nextButton.addEventListener('click', function() {
+        if (currentIndex < timelineItems.length - 1) {
+            currentIndex++;
+            updateTimelineDisplay();
+        }
+    });
+    
+    updateTimelineDisplay();
 }
