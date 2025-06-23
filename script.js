@@ -930,377 +930,356 @@ function addFeedbackStyles() {
 // FIXED LANGUAGE SWITCHER
 // =============================================
 
+// NEW TRANSLATION SYSTEM - MUCH CLEANER APPROACH
+// =============================================
+
 let isEnglish = false;
+const originalTexts = new Map();
+const originalHTML = new Map();
 
-const englishTranslations = {
-'La nostra missione è migliorare l\'esperienza di attimi di vita delle persone, offrendo soluzioni intuitive e di alta qualità, guidati dai dati, dalla passione per l\'innovazione e dall\'impegno nella cura dei particolari': 
-'Our mission is to improve people\'s life experiences by offering intuitive and high-quality solutions, guided by data, passion for innovation and commitment to attention to detail',
-    
-'I Nostri Valori': 
-'Our Values',
+// Complete translations object
+const translations = {
+  // Navigation
+  'Chi siamo': 'About Us',
+  'Valori': 'Values', 
+  'Persone': 'People',
+  'Prodotti': 'Products',
+  'Lavora con noi': 'Work with us',
 
-'Le persone, al centro': 
-'People, at the center',
+  // Hero section
+  'Innova oggi,': 'Innovate Today,',
+  'transforma domani': 'Shape Tomorrow',
+  'La nostra missione è migliorare l\'esperienza di attimi di vita delle persone, offrendo soluzioni intuitive e di alta qualità, guidati dai dati, dalla passione per l\'innovazione e dall\'impegno nella cura dei particolari': 
+  'Our mission is to improve people\'s life experiences by offering intuitive and high-quality solutions, guided by data, passion for innovation and commitment to attention to detail',
 
-'Devono essere felici quando usano un nostro prodotto. Il nostro obiettivo è avere, a prescindere dalla forma, un impatto concreto e positivo.': 
-'They must be happy when using our product. Our goal is to have a concrete and positive impact, regardless of the form.',
+  // Values section
+  'I Nostri Valori': 'Our Values',
+  'Le persone, al centro': 'People, at the center',
+  'Devono essere felici quando usano un nostro prodotto. Il nostro obiettivo è avere, a prescindere dalla forma, un impatto concreto e positivo.': 
+  'They must be happy when using our product. Our goal is to have a concrete and positive impact, regardless of the form.',
+  'Innoviamo si, Rinnoviamo anche': 'We innovate yes, we also renew',
+  'Vogliamo saper creare il nuovo, ma anche riconoscere ciò che può essere migliorato trasformando i limiti in opportunità.': 
+  'We want to know how to create the new, but also recognize what can be improved by transforming limitations into opportunities.',
+  'Perfezione come mezzo, non come fine': 'Perfection as a means, not as an end',
+  'La cura nei dettagli ci guida oltre gli standard. Cerchiamo l\'equilibrio perfetto tra qualità, velocità e funzionalità.': 
+  'Attention to detail guides us beyond standards. We seek the perfect balance between quality and functionality.',
+  'La verità è nei dati': 'The truth is in the data',
+  'Sono la bussola per navigare l\'incertezza. Li raccogliamo, li valorizziamo e li trasformiamo in strumenti per decisioni interne o per creare opportunità all\'esterno.': 
+  'They are the compass to navigate uncertainty. We collect them, enhance them and transform them into tools for internal decisions or to create opportunities externally.',
+  'Inquietudine conoscitiva': 'Cognitive restlessness',
+  'Ciò che sappiamo non ci basta. La curiosità e la costante voglia di migliorare sono il nostro motore per crescere.': 
+  'What we know is not enough for us. Curiosity and the constant desire to improve are our engine for growth.',
+  'Divertimento': 'Fun',
+  'Lavoriamo tanto, ma ci divertiamo. Perché lo facciamo in ciò che ci appassiona e ci dà più soddisfazione.': 
+  'We work hard, but we have fun. Because we do it in what we are passionate about and what gives us the most satisfaction.',
 
-'Innoviamo si, Rinnoviamo anche': 
-'We innovate yes, we also renew',
+  // Timeline months
+  'Maggio 2020': 'May 2020',
+  'Dicembre 2020': 'December 2020', 
+  'Marzo 2021': 'March 2021',
+  'Agosto 2022': 'August 2022',
+  'Marzo 2023': 'March 2023',
+  'Agosto 2023': 'August 2023',
+  'Marzo 2024': 'March 2024',
+  'Giugno 2024': 'June 2024',
+  'Agosto 2024': 'August 2024',
+  'Ottobre 2024': 'October 2024',
+  'Agosto 2025': 'August 2025',
 
-'Vogliamo saper creare il nuovo, ma anche riconoscere ciò che può essere migliorato trasformando i limiti in opportunità.': 
-'We want to know how to create the new, but also recognize what can be improved by transforming limitations into opportunities.',
+  // Timeline descriptions
+  'Tutto comincia nel 2020 con la nascita di Fantatia, la pagina creata da Mattia per parlare di fantacalcio. Amia? Algo? Sono ancora sogni lontani.': 
+  'Everything begins in 2020 with the birth of Fantatia, the page created by Mattia to talk about fantasy football. Amia? Algo? They are still distant dreams.',
+  'Durante una live su Twitch, Abba si propone per aiutare Mattia con la comunicazione. È il primo a salire sulla barca e oggi è ancora con noi come Customer Success Manager.': 
+  'During a live on Twitch, Abba proposes to help Mattia with communication. He is the first to get on the boat and today he is still with us as Customer Success Manager.',
+  'Mattia intuisce che ai fantallenatori manca uno strumento di supporto strategico. Con Tancredi crea la prima versione di Algo su Excel! Agli utenti interessa e iniziano ad abbonarsi.': 
+  'Mattia realizes that fantasy coaches lack a strategic support tool. With Tancredi he creates the first version of Algo on Excel! Users are interested and start subscribing.',
+  'Dopo la prima stagione conosciamo Paolo, che si unisce al team con nuove idee per migliorare l\'algoritmo. Il file Excel non basta più. Nasce fantatia.com.': 
+  'After the first season we meet Paolo, who joins the team with new ideas to improve the algorithm. The Excel file is no longer enough. fantatia.com is born.',
+  'Algo cresce, serve un team più solido. Arrivano Andrea (Backend), Leonardo (Frontend) e Tommaso (Business Analyst). Amia comincia a prendere forma.': 
+  'Algo grows, we need a more solid team. Andrea (Backend), Leonardo (Frontend) and Tommaso (Business Analyst) arrive. Amia begins to take shape.',
+  'Nasce ufficialmente Amia. Ma nell\'agosto 2023 l\'uscita di Algo fallisce, non siamo pronti. Torniamo su fantatia.com e ci riorganizziamo.': 
+  'Amia is officially born. But in August 2023 the release of Algo fails, we are not ready. We go back to fantatia.com and reorganize.',
+  'Non ci fermiamo, siamo motivati. Il team si amplia: Michele (Product Designer), Luca (App Developer) e Giampaolo (Cloud & DevOps). Si riparte, all in. Investiamo tutto.': 
+  'We don\'t stop, we are motivated. The team expands: Michele (Product Designer), Luca (App Developer) and Giampaolo (Cloud & DevOps). We start again, all in. We invest everything.',
+  'Contemporaneamente nasce anche il team comunicazione a supporto di Tia e delle pagine social di Algo. Entrano Matteo (Social Media Manager) e Nicola (Graphic Designer).': 
+  'At the same time, the communication team is also born to support Tia and Algo\'s social pages. Matteo (Social Media Manager) and Nicola (Graphic Designer) join.',
+  'Dopo mesi di lavoro e un estate passata a scrivere codice Algo Fantacalcio è live sugli store! Il primo prodotto ufficiale di Amia.': 
+  'After months of work and a summer spent writing code Algo Fantacalcio is live on the stores! Amia\'s first official product.',
+  'Il team cambia volto. Luca e Leonardo lasciano, ma entrano Chris (App Developer) e Mika (Backend), che si affianca ad Andrea.': 
+  'The team changes face. Luca and Leonardo leave, but Chris (App Developer) and Mika (Backend) join, working alongside Andrea.',
+  'Il primo anno di Algo ci ha insegnato tanto. Tante difficoltà, ma anche tante soddisfazioni: oltre 150.000 download e moltissimi fantallenatori felici. Ora Amia è pronta a crescere. E no, non faremo solo fantacalcio.': 
+  'The first year of Algo taught us a lot. Many difficulties, but also many satisfactions: over 150,000 downloads and many happy fantasy coaches. Now Amia is ready to grow. And no, we won\'t only do fantasy football.',
 
-'Perfezione come mezzo, non come fine': 
-'Perfection as a means, not as an end',
+  // People section
+  'Crescere & Divertirsi, insieme': 'Growing & Having Fun, together',
+  'Il nostro primo bootcamp, Luglio 2024': 'Our first bootcamp, July 2024',
 
-'La cura nei dettagli ci guida oltre gli standard. Cerchiamo l\'equilibrio perfetto tra qualità, velocità e funzionalità.': 
-'Attention to detail guides us beyond standards. We seek the perfect balance between quality and functionality.',
+  // Products section
+  'I Nostri Prodotti': 'Our Products',
+  'La nostra prima app, trasforma dati in scelte fantacalcistiche.': 
+  'Our first app, transforms data into fantasy football choices.',
+  'Algoritmo Proprietario': 'Proprietary Algorithm',
+  'Sviluppato internamente per massimizzare le tue probabilità di vittoria.': 
+  'Developed internally to maximize your chances of winning.',
+  '150k+ Utenti Attivi': '150k+ Active Users',
+  'Più di 150mila utenti a meno di un anno dal rilascio. Una community in continua crescita.': 
+  'More than 150 thousand users in less than a year from release. A growing community.',
+  'Qualità': 'Quality',
+  'In linea con i nostri valori, stiamo costruendo un prodotto che rispecchi le nostre, alte, aspettative.': 
+  'In line with our values, we are building a product that reflects our high expectations.',
+  'Download': 'Downloads',
+  'Rating medio': 'Average Rating',
+  'Reviews': 'Reviews',
+  'Disponibile su': 'Available on',
+  'per iOS': 'for iOS',
+  'per Android': 'for Android',
 
-'La verità è nei dati': 
-'The truth is in the data',
-
-'Sono la bussola per navigare l\'incertezza. Li raccogliamo, li valorizziamo e li trasformiamo in strumenti per decisioni interne o per creare opportunità all\'esterno.': 
-'They are the compass to navigate uncertainty. We collect them, enhance them and transform them into tools for internal decisions or to create opportunities externally.',
-
-'Inquietudine conoscitiva': 
-'Cognitive restlessness',
-
-'Ciò che sappiamo non ci basta. La curiosità e la costante voglia di migliorare sono il nostro motore per crescere.': 
-'What we know is not enough for us. Curiosity and the constant desire to improve are our engine for growth.',
-
-'Divertimento': 
-'Fun',
-
-'Lavoriamo tanto, ma ci divertiamo. Perché lo facciamo in ciò che ci appassiona e ci dà più soddisfazione.': 
-'We work hard, but we have fun. Because we do it in what we are passionate about and what gives us the most satisfaction.',
-
-// TIMELINE TRANSLATIONS
-'Tutto comincia nel 2020 con la nascita di Fantatia, la pagina creata da Mattia per parlare di fantacalcio.\nAmia? Algo? Sono ancora sogni lontani.': 
-'Everything begins in 2020 with the birth of Fantatia, the page created by Mattia to talk about fantasy football.\nAmia? Algo? They are still distant dreams.',
-
-'Durante una live su Twitch, Abba si propone per aiutare Mattia con la comunicazione.\nÈ il primo a salire sulla barca e oggi è ancora con noi come Customer Success Manager.': 
-'During a live on Twitch, Abba proposes to help Mattia with communication.\nHe is the first to get on the boat and today he is still with us as Customer Success Manager.',
-
-'Mattia intuisce che ai fantallenatori manca uno strumento di supporto strategico.\nCon Tancredi crea la prima versione di Algo su Excel! Agli utenti interessa e iniziano ad abbonarsi.': 
-'Mattia realizes that fantasy coaches lack a strategic support tool.\nWith Tancredi he creates the first version of Algo on Excel! Users are interested and start subscribing.',
-
-'Dopo la prima stagione conosciamo Paolo, che si unisce al team con nuove idee per migliorare l\'algoritmo.\nIl file Excel non basta più. Nasce fantatia.com.': 
-'After the first season we meet Paolo, who joins the team with new ideas to improve the algorithm.\nThe Excel file is no longer enough. fantatia.com is born.',
-
-'Algo cresce, serve un team più solido.\nArrivano Andrea (Backend), Leonardo (Frontend) e Tommaso (Business Analyst).\nAmia comincia a prendere forma.': 
-'Algo grows, we need a more solid team.\nAndrea (Backend), Leonardo (Frontend) and Tommaso (Business Analyst) arrive.\nAmia begins to take shape.',
-
-'Nasce ufficialmente Amia.\nMa nell\'agosto 2023 l\'uscita di Algo fallisce, non siamo pronti.\nTorniamo su fantatia.com e ci riorganizziamo.': 
-'Amia is officially born.\nBut in August 2023 the release of Algo fails, we are not ready.\nWe go back to fantatia.com and reorganize.',
-
-'Non ci fermiamo, siamo motivati.\nIl team si amplia: Michele (Product Designer), Luca (App Developer) e Giampaolo (Cloud & DevOps).\nSi riparte, all in. Investiamo tutto.': 
-'We don\'t stop, we are motivated.\nThe team expands: Michele (Product Designer), Luca (App Developer) and Giampaolo (Cloud & DevOps).\nWe start again, all in. We invest everything.',
-
-'Contemporaneamente nasce anche il team comunicazione a supporto di Tia e delle pagine social di Algo.\nEntrano Matteo (Social Media Manager) e Nicola (Graphic Designer).': 
-'At the same time, the communication team is also born to support Tia and Algo\'s social pages.\nMatteo (Social Media Manager) and Nicola (Graphic Designer) join.',
-
-'Dopo mesi di lavoro e un estate passata a scrivere codice Algo Fantacalcio è live sugli store!\nIl primo prodotto ufficiale di Amia.': 
-'After months of work and a summer spent writing code Algo Fantacalcio is live on the stores!\nAmia\'s first official product.',
-
-'Il team cambia volto.\nLuca e Leonardo lasciano, ma entrano Chris (App Developer) e Mika (Backend), che si affianca ad Andrea.': 
-'The team changes face.\nLuca e Leonardo leave, but Chris (App Developer) and Mika (Backend) join, working alongside Andrea.',
-
-'Il primo anno di Algo ci ha insegnato tanto. Tante difficoltà, ma anche tante soddisfazioni:\noltre 150.000 download e moltissimi fantallenatori felici.\nOra Amia è pronta a crescere. E no, non faremo solo fantacalcio': 
-'The first year of Algo taught us a lot. Many difficulties, but also many satisfactions:\nover 150,000 downloads and many happy fantasy coaches.\nNow Amia is ready to grow. And no, we won\'t only do fantasy football',
-
-// MONTH TRANSLATIONS
-'Maggio 2020': 'May 2020',
-'Dicembre 2020': 'December 2020',
-'Marzo 2021': 'March 2021',
-'Agosto 2022': 'August 2022',
-'Marzo 2023': 'March 2023',
-'Agosto 2023': 'August 2023',
-'Marzo 2024': 'March 2024',
-'Giugno 2024': 'June 2024',
-'Agosto 2024': 'August 2024',
-'Ottobre 2024': 'October 2024',
-'Agosto 2025': 'August 2025',
-
-'Crescere & Divertirsi, insieme': 
-'Growing & Having Fun, together',
-
-'Il nostro primo bootcamp, Luglio 2024': 
-'Our first bootcamp, July 2024',
-
-'I Nostri Prodotti': 
-'Our Products',
-
-'La nostra prima app, trasforma dati in scelte fantacalcistiche.': 
-'Our first app, transforms data into fantasy football choices.',
-
-'Algoritmo Proprietario': 
-'Proprietary Algorithm',
-
-'Sviluppato internamente per massimizzare le tue probabilità di vittoria.': 
-'Developed internally to maximize your chances of winning.',
-
-'150k+ Utenti Attivi': 
-'150k+ Active Users',
-
-'Più di 150mila utenti a meno di un anno dal rilascio. Una community in continua crescita.': 
-'More than 150 thousand users in less than a year from release. A growing community.',
-
-'Qualità': 
-'Quality',
-
-'In linea con i nostri valori, stiamo costruendo un prodotto che rispecchi le nostre, alte, aspettative.': 
-'In line with our values, we are building a product that reflects our high expectations.',
-
-'Download': 
-'Downloads',
-
-'Rating medio': 
-'Average Rating',
-
-'Reviews': 
-'Reviews',
-
-'Disponibile su': 
-'Available on',
-
-'per iOS': 
-'for iOS',
-
-'per Android': 
-'for Android',
-
-'Unisciti al team': 
-'Join the team',
-
-'Contatti': 
-'Contacts',
-
-'Seguici': 
-'Follow us'
+  // Footer
+  'Unisciti al team': 'Join the team',
+  'Contatti': 'Contacts',
+  'Seguici': 'Follow us'
 };
 
-// Store original content for reverting
-const originalContent = new Map();
+// Special cases that need HTML handling
+const specialTranslations = {
+  heroTitle: {
+    italian: 'Innova oggi,<span class="glow">transforma domani</span>',
+    english: 'Innovate Today,<span class="glow">Shape Tomorrow</span>'
+  },
+  peopleTitle: {
+    italian: 'Amia, una storia di <br>persone',
+    english: 'Amia, a story of <br>people'
+  },
+  statements: {
+    italian: [
+      'Abbiamo un sogno proibito: <span class="highlight">che prima o poi tutti abbiano almeno un\'app di Amia sul telefono.</span><br> È il nostro obiettivo più ambizioso.',
+      'La strada per arrivarci è una sola: <span class="highlight">creare prodotti che le persone amino davvero.</span> Prodotti curati fin nei minimi dettagli, anche quelli che non si vedono.',
+      'Ma tra il dire e il fare <span class="highlight">c\'è di mezzo il fare.</span>',
+      'E allora facciamolo. Costruiamo il nostro futuro <span class="highlight">insieme.</span>'
+    ],
+    english: [
+      'We have a forbidden dream: <span class="highlight">that sooner or later everyone has at least one Amia app on their phone.</span><br> It\'s our most ambitious goal.',
+      'There\'s only one way to get there: <span class="highlight">create products that people really love.</span> Products crafted down to the smallest details, even those you can\'t see.',
+      'But between saying and doing <span class="highlight">there\'s doing.</span>',
+      'So let\'s do it. Let\'s build our future <span class="highlight">together.</span>'
+    ]
+  }
+};
 
 function initializeLanguageSwitcher() {
-    const switcher = document.getElementById('languageSwitcher');
-    const flagIcon = document.getElementById('flagIcon');
-    
-    if (!switcher || !flagIcon) return;
-    
-    // Store original content when first initialized
-    storeOriginalContent();
-    
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 100) {
-            switcher.classList.add('hidden');
-        } else {
-            switcher.classList.remove('hidden');
-        }
-    }, { passive: true });
-    
-    switcher.addEventListener('click', () => {
-        isEnglish = !isEnglish;
-        updateLanguage();
-        updateFlag();
-    });
-}
-
-function storeOriginalContent() {
-    // Store hero heading
-    const heroHeading = document.querySelector('.heading-container h1');
-    if (heroHeading) {
-        originalContent.set('heroHeading', heroHeading.innerHTML);
-    }
-    
-    // Store hero description
-    const heroDescription = document.querySelector('.about-text .lead');
-    if (heroDescription) {
-        originalContent.set('heroDescription', heroDescription.textContent);
-    }
-    
-    // Store people title
-    const peopleTitle = document.querySelector('#persone .nostra-storia-title');
-    if (peopleTitle) {
-        originalContent.set('peopleTitle', peopleTitle.innerHTML);
-    }
-    
-    // Store statements
-    const statements = document.querySelectorAll('.statement-text');
-    statements.forEach((statement, index) => {
-        originalContent.set(`statement${index}`, statement.innerHTML);
-    });
-}
-
-function updateLanguage() {
-    if (isEnglish) {
-        // Translate using the translations object
-        document.querySelectorAll('*').forEach(element => {
-            if (element.tagName === 'SCRIPT' || element.children.length > 0) return;
-            
-            const text = element.textContent?.trim();
-            if (text && englishTranslations[text]) {
-                element.textContent = englishTranslations[text];
-            }
-        });
-        
-        // Handle special cases with HTML content
-        const heroHeading = document.querySelector('.heading-container h1');
-        if (heroHeading) {
-            heroHeading.innerHTML = 'Innovate Today, <span class="glow">Shape Tomorrow</span>';
-        }
-
-        const heroDescription = document.querySelector('.about-text .lead');
-        if (heroDescription) {
-            heroDescription.textContent = englishTranslations['La nostra missione è migliorare l\'esperienza di attimi di vita delle persone, offrendo soluzioni intuitive e di alta qualità, guidati dai dati, dalla passione per l\'innovazione e dall\'impegno nella cura dei particolari'];
-        }
-        
-        const peopleTitle = document.querySelector('#persone .nostra-storia-title');
-        if (peopleTitle) {
-            peopleTitle.innerHTML = 'Amia, a story of <br>people';
-        }
-        
-        // Translate statements with HTML content
-        const statements = document.querySelectorAll('.statement-text');
-        const englishStatements = [
-            'We have a forbidden dream: <span class="highlight">that sooner or later everyone has at least one Amia app on their phone.</span><br> It\'s our most ambitious goal.',
-            'There\'s only one way to get there: <span class="highlight">create products that people really love.</span> Products crafted down to the smallest details, even those you can\'t see.',
-            'But between saying and doing <span class="highlight">there\'s doing.</span>',
-            'So let\'s do it. Let\'s build our future <span class="highlight">together.</span>'
-        ];
-        
-        statements.forEach((statement, index) => {
-            if (englishStatements[index]) {
-                statement.innerHTML = englishStatements[index];
-            }
-        });
-
-        // FORCE UPDATE TIMELINE MONTHS - this is the key fix!
-        updateTimelineLanguage();
-        
+  const switcher = document.getElementById('languageSwitcher');
+  const flagIcon = document.getElementById('flagIcon');
+  
+  if (!switcher || !flagIcon) return;
+  
+  // Store all original content first
+  storeAllOriginalContent();
+  
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 100) {
+      switcher.classList.add('hidden');
     } else {
-        // Revert to original Italian content
-        const heroHeading = document.querySelector('.heading-container h1');
-        if (heroHeading && originalContent.has('heroHeading')) {
-            heroHeading.innerHTML = originalContent.get('heroHeading');
-        }
-        
-        const heroDescription = document.querySelector('.about-text .lead');
-        if (heroDescription && originalContent.has('heroDescription')) {
-            heroDescription.textContent = originalContent.get('heroDescription');
-        }
-        
-        const peopleTitle = document.querySelector('#persone .nostra-storia-title');
-        if (peopleTitle && originalContent.has('peopleTitle')) {
-            peopleTitle.innerHTML = originalContent.get('peopleTitle');
-        }
-        
-        const statements = document.querySelectorAll('.statement-text');
-        statements.forEach((statement, index) => {
-            if (originalContent.has(`statement${index}`)) {
-                statement.innerHTML = originalContent.get(`statement${index}`);
-            }
-        });
-        
-        // Reload page to restore all original Italian content
-        location.reload();
+      switcher.classList.remove('hidden');
     }
-    
-    const switcher = document.getElementById('languageSwitcher');
-    if (switcher) {
-        switcher.setAttribute('data-tooltip', isEnglish ? 'Passa all\'italiano' : 'Switch to English');
+  }, { passive: true });
+  
+  switcher.addEventListener('click', () => {
+    isEnglish = !isEnglish;
+    updateAllContent();
+    updateFlag();
+  });
+}
+
+function storeAllOriginalContent() {
+  // Store all text elements
+  document.querySelectorAll('*').forEach(element => {
+    if (element.children.length === 0 && element.textContent.trim()) {
+      const key = generateUniqueKey(element);
+      originalTexts.set(key, element.textContent.trim());
     }
+  });
+  
+  // Store special HTML elements
+  const heroTitle = document.querySelector('.heading-container h1');
+  if (heroTitle) {
+    originalHTML.set('heroTitle', heroTitle.innerHTML);
+  }
+  
+  const peopleTitle = document.querySelector('#persone .nostra-storia-title');
+  if (peopleTitle) {
+    originalHTML.set('peopleTitle', peopleTitle.innerHTML);
+  }
+  
+  const statements = document.querySelectorAll('.statement-text');
+  statements.forEach((statement, index) => {
+    originalHTML.set(`statement${index}`, statement.innerHTML);
+  });
+}
+
+function generateUniqueKey(element) {
+  const tagName = element.tagName.toLowerCase();
+  const classes = element.className ? `.${element.className.split(' ').join('.')}` : '';
+  const text = element.textContent.trim().substring(0, 50);
+  return `${tagName}${classes}_${text}`;
+}
+
+function updateAllContent() {
+  if (isEnglish) {
+    translateToEnglish();
+  } else {
+    revertToItalian();
+  }
+  
+  // Update timeline after content change
+  setTimeout(() => {
+    updateTimelineDisplay();
+  }, 50);
+  
+  // Update tooltip
+  const switcher = document.getElementById('languageSwitcher');
+  if (switcher) {
+    switcher.setAttribute('data-tooltip', isEnglish ? 'Passa all\'italiano' : 'Switch to English');
+  }
+}
+
+function translateToEnglish() {
+  // Translate regular text elements
+  document.querySelectorAll('*').forEach(element => {
+    if (element.children.length === 0 && element.textContent.trim()) {
+      const text = element.textContent.trim();
+      if (translations[text]) {
+        element.textContent = translations[text];
+      }
+    }
+  });
+  
+  // Handle special cases with HTML
+  const heroTitle = document.querySelector('.heading-container h1');
+  if (heroTitle) {
+    heroTitle.innerHTML = specialTranslations.heroTitle.english;
+  }
+  
+  const peopleTitle = document.querySelector('#persone .nostra-storia-title');
+  if (peopleTitle) {
+    peopleTitle.innerHTML = specialTranslations.peopleTitle.english;
+  }
+  
+  const statements = document.querySelectorAll('.statement-text');
+  statements.forEach((statement, index) => {
+    if (specialTranslations.statements.english[index]) {
+      statement.innerHTML = specialTranslations.statements.english[index];
+    }
+  });
+}
+
+function revertToItalian() {
+  // Revert regular text elements
+  document.querySelectorAll('*').forEach(element => {
+    if (element.children.length === 0 && element.textContent.trim()) {
+      const key = generateUniqueKey(element);
+      if (originalTexts.has(key)) {
+        element.textContent = originalTexts.get(key);
+      }
+    }
+  });
+  
+  // Revert special HTML elements
+  const heroTitle = document.querySelector('.heading-container h1');
+  if (heroTitle && originalHTML.has('heroTitle')) {
+    heroTitle.innerHTML = originalHTML.get('heroTitle');
+  }
+  
+  const peopleTitle = document.querySelector('#persone .nostra-storia-title');
+  if (peopleTitle && originalHTML.has('peopleTitle')) {
+    peopleTitle.innerHTML = originalHTML.get('peopleTitle');
+  }
+  
+  const statements = document.querySelectorAll('.statement-text');
+  statements.forEach((statement, index) => {
+    if (originalHTML.has(`statement${index}`)) {
+      statement.innerHTML = originalHTML.get(`statement${index}`);
+    }
+  });
+}
+
+function updateTimelineDisplay() {
+  const currentYearElement = document.querySelector('.current-year');
+  const timelineItems = document.querySelectorAll('.timeline-item');
+  
+  if (!currentYearElement || !timelineItems.length) return;
+  
+  // Find active timeline item
+  let activeItem = null;
+  timelineItems.forEach(item => {
+    if (item.classList.contains('active')) {
+      activeItem = item;
+    }
+  });
+  
+  if (activeItem) {
+    const yearText = activeItem.getAttribute('data-year');
+    if (isEnglish && translations[yearText]) {
+      currentYearElement.textContent = translations[yearText];
+    } else {
+      currentYearElement.textContent = yearText;
+    }
+  }
 }
 
 function updateFlag() {
-    const flagIcon = document.getElementById('flagIcon');
-    if (!flagIcon) return;
-    
-    if (isEnglish) {
-        flagIcon.src = 'https://flagcdn.com/w40/gb.png';
-        flagIcon.alt = 'British Flag';
-    } else {
-        flagIcon.src = 'https://flagcdn.com/w40/it.png';
-        flagIcon.alt = 'Italian Flag';
-    }
+  const flagIcon = document.getElementById('flagIcon');
+  if (!flagIcon) return;
+  
+  if (isEnglish) {
+    flagIcon.src = 'https://flagcdn.com/w40/gb.png';
+    flagIcon.alt = 'British Flag';
+  } else {
+    flagIcon.src = 'https://flagcdn.com/w40/it.png';
+    flagIcon.alt = 'Italian Flag';
+  }
 }
 
-// NEW FUNCTION TO HANDLE TIMELINE LANGUAGE UPDATES
-function updateTimelineLanguage() {
-    // Update the current displayed year in timeline
-    const currentYearElement = document.querySelector('.current-year');
-    const timelineItems = document.querySelectorAll('.timeline-item');
-    
-    if (!currentYearElement || !timelineItems.length) return;
-    
-    // Find the active timeline item
-    let activeIndex = 0;
-    timelineItems.forEach((item, index) => {
-        if (item.classList.contains('active')) {
-            activeIndex = index;
-        }
-    });
-    
-    // Get the current Italian year text and translate it
-    const currentItalianYear = currentYearElement.textContent.trim();
-    if (englishTranslations[currentItalianYear]) {
-        currentYearElement.textContent = englishTranslations[currentItalianYear];
-    }
-    
-    // Also update data-year attributes if needed for future navigation
-    timelineItems.forEach(item => {
-        const italianYear = item.getAttribute('data-year');
-        if (italianYear && englishTranslations[italianYear]) {
-            item.setAttribute('data-year-en', englishTranslations[italianYear]);
-        }
-    });
-}
-
-// MODIFY TIMELINE CAROUSEL TO WORK WITH TRANSLATIONS
+// MODIFIED TIMELINE CAROUSEL TO WORK WITH TRANSLATIONS
 function initializeTimelineCarousel() {
-    const timelineItems = document.querySelectorAll('.timeline-item');
-    const prevButton = document.querySelector('.timeline-controls .prev');
-    const nextButton = document.querySelector('.timeline-controls .next');
-    const currentYearElement = document.querySelector('.current-year');
+  const timelineItems = document.querySelectorAll('.timeline-item');
+  const prevButton = document.querySelector('.timeline-controls .prev');
+  const nextButton = document.querySelector('.timeline-controls .next');
+  const currentYearElement = document.querySelector('.current-year');
+  
+  if (!timelineItems.length || !prevButton || !nextButton || !currentYearElement) return;
+  
+  let currentIndex = 0;
+  
+  function updateTimelineDisplay() {
+    timelineItems.forEach(item => item.classList.remove('active'));
+    timelineItems[currentIndex].classList.add('active');
     
-    if (!timelineItems.length || !prevButton || !nextButton || !currentYearElement) return;
+    const currentItem = timelineItems[currentIndex];
+    const yearText = currentItem.getAttribute('data-year');
     
-    let currentIndex = 0;
-    
-    function updateTimelineDisplay() {
-        timelineItems.forEach(item => item.classList.remove('active'));
-        timelineItems[currentIndex].classList.add('active');
-        
-        const currentItem = timelineItems[currentIndex];
-        let currentYear = currentItem.getAttribute('data-year');
-        
-        // Check if we're in English mode and have English translation
-        if (isEnglish && currentItem.getAttribute('data-year-en')) {
-            currentYear = currentItem.getAttribute('data-year-en');
-        } else if (isEnglish && englishTranslations[currentYear]) {
-            currentYear = englishTranslations[currentYear];
-        }
-        
-        currentYearElement.textContent = currentYear;
-        
-        prevButton.disabled = currentIndex === 0;
-        nextButton.disabled = currentIndex === timelineItems.length - 1;
+    if (isEnglish && translations[yearText]) {
+      currentYearElement.textContent = translations[yearText];
+    } else {
+      currentYearElement.textContent = yearText;
     }
     
-    prevButton.addEventListener('click', function() {
-        if (currentIndex > 0) {
-            currentIndex--;
-            updateTimelineDisplay();
-        }
-    });
-    
-    nextButton.addEventListener('click', function() {
-        if (currentIndex < timelineItems.length - 1) {
-            currentIndex++;
-            updateTimelineDisplay();
-        }
-    });
-    
-    updateTimelineDisplay();
+    prevButton.disabled = currentIndex === 0;
+    nextButton.disabled = currentIndex === timelineItems.length - 1;
+  }
+  
+  prevButton.addEventListener('click', function() {
+    if (currentIndex > 0) {
+      currentIndex--;
+      updateTimelineDisplay();
+    }
+  });
+  
+  nextButton.addEventListener('click', function() {
+    if (currentIndex < timelineItems.length - 1) {
+      currentIndex++;
+      updateTimelineDisplay();
+    }
+  });
+  
+  updateTimelineDisplay();
 }
