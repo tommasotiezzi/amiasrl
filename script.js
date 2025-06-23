@@ -1003,8 +1003,8 @@ const englishTranslations = {
 'Il team cambia volto.\nLuca e Leonardo lasciano, ma entrano Chris (App Developer) e Mika (Backend), che si affianca ad Andrea.': 
 'The team changes face.\nLuca e Leonardo leave, but Chris (App Developer) and Mika (Backend) join, working alongside Andrea.',
 
-'Il primo anno di Algo ci ha insegnato tanto. Tante difficoltà, ma anche tante soddisfazioni:\noltre 150.000 download e moltissimi fantallenatori felici.\nOra Amia è pronta a crescere. E no, non faremo solo fantacalcio': 
-'The first year of Algo taught us a lot. Many difficulties, but also many satisfactions:\nover 150,000 downloads and many happy fantasy coaches.\nNow Amia is ready to grow. And no, we won\'t only do fantasy football',
+'Il primo anno di Algo ci ha insegnato tanto. Tante difficoltà, ma anche tante soddisfazioni: oltre 150.000 download e moltissimi fantallenatori felici. Ora Amia è pronta a crescere. E no, non faremo solo fantacalcio.': 
+'The first year of Algo taught us a lot. Many difficulties, but also many satisfactions: over 150,000 downloads and many happy fantasy coaches. Now Amia is ready to grow. And no, we won\'t only do fantasy football',
 
 // MONTH TRANSLATIONS
 'Maggio 2020': 'May 2020',
