@@ -1,446 +1,662 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <title>AMIA - Innovate Today, Shape Tomorrow</title>
-    <link rel="icon" type="image/png" href="./Images/Marchi/AMIA-LOGO-color4-MARCHIO.svg" style="height: 32px; width: 32px">
-</head>
-<body style="background-color: #fafafa;">
-    <!-- Header Section -->
-    <section id="header">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+    <title>Amia - Innovate Today, Shape Tomorrow | Sviluppo App e Soluzioni Digitali</title>
+    <meta name="description" content="Amia trasforma idee innovative in soluzioni digitali di alta qualità. Scopri la nostra storia, i nostri valori e il team che ha creato Algo Fantacalcio con oltre 150k download.">
+    <meta name="keywords" content="amia, innovazione, sviluppo app, algo fantacalcio, team, startup italiana, soluzioni digitali, app development">
+    <meta name="author" content="Amia SRL">
+    <meta name="robots" content="index, follow">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Amia - Innovate Today, Shape Tomorrow">
+    <meta property="og:description" content="Trasformiamo idee innovative in soluzioni digitali che migliorano l'esperienza delle persone. Scopri la nostra storia e unisciti al team.">
+    <meta property="og:image" content="./Images/Marchi/AMIA-LOGO-color4-MARCHIO.svg">
+    <meta property="og:url" content="https://www.amiasrl.it">
+    <meta property="og:site_name" content="Amia">
+    <meta property="og:locale" content="it_IT">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Amia - Innovate Today, Shape Tomorrow">
+    <meta name="twitter:description" content="Trasformiamo idee innovative in soluzioni digitali che migliorano l'esperienza delle persone.">
+    <meta name="twitter:image" content="./Images/Marchi/AMIA-LOGO-color4-MARCHIO.svg">
+    
+    <link rel="canonical" href="https://www.amiasrl.it">
+    
+    <link rel="icon" type="image/svg+xml" href="./Images/Marchi/AMIA-LOGO-color4-MARCHIO.svg">
+    <link rel="apple-touch-icon" href="./Images/Marchi/AMIA-LOGO-color4-MARCHIO.svg">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Amia SRL",
+      "description": "Amia trasforma idee innovative in soluzioni digitali di alta qualità",
+      "url": "https://www.amiasrl.it",
+      "logo": "https://www.amiasrl.it/Images/Loghi/AMIA-LOGO-black-O.svg",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "info@amiasrl.it",
+        "contactType": "Customer Service"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Portico Antica Fonte 11",
+        "addressLocality": "Darfo Boario Terme",
+        "postalCode": "25047",
+        "addressRegion": "BS",
+        "addressCountry": "IT"
+      },
+      "foundingDate": "2023",
+      "sameAs": [
+        "https://www.instagram.com/amia_it",
+        "https://www.linkedin.com/company/amia-it/"
+      ]
+    }
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-13920YSJ44"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-13920YSJ44');
+    </script>
+    </head>
+<body>
+    <!-- Header -->
+    <header role="banner">
         <div class="container">
-          <nav class="navbar navbar-expand-lg">
-            <div class="container-fluid">
-              <a href="#" class="navbar-brand" href="/">
-                <img src="./Images/Loghi/AMIA-LOGO-black-O.svg" width="80" height="40" alt="Amia Logo">
-              </a>
-              <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke="currentColor" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"/>
-                </svg>
-              </button>
-              <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                  <li class="nav-item"><a href="#about" class="nav-link active" aria-current="page" style="color: #141414;">Chi siamo</a></li>
-                  <li class="nav-item"><a href="#valori" class="nav-link item-valori" style="color: #141414; padding-left: 16px; padding-right: 16px;">Valori</a></li>
-                  <li class="nav-item"><a href="#persone" class="nav-link" style="color: #141414;">Persone</a></li>
-                  <li class="nav-item"><a href="#prodotti" class="nav-link" style="color: #141414;">Prodotti</a></li>
-                  <li class="nav-item"><a href="#lavoraconnoi" class="nav-link" style="color: #141414;">Lavora con noi</a></li>
-                </ul>
-              </div>
-            </div>
-          </nav>
-        </div>
-    </section>
-    <div class="section-end-fade"></div>
-    <!-- About/Hero Section -->
-    <section id="about" class="hero marginSection" style="padding-top: 30px !important">
-      <div class="container">
-          <div class="container2">
-              <div class="item logo-container">
-                  <img src="./Images/Marchi/AMIA-LOGO-black-MARCHIO.svg" alt="AMIA Logo" class="logo-default">
-                  <img src="./Images/Marchi/AMIA-LOGO-color4-MARCHIO.svg" alt="AMIA logo 2" class="logo-hover">
-              </div>
-
-              <div class="item heading-container">
-                  <h1>Innova oggi,<span class="glow">Transforma domani</span></h1>
-              </div>
-
-              <div class="item about-text">
-                  <p class="lead mt-4">La nostra missione è migliorare l'esperienza di attimi di vita delle persone, offrendo soluzioni intuitive e di alta qualità, <br>guidati dai dati, dalla passione per l'innovazione e dall'impegno nella cura dei particolari.</p>
-              </div>
-              <img class="arrow" src="./Images/Support_Images/Freccia-Nera.png" alt="">
-          </div>
-      </div>
-  </section>
-
-    <!-- Valori Section -->
-    <section id="valori" class="valori py-5 marginSection">
-        <div class="container">
-            <h2 class="text-center title-section mb-5">I Nostri Valori</h2>
-            <div class="valori-timeline">
-                <div class="valori-item valori-box animate-on-scroll" data-value="innovation">
-                <div class="valori-item valori-box animate-on-scroll" data-value="excellence">
-                    <div class="valori-content">
-                        <h3>Le persone, al centro</h3>
-                        <p class="lead mt-4">Devono essere felici quando usano un nostro prodotto. Il nostro obiettivo è avere, a prescindere dalla forma, un impatto concreto e positivo.</p>
-                    </div>
-                </div>
-                    <div class="valori-content">
-                        <h3>Innoviamo si, Rinnoviamo anche</h3>
-                        <p class="lead mt-4">Vogliamo saper creare il nuovo, ma anche riconoscere ciò che può essere migliorato trasformando i limiti in opportunità.</p>
-                    </div>
-                </div>
-                <div class="valori-item valori-box animate-on-scroll" data-value="integrity">
-                    <div class="valori-content">
-                        <h3>Perfezione come mezzo, non come fine</h3>
-                        <p class="lead mt-4">La cura nei dettagli ci guida oltre gli standard. Cerchiamo l’equilibrio perfetto tra qualità, velocità e funzionalità.</p>
-                    </div>
-                </div>
-                <div class="valori-item valori-box animate-on-scroll" data-value="integrity">
-                    <div class="valori-content">
-                        <h3>La verità è nei dati</h3>
-                        <p class="lead mt-4">Sono la bussola per navigare l'incertezza. Li raccogliamo, li valorizziamo e li trasformiamo in strumenti per decisioni interne o per creare opportunità all’esterno.</p>
-                    </div>
-                </div>
-                <div class="valori-item valori-box animate-on-scroll" data-value="integrity">
-                  <div class="valori-content">
-                      <h3>Inquietudine conoscitiva</h3>
-                      <p class="lead mt-4">Ciò che sappiamo non ci basta. La curiosità e la costante voglia di migliorare sono il nostro motore per crescere.</p>
-                  </div>
-              </div>
-              <div class="valori-item valori-box animate-on-scroll" data-value="integrity">
-                <div class="valori-content">
-                    <h3>Divertimento</h3>
-                    <p class="lead mt-4">Lavoriamo tanto, ma ci divertiamo. Perché lo facciamo in ciò che ci appassiona e ci dà più soddisfazione.</p>
-                </div>
-            </div>
+            <div class="header-content">
+                <a href="#" class="logo" aria-label="Amia Homepage">
+                    <img src="./Images/Loghi/AMIA-LOGO-black-O.svg" alt="Amia Logo" width="32" height="32" />
+                </a>
+                <nav class="main-nav" role="navigation" aria-label="Menu principale">
+                    <ul>
+                        <li><a href="#chi-siamo" aria-label="Scopri chi siamo">Chi siamo</a></li>
+                        <li><a href="#valori" aria-label="Scopri i nostri valori">Valori</a></li>
+                        <li><a href="#persone" aria-label="La storia del nostro team">Persone</a></li>
+                        <li><a href="#prodotti" aria-label="I nostri prodotti">Prodotti</a></li>
+                    </ul>
+                </nav>
+                <a href="./careers/index.html" class="cta-button" aria-label="Candidati per lavorare con noi">
+                    Lavora con noi
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+                
+                <button class="hamburger" aria-label="Apri menu di navigazione" aria-expanded="false">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
             </div>
         </div>
-    </section>
+    </header>
 
-    <!-- People Section -->
-    <section id="persone" class="py-5 bg-light marginSection">
-      <div class="container">
+<!-- Mobile Navigation -->
+<nav class="mobile-nav" role="navigation" aria-label="Menu mobile">
+    
+    <div class="mobile-nav-section">
+        <a href="#chi-siamo" aria-label="Scopri chi siamo">Chi siamo</a>
+        <a href="#valori" aria-label="Scopri i nostri valori">Valori</a>
+        <a href="#persone" aria-label="La storia del nostro team">Persone</a>
+        <a href="#prodotti" aria-label="I nostri prodotti">Prodotti</a>
+    </div>
+    
+    
+    <div class="mobile-nav-section">
+        <a href="./careers/index.html" class="cta-button" aria-label="Candidati per lavorare con noi" style= "margin-bottom: 100px;">
+            Lavora con noi
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+    </div>
+</nav>
 
-        <div class="container-timeline">
-            <div class="timeline-carousel mt-5">
-                <h1 class="nostra-storia-title">Amia, una storia di <br>persone</h1>
-                <div class="timeline-item active" data-year="Maggio 2020">
-                    <img src="./storia_amia/fantatia.png" alt="Person" class="timeline-photo">
-                    <p class="timeline-description">Tutto comincia nel 2020 con la nascita di Fantatia, la pagina creata da Mattia per parlare di fantacalcio. Amia? Algo? Sono ancora sogni lontani.</p>
+    <!-- Main Content -->
+    <main role="main">
+        <!-- Hero Section -->
+        <section class="hero" role="banner" id="chi-siamo">
+            <div class="container">
+                <div class="hero-icon">
+                    <img src="./Images/Marchi/AMIA-LOGO-color4-MARCHIO.svg" alt="Amia - Marchio aziendale" width="256" height="256" />
                 </div>
-                <div class="timeline-item" data-year="Dicembre 2020">
-                    <img src="./storia_amia/abbaentra.png" alt="Person" class="timeline-photo">
-                    <p class="timeline-description">Durante una live su Twitch, Abba si propone per aiutare Mattia con la comunicazione. È il primo a salire sulla barca e oggi è ancora con noi come Customer Success Manager.</p>
-                </div>
-                <div class="timeline-item" data-year="Marzo 2021">
-                    <img src="./storia_amia/IngressoTanc.png" alt="Person" class="timeline-photo">
-                    <p class="timeline-description">Mattia intuisce che ai fantallenatori manca uno strumento di supporto strategico. Con Tancredi crea la prima versione di Algo su Excel! Agli utenti interessa e iniziano ad abbonarsi.</p>
-                </div>
-                <div class="timeline-item" data-year="Agosto 2022">
-                    <img src="./storia_amia/fantatia.com.png" alt="Person" class="timeline-photo">
-                    <p class="timeline-description">Dopo la prima stagione conosciamo Paolo, che si unisce al team con nuove idee per migliorare l’algoritmo. Il file Excel non basta più. Nasce fantatia.com.</p>
-                </div>
-                <div class="timeline-item" data-year="Marzo 2023">
-                    <img src="./storia_amia/Amia.png" alt="Person" class="timeline-photo">
-                    <p class="timeline-description">Algo cresce, serve un team più solido. Arrivano Andrea (Backend), Leonardo (Frontend) e Tommaso (Business Analyst). Amia comincia a prendere forma.</p>
-                </div>
-                <div class="timeline-item" data-year="Agosto 2023">
-                    <img src="./storia_amia/fail.png" alt="Person" class="timeline-photo">
-                    <p class="timeline-description">Nasce ufficialmente Amia. Ma nell’agosto 2023 l’uscita di Algo fallisce, non siamo pronti. Torniamo su fantatia.com e ci riorganizziamo.</p>
-                </div>
-                <div class="timeline-item" data-year="Marzo 2024">
-                    <img src="./storia_amia/michelucagiamp.png" alt="Person" class="timeline-photo">
-                    <p class="timeline-description">Non ci fermiamo, siamo motivati. Il team si amplia: Michele (Product Designer), Luca (App Developer) e Giampaolo (Cloud & DevOps). Si riparte, all in. Investiamo tutto.</p>
-                </div>
-                <div class="timeline-item" data-year="Giugno 2024">
-                    <img src="./storia_amia/nicmatte.png" alt="Person" class="timeline-photo">
-                    <p class="timeline-description">Contemporaneamente nasce anche il team comunicazione a supporto di Tia e delle pagine social di Algo. Entrano Matteo (Social Media Manager) e Nicola (Graphic Designer).</p>
-                </div>
-                <div class="timeline-item" data-year="Agosto 2024">
-                    <img src="./storia_amia/lancioalgo.png" alt="Person" class="timeline-photo">
-                    <p class="timeline-description">Dopo mesi di lavoro e un estate passata a scrivere codice Algo Fantacalcio è live sugli store! Il primo prodotto ufficiale di Amia.</p>
-                </div>
-                <div class="timeline-item" data-year="Ottobre 2024">
-                    <img src="./storia_amia/chris&mika.png" alt="Person" class="timeline-photo">
-                    <p class="timeline-description">Il team cambia volto. Luca e Leonardo lasciano, ma entrano Chris (App Developer) e Mika (Backend), che si affianca ad Andrea.</p>
-                </div>
-                <div class="timeline-item" data-year="Agosto 2025">
-                    <img src="./Images/Marchi/AMIA-LOGO-color4-MARCHIO.svg" alt="Person" class="timeline-photo">
-                    <p class="timeline-description">Il primo anno di Algo ci ha insegnato tanto. Tante difficoltà, ma anche tante soddisfazioni: oltre 150.000 download e moltissimi fantallenatori felici. Ora Amia è pronta a crescere. E no, non faremo solo fantacalcio.</p>
-                </div>
-
-                
-                <div class="timeline-controls">
-                    <button class="prev">←</button>
-                    <div class="timeline-track">
-                        <div class="timeline-dot"></div>
-                    </div>
-                    <button class="next">→</button>
-                </div>
-                <div class="current-year"></div>
+                <h1>Innovate Today, Shape Tomorrow</h1>
+                <p>La nostra missione è migliorare l'esperienza di attimi di vita delle persone, offrendo soluzioni intuitive e di alta qualità, guidati dai dati, dalla passione per l'innovazione e dall'impegno nella cura dei particolari</p>
             </div>
-        </div>
-<!-- Endless Carosuel -->
-        <section class="bootcamp-section">
-        <h2 class="nostra-storia-title">Crescere & Divertirsi, insieme </h2>
-        <p class="bootcamp-subtitle">Il nostro primo bootcamp, Luglio 2024</p>
-        <div class="container">            
-            <div class="infinite-carousel">
-            <div class="infinite-carousel-wrapper">
-                <div class="infinite-carousel-item">
-                <img src="./Images/abba.jpeg" alt="Team Working">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/abba&andre.jpeg" alt="Team Building">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/Andre&Leo.jpeg" alt="Coding Session">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/andrelavora.jpeg" alt="Team Discussion">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/andreride.jpeg" alt="App Development">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/BeerPong.jpeg" alt="Design Workshop">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/play.jpeg" alt="Presenting Work">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/leolavora.jpeg" alt="Team Lunch">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/pcs&leo.jpeg" alt="Code Review">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/pol&tanc.jpeg" alt="Success Celebration">
-                </div>
-                <div class="infinite-carousel-item">
-                <img src="./Images/pol&team.jpeg" alt="Team Working">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/tanc&polgiocano.jpeg" alt="Team Building">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/Tanc&Visore.jpeg" alt="Coding Session">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/TancLavora.jpeg" alt="Team Discussion">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/tom lavora.jpeg" alt="App Development">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./images/tom.jpeg" alt="Design Workshop">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/1leoallavoro.jpeg" alt="Presenting Work">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/2team.jpeg" alt="Team Lunch">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/3tommi.jpeg" alt="Code Review">
-                </div>
-                
-                <div class="infinite-carousel-item">
-                <img src="./Images/4leochefacose.jpeg" alt="Success Celebration">
-                </div>
-            </div>
-            </div>
-        </div>
         </section>
-    </section>
 
-    <!-- Products Section -->
-    <section id="prodotti" class="prodotti py-5 marginSection" style="padding-top: 0px !important;">
-        <div class="container">
-            <h1 class="nostra-storia-title">I Nostri Prodotti</h1>
-            
-            <div class="product-showcase">
-                <!-- Left Side - Product Image -->
-                <div class="product-visual">
-                    <div class="product-stage">
-                        <img src="./Images/Frame mock.png" class="product-device" alt="Algo Fantacalcio App">
-                    </div>
-                </div>
-                
-                <!-- Right Side - Product Info -->
-                <div class="product-details">
-                    <div class="product-intro">
-                        <h2 class="product-name">Algo Fantacalcio</h2>
-                        <p class="product-tagline">La nostra prima app, trasforma dati in scelte fantacalcistiche.</p>
-                    </div>
-                    
-                    <div class="product-highlights">
-                        <div class="highlight-item">
-                            <div class="highlight-icon">
-                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                    <path d="M16 2L20.12 10.88L30 12.24L22.5 19.12L24.24 30L16 25.12L7.76 30L9.5 19.12L2 12.24L11.88 10.88L16 2Z" fill="currentColor"/>
-                                </svg>
-                            </div>
-                            <div class="highlight-content">
-                                <h3>Algoritmo Proprietario</h3>
-                                <p>Sviluppato internamente per massimizzare le tue probabilità di vittoria.</p>
-                            </div>
-                        </div>
-                        
-                        <div class="highlight-item">
-                            <div class="highlight-icon">
-                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                    <path d="M16 4C21.52 4 26 8.48 26 14C26 19.52 21.52 24 16 24C10.48 24 6 19.52 6 14C6 8.48 10.48 4 16 4ZM16 2C9.372 2 4 7.372 4 14C4 20.628 9.372 26 16 26C22.628 26 28 20.628 28 14C28 7.372 22.628 2 16 2ZM16 11C14.896 11 14 11.896 14 13V19C14 20.104 14.896 21 16 21C17.104 21 18 20.104 18 19V13C18 11.896 17.104 11 16 11ZM16 6C15.448 6 15 6.448 15 7C15 7.552 15.448 8 16 8C16.552 8 17 7.552 17 7C17 6.448 16.552 6 16 6Z" fill="currentColor"/>
-                                </svg>
-                            </div>
-                            <div class="highlight-content">
-                                <h3>150k+ Utenti Attivi</h3>
-                                <p>Più di 150mila utenti a meno di un anno dal rilascio. Una community in continua crescita.</p>
-                            </div>
-                        </div>
-                        
-                        <div class="highlight-item">
-                            <div class="highlight-icon">
-                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                    <path d="M16 2C8.268 2 2 8.268 2 16C2 23.732 8.268 30 16 30C23.732 30 30 23.732 30 16C30 8.268 23.732 2 16 2ZM14.5 22.5L7.5 15.5L9.914 13.086L14.5 17.672L22.086 10.086L24.5 12.5L14.5 22.5Z" fill="currentColor"/>
-                                </svg>
-                            </div>
-                            <div class="highlight-content">
-                                <h3>Qualità</h3>
-                                <p>In linea con i nostri valori, stiamo costruendo un prodotto che rispecchi le nostre, alte, aspettative.</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="product-metrics">
-                        <div class="metric">
-                            <span class="metric-value">150K+</span>
-                            <span class="metric-label">Download</span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-value">4.3</span>
-                            <span class="metric-label">Rating medio<br></span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-value">600+</span>
-                            <span class="metric-label">Reviews</span>
-                        </div>
-                    </div>
-                    
-                    <div class="download-section">
-                        <p class="download-text">Disponibile su</p>
-                        <div class="download-buttons">
-                            <a href="https://apps.apple.com/app/algo-fantacalcio/id6557064118" class="download-button app-store">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                    <path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 22 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.09997 22C7.78997 22.05 6.79997 20.68 5.95997 19.47C4.24997 17 2.93997 12.45 4.69997 9.39C5.56997 7.87 7.12997 6.91 8.81997 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.9 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.09 16.67C20.06 16.74 19.67 18.11 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.97 2C16.1 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z" fill="currentColor"/>
-                                </svg>
-                                <div class="button-text">
-                                    <span class="button-primary">App Store</span>
-                                    <span class="button-secondary">per iOS</span>
-                                </div>
-                            </a>
-                            
-                            <a href="https://play.google.com/store/apps/details?id=com.algo_mobile&pli=1" class="download-button google-play">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                    <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" fill="currentColor"/>
-                                </svg>
-                                <div class="button-text">
-                                    <span class="button-primary">Google Play</span>
-                                    <span class="button-secondary">per Android</span>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+        <div class="scroll-section" role="button" tabindex="0" aria-label="Scorri per scoprire di più">
+            <div class="scroll-content">
+                <span>Scopri di più</span><br>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
             </div>
         </div>
-    </section>
-    <section id="lavoraconnoi">
-        <div class="manifesto-container top-container">
-            <div class="manifesto-row">
-            <div class="statement-content">
-                <p class="statement-text"> 
-                Abbiamo un sogno proibito: <span class="highlight">che prima o poi tutti abbiano almeno un'app di Amia sul telefono.</span><br> È il nostro obiettivo più ambizioso.
-                </p>
-            </div>
-            </div>
 
-            <div class="manifesto-row">
-            <div class="statement-content">
-                <p class="statement-text">
-                La strada per arrivarci è una sola: <span class="highlight">creare prodotti che le persone amino davvero.</span> Prodotti curati fin nei minimi dettagli, anche quelli che non si vedono.
-                </p>
+        <!-- Values Section -->
+        <section id="valori" class="values" aria-labelledby="valori-title">
+            <div class="container">
+                <div class="values-grid">
+                    <article class="value-card">
+                        <h3>Le persone, al centro</h3>
+                        <p>Devono essere felici quando usano un nostro prodotto. Il nostro obiettivo è avere, a prescindere dalla forma, un impatto concreto e positivo.</p>
+                    </article>
+                    <article class="value-card">
+                        <h3>Innoviamo sì, Rinnoviamo anche</h3>
+                        <p>Vogliamo saper creare il nuovo, ma anche riconoscere ciò che può essere migliorato trasformando i limiti in opportunità.</p>
+                    </article>
+                    <article class="value-card">
+                        <h3>Perfezione come mezzo</h3>
+                        <p>La cura nei dettagli ci guida oltre gli standard. Cerchiamo l'equilibrio perfetto tra qualità, velocità e funzionalità.</p>
+                    </article>
+                    <article class="value-card">
+                        <h3>La verità è nei dati</h3>
+                        <p>Sono la bussola per navigare l'incertezza. Li raccogliamo, li valorizziamo e li trasformiamo in strumenti per decisioni interne o per creare opportunità all'esterno.</p>
+                    </article>
+                    <article class="value-card">
+                        <h3>Inquietudine costruttiva</h3>
+                        <p>Ciò che sappiamo non ci basta. La curiosità e la costante voglia di migliorare sono il nostro motore per crescere.</p>
+                    </article>
+                    <article class="value-card">
+                        <h3>Divertimento</h3>
+                        <p>Lavoriamo tanto, ma ci divertiamo. Perché lo facciamo in ciò che ci appassiona e ci dà più soddisfazione.</p>
+                    </article>
+                </div>
             </div>
-            </div>
-            <div class="manifesto-row">
-            <div class="statement-content">
-                <p class="statement-text">
-                Ma tra il dire e il fare <span class="highlight">c'è di mezzo il fare.</span>
-                </p>
-            </div>
-            </div>
-            <div class="manifesto-row">
-            <div class="statement-content">
-                <p class="statement-text">
-                E allora facciamolo. Costruiamo il nostro futuro 
-                <span class="highlight">insieme.</span>
-                </p>
-            </div>
-            </div>
-            
-            <div class="cta-container">
-                <a href="./careers" class="cta-button">
-                <span class="cta-text">Unisciti al team</span>
-                <span class="cta-arrow">→</span>
+        </section>
+
+        <section class="values-cta" aria-labelledby="values-cta-title">
+            <div class="container">
+                <h2 id="values-cta-title">Questi sono i valori che ci guidano ogni giorno.</h2>
+                <p>Se ti ci riconosci, forse è il momento di fare il prossimo passo.</p>
+                <a href="./careers/index.html" class="cta-button" aria-label="Unisciti al nostro team">
+                    Unisciti al Team
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                 </a>
             </div>
+        </section>
+
+        <!-- Story Section -->
+        <section id="persone" aria-labelledby="storia-title">
+            <div class="container">
+                <div class="container-timeline">
+                    <div class="timeline-carousel">
+                        <h2 id="storia-title" class="nostra-storia-title">Amia, una storia di <br>persone</h2>
+                        <p class="timeline-subtitle">E adesso la storia continua</p>
+                        
+                        <div class="timeline-carousel-container" role="region" aria-label="Timeline della storia di Amia">
+                            <div class="timeline-track" aria-hidden="true">
+                                <div class="timeline-progress"></div>
+                            </div>
+
+                            <article class="timeline-item active" data-year="Maggio 2020" data-index="0">
+                                <img src="./storia_amia/fantatia.png" alt="Nascita di Fantatia - Maggio 2020" class="timeline-photo" loading="lazy" width="150" height="150">
+                                <div class="timeline-content">
+                                    <time class="timeline-year" datetime="2020-05">Maggio 2020</time>
+                                    <h3 class="timeline-title">Gli inizi</h3>
+                                    <p class="timeline-description">Tutto comincia nel 2020 con la nascita di Fantatia, la pagina creata da Mattia per parlare di fantacalcio. Amia? Algo? Sono ancora sogni lontani.</p>
+                                </div>
+                            </article>
+
+                            <article class="timeline-item" data-year="Dicembre 2020" data-index="1">
+                                <img src="./storia_amia/abbaentra.png" alt="Abba si unisce al team - Dicembre 2020" class="timeline-photo" loading="lazy" width="150" height="150">
+                                <div class="timeline-content">
+                                    <time class="timeline-year" datetime="2020-12">Dicembre 2020</time>
+                                    <h3 class="timeline-title">Abba si unisce al team</h3>
+                                    <p class="timeline-description">Durante una live su Twitch, Abba si propone per aiutare Mattia con la comunicazione. È il primo a salire sulla barca e oggi è ancora con noi come Customer Success Manager.</p>
+                                </div>
+                            </article>
+
+                            <article class="timeline-item" data-year="Marzo 2021" data-index="2">
+                                <img src="./storia_amia/IngressoTanc.png" alt="Algo su Excel - Marzo 2021" class="timeline-photo" loading="lazy" width="150" height="150">
+                                <div class="timeline-content">
+                                    <time class="timeline-year" datetime="2021-03">Marzo 2021</time>
+                                    <h3 class="timeline-title">Algo su Excel</h3>
+                                    <p class="timeline-description">Mattia intuisce che ai fantallenatori manca uno strumento di supporto strategico. Tancredi crea la prima versione su Excel! Agli utenti piace e iniziano ad abbonarsi.</p>
+                                </div>
+                            </article>
+
+                            <article class="timeline-item" data-year="Agosto 2022" data-index="3">
+                                <img src="./storia_amia/fantatia.com.png" alt="Nasce fantatia.com - Agosto 2022" class="timeline-photo" loading="lazy" width="150" height="150">
+                                <div class="timeline-content">
+                                    <time class="timeline-year" datetime="2022-08">Agosto 2022</time>
+                                    <h3 class="timeline-title">Nasce fantatia.com</h3>
+                                    <p class="timeline-description">Dopo la prima stagione conosciamo Paolo, che si unisce al team con nuove idee per migliorare l'algoritmo. Il file Excel non basta più. Nasce fantatia.com.</p>
+                                </div>
+                            </article>
+
+                            <article class="timeline-item" data-year="Marzo 2023" data-index="4">
+                                <img src="./storia_amia/Amia.png" alt="Amia prende forma - Marzo 2023" class="timeline-photo" loading="lazy" width="150" height="150">
+                                <div class="timeline-content">
+                                    <time class="timeline-year" datetime="2023-03">Marzo 2023</time>
+                                    <h3 class="timeline-title">Amia comincia a prendere forma</h3>
+                                    <p class="timeline-description">Algo cresce, serve un team più solido. Arrivano Andrea (Backend), Leonardo (Frontend) e Tommaso (Business Analyst). Amia comincia a prendere forma.</p>
+                                </div>
+                            </article>
+
+                            <article class="timeline-item" data-year="Agosto 2023" data-index="5">
+                                <img src="./storia_amia/fail.png" alt="Il primo fallimento - Agosto 2023" class="timeline-photo" loading="lazy" width="150" height="150">
+                                <div class="timeline-content">
+                                    <time class="timeline-year" datetime="2023-08">Agosto 2023</time>
+                                    <h3 class="timeline-title">Il primo fallimento</h3>
+                                    <p class="timeline-description">Nasce ufficialmente Amia. Ma nell'agosto 2023 l'uscita di Algo fallisce, non siamo pronti. Torniamo su fantatia.com e ci riorganizziamo.</p>
+                                </div>
+                            </article>
+
+                            <article class="timeline-item" data-year="Marzo 2024" data-index="6">
+                                <img src="./storia_amia/michelucagiamp.png" alt="Si riparte, all in - Marzo 2024" class="timeline-photo" loading="lazy" width="150" height="150">
+                                <div class="timeline-content">
+                                    <time class="timeline-year" datetime="2024-03">Marzo 2024</time>
+                                    <h3 class="timeline-title">Si riparte, all in</h3>
+                                    <p class="timeline-description">Non ci fermiamo, siamo motivati. Il team si amplia: Michele (Product Designer), Luca (App Developer) e Giampaolo (Cloud & DevOps). Si riparte, all in. Investiamo tutto.</p>
+                                </div>
+                            </article>
+
+                            <article class="timeline-item" data-year="Giugno 2024" data-index="7">
+                                <img src="./storia_amia/nicmatte.png" alt="Team comunicazione - Giugno 2024" class="timeline-photo" loading="lazy" width="150" height="150">
+                                <div class="timeline-content">
+                                    <time class="timeline-year" datetime="2024-06">Giugno 2024</time>
+                                    <h3 class="timeline-title">Team comunicazione</h3>
+                                    <p class="timeline-description">Contemporaneamente nasce anche il team comunicazione a supporto di Tia e delle pagine social di Algo. Entrano Matteo (Social Media Manager) e Nicola (Graphic Designer).</p>
+                                </div>
+                            </article>
+
+                            <article class="timeline-item" data-year="Agosto 2024" data-index="8">
+                                <img src="./storia_amia/lancioalgo.png" alt="Algo è live - Agosto 2024" class="timeline-photo" loading="lazy" width="150" height="150">
+                                <div class="timeline-content">
+                                    <time class="timeline-year" datetime="2024-08">Agosto 2024</time>
+                                    <h3 class="timeline-title">Algo è live!</h3>
+                                    <p class="timeline-description">Dopo mesi di lavoro e un estate passata a scrivere codice Algo Fantacalcio è live sugli store! Il primo prodotto ufficiale di Amia.</p>
+                                </div>
+                            </article>
+
+                            <article class="timeline-item" data-year="Ottobre 2024" data-index="9">
+                                <img src="./storia_amia/chris&mika.png" alt="Il team cambia volto - Ottobre 2024" class="timeline-photo" loading="lazy" width="150" height="150">
+                                <div class="timeline-content">
+                                    <time class="timeline-year" datetime="2024-10">Ottobre 2024</time>
+                                    <h3 class="timeline-title">Il team cambia volto</h3>
+                                    <p class="timeline-description">Il team cambia volto. Luca e Leonardo lasciano, ma entrano Chris (App Developer) e Mika (Backend), che si affianca ad Andrea.</p>
+                                </div>
+                            </article>
+
+                            <article class="timeline-item" data-year="Agosto 2025" data-index="10">
+                                <img src="./Images/Marchi/AMIA-LOGO-color4-MARCHIO.svg" alt="Il futuro di Amia - Agosto 2025" class="timeline-photo" loading="lazy" width="150" height="150">
+                                <div class="timeline-content">
+                                    <time class="timeline-year" datetime="2025-08">Agosto 2025</time>
+                                    <h3 class="timeline-title">E adesso?</h3>
+                                    <p class="timeline-description">Il primo anno di Algo ci ha insegnato tanto. Tante difficoltà, ma anche tante soddisfazioni. Ora Amia è pronta a crescere. <br>E no, non faremo solo fantacalcio.</p>
+                                </div>
+                            </article>
+                            
+                            <div class="timeline-controls" role="group" aria-label="Controlli timeline">
+                                <button class="timeline-nav prev" onclick="previousSlide()" aria-label="Evento precedente">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                                <button class="timeline-nav next" onclick="nextSlide()" aria-label="Evento successivo">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="timeline-indicators" role="tablist" aria-label="Indicatori timeline"></div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </section>
-    
-    
-    <!-- Footer -->
-    <footer class="bg-dark text-light py-4">
-            <div class="row">
-                <div class="col-md-3 mb-4 mb-md-0">
-                    <img src="./Images/Loghi/AMIA-LOGO-black-O.svg" width="120" height="60" alt="Amia Logo" class="footer-logo mb-3">
-                    <p>Innovate Today, Shape Tomorrow</p>
+        </section>
+
+        <!-- Bootcamp Section -->
+        <section class="bootcamp-section" aria-labelledby="bootcamp-title">
+            <div class="container">
+                <h2 id="bootcamp-title" class="nostra-storia-title">Crescere & Divertirsi, insieme</h2>
+                <p class="bootcamp-subtitle">Il nostro primo bootcamp, Luglio 2024</p>
+            </div>
+            
+            <div class="infinite-carousel" role="region" aria-label="Galleria immagini del bootcamp">
+                <div class="infinite-carousel-wrapper">
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/abba.jpeg" alt="Team Working durante il bootcamp" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/abba&andre.jpeg" alt="Team Building sessione" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/Andre&Leo.jpeg" alt="Coding Session intensa" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/andrelavora.jpeg" alt="Team Discussion produttiva" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/andreride.jpeg" alt="Pausa relax durante lo sviluppo" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/BeerPong.jpeg" alt="Beer Pong - momento di svago" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/play.jpeg" alt="Momento di gioco del team" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/leolavora.jpeg" alt="Leonardo al lavoro concentrato" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/pcs&leo.jpeg" alt="Setup di lavoro con Leonardo" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/pol&tanc.jpeg" alt="Paolo e Tancredi in collaborazione" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/pol&team.jpeg" alt="Paolo con il team completo" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/tanc&polgiocano.jpeg" alt="Tancredi e Paolo in pausa gioco" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/Tanc&Visore.jpeg" alt="Tancredi con visore VR" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/TancLavora.jpeg" alt="Tancredi concentrato nel lavoro" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/tom lavora.jpeg" alt="Tommaso durante lo sviluppo" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./images/tom.jpeg" alt="Ritratto di Tommaso" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/1leoallavoro.jpeg" alt="Leonardo al computer" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/2team.jpeg" alt="Foto di gruppo del team" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/3tommi.jpeg" alt="Tommaso in azione" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/4leochefacose.jpeg" alt="Leonardo multitasking" loading="lazy" width="300" height="200">
+                    </div>
+
+                    <!-- DUPLICATI PER SEAMLESS LOOP -->
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/abba.jpeg" alt="Team Working durante il bootcamp" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/abba&andre.jpeg" alt="Team Building sessione" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/Andre&Leo.jpeg" alt="Coding Session intensa" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/andrelavora.jpeg" alt="Team Discussion produttiva" loading="lazy" width="300" height="200">
+                    </div>
+                    
+                    <div class="infinite-carousel-item">
+                        <img src="./Images/andreride.jpeg" alt="Pausa relax durante lo sviluppo" loading="lazy" width="300" height="200">
+                    </div>
                 </div>
-                <div class="col-md-6 mb-4 mb-md-0">
-                    <h5>Contatti</h5>
-                    <ul class="list-unstyled">
-                        <li>Email: info@amiasrl.it</li>
-                        <li>Indirizzo: Portico Antica Fonte 11
-                          Darfo Boario Terme (BS)
-                          25047<br>
-                          P.IVA 04501060984</li>
-                    </ul>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section id="prodotti" class="prodotti" aria-labelledby="prodotti-title">
+            <div class="container">
+                <div class="prodotti-intro">
+                    <h2 id="prodotti-title" class="prodotti-intro-title">Cosa abbiamo creato finora</h2>
+                    <p class="prodotti-intro-subtitle">Siamo partiti da un'idea chiara e l'abbiamo trasformata in un'app funzionante, utile e già sul mercato. Ma questo è solo l'inizio.</p>
                 </div>
-                <div class="col-md-3">
-                    <h5>Seguici</h5>
-                    <div class="social-icons">
-                        <a href="https://www.linkedin.com/company/amia-it/posts/?feedView=all" class="me-3">
-                            <img src="./Images/Support_Images/linkedin-brands.svg" alt="" width="24" height="24">
-                        </a>
-                        <a href="https://www.instagram.com/amia_it?igsh=MWsycDRhYWVzbWdiYQ==" class="me-3">
-                          <img src="./Images/Support_Images/instagram-brands-solid.svg" alt="" width="24" height="24" >
+                
+                <div class="product-showcase">
+                    <div class="product-visual">
+                        <div class="product-stage">
+                            <img src="./Images/Frame mock.png" class="product-device" alt="Mockup dell'app Algo Fantacalcio" width="400" height="600" loading="lazy">
+                        </div>
+                    </div>
+                    
+                    <div class="product-details">
+                        <div class="product-intro">
+                            <h3 class="product-name">Algo Fantacalcio</h3>
+                            <p class="product-tagline">La nostra prima app, trasforma dati in scelte fantacalcistiche.</p>
+                        </div>
+                        
+                        <div class="product-highlights">
+                            <div class="highlight-item">
+                                <div class="highlight-icon">
+                                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                                        <path d="M16 2L20.12 10.88L30 12.24L22.5 19.12L24.24 30L16 25.12L7.76 30L9.5 19.12L2 12.24L11.88 10.88L16 2Z" fill="currentColor"/>
+                                    </svg>
+                                </div>
+                                <div class="highlight-content">
+                                    <h4>Algoritmo Proprietario</h4>
+                                    <p>Sviluppato internamente per massimizzare le tue probabilità di vittoria.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="highlight-item">
+                                <div class="highlight-icon">
+                                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                                        <path d="M16 4C21.52 4 26 8.48 26 14C26 19.52 21.52 24 16 24C10.48 24 6 19.52 6 14C6 8.48 10.48 4 16 4ZM16 2C9.372 2 4 7.372 4 14C4 20.628 9.372 26 16 26C22.628 26 28 20.628 28 14C28 7.372 22.628 2 16 2ZM16 11C14.896 11 14 11.896 14 13V19C14 20.104 14.896 21 16 21C17.104 21 18 20.104 18 19V13C18 11.896 17.104 11 16 11ZM16 6C15.448 6 15 6.448 15 7C15 7.552 15.448 8 16 8C16.552 8 17 7.552 17 7C17 6.448 16.552 6 16 6Z" fill="currentColor"/>
+                                    </svg>
+                                </div>
+                                <div class="highlight-content">
+                                    <h4>150k+ Utenti Attivi</h4>
+                                    <p>Più di 150mila utenti a meno di un anno dal rilascio. Una community in continua crescita.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="highlight-item">
+                                <div class="highlight-icon">
+                                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                                        <path d="M16 2C8.268 2 2 8.268 2 16C2 23.732 8.268 30 16 30C23.732 30 30 23.732 30 16C30 8.268 23.732 2 16 2ZM14.5 22.5L7.5 15.5L9.914 13.086L14.5 17.672L22.086 10.086L24.5 12.5L14.5 22.5Z" fill="currentColor"/>
+                                    </svg>
+                                </div>
+                                <div class="highlight-content">
+                                    <h4>Qualità</h4>
+                                    <p>In linea con i nostri valori, stiamo costruendo un prodotto che rispecchi le nostre, alte, aspettative.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="product-metrics">
+                            <div class="metric">
+                                <span class="metric-value">150K+</span>
+                                <span class="metric-label">Download</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">4.3</span>
+                                <span class="metric-label">Rating medio</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">600+</span>
+                                <span class="metric-label">Reviews</span>
+                            </div>
+                        </div>
+                        
+                        <div class="download-section">
+                            <p class="download-text">Disponibile su</p>
+                            <div class="download-buttons">
+                                <a href="https://apps.apple.com/app/apple-store/id6557064118?pt=127193764&ct=amiasite&mt=8" class="download-button app-store" aria-label="Scarica Algo Fantacalcio dall'App Store">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 22 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.09997 22C7.78997 22.05 6.79997 20.68 5.95997 19.47C4.24997 17 2.93997 12.45 4.69997 9.39C5.56997 7.87 7.12997 6.91 8.81997 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.9 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.09 16.67C20.06 16.74 19.67 18.11 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.97 2C16.1 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z" fill="currentColor"/>
+                                    </svg>
+                                    <div class="button-text">
+                                        <span class="button-primary">App Store</span>
+                                        <span class="button-secondary">per iOS</span>
+                                    </div>
+                                </a>
+                                
+                                <a href="https://play.google.com/store/apps/details?id=com.algo_mobile&referrer=utm_source=website&utm_medium=cta&utm_campaign=sito_amia" class="download-button google-play" aria-label="Scarica Algo Fantacalcio da Google Play">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" fill="currentColor"/>
+                                    </svg>
+                                    <div class="button-text">
+                                        <span class="button-primary">Google Play</span>
+                                        <span class="button-secondary">per Android</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA Section -->
+        <section class="final-cta-section" aria-labelledby="final-cta-title">
+            <div class="container">
+                <div class="final-cta-content">
+                    <div class="final-cta-icon">
+                        <img src="./Images/Marchi/AMIA-LOGO-black-MARCHIO.svg" alt="Amia - Il nostro sogno" width="60" height="60" />
+                    </div>
+                    
+                    <div class="final-cta-main">
+                        <h2 id="final-cta-title" class="final-cta-title">Abbiamo un sogno proibito</h2>
+                        <p class="final-cta-description">che prima o poi tutti abbiano almeno un'app di Amia sul telefono.<br>È il nostro obiettivo più ambizioso</p>
+                    </div>
+                    
+                    <div class="final-cta-sub">
+                        <h3 class="final-cta-subtitle">La strada per arrivarci è una sola</h3>
+                        <p class="final-cta-subdescription">creare prodotti che le persone amino davvero. Prodotti curati fin nei minimi dettagli, anche quelli che non si vedono</p>
+                    </div>
+                    
+                    <div class="final-cta-divider" aria-hidden="true"></div>
+                    
+                    <div class="final-cta-bottom">
+                        <p class="final-cta-quote">Ma tra il dire e il fare c'è di mezzo il fare.</p>
+                        <p class="final-cta-call">E allora facciamolo. Costruiamo il nostro futuro insieme.</p>
+                    </div>
+                    
+                    <div class="final-cta-button-wrapper">
+                        <a href="./careers/index.html" class="final-cta-button" aria-label="Unisciti al team Amia">
+                            Unisciti al Team
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
                         </a>
                     </div>
                 </div>
             </div>
-            <hr class="mt-4 mb-3 border-light">
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <div class="footer-logo">
+                        <img src="./Images/Loghi/AMIA-LOGO-black-O.svg" alt="Amia Logo" width="32" height="32" />
+                    </div>
+                    <div class="footer-tagline">
+                        <p>Innovate Today,<br>Shape Tomorrow</p>
+                    </div>
+                </div>
+                  
+                <div class="footer-center">
+                    <h4 class="footer-title">CONTATTI</h4>
+                    <div class="footer-contact">
+                        <p class="footer-email">
+                            <a href="mailto:info@amiasrl.it" aria-label="Invia email a info@amiasrl.it">info@amiasrl.it</a>
+                        </p>
+                        <address class="footer-address">
+                            Portico Antica Fonte 11<br>
+                            Darfo Boario Terme (BS) 25047
+                        </address>
+                        <p class="footer-vat">P.IVA 04501060984</p>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Social -->
+                <div class="footer-right">
+                    <h4 class="footer-title">SEGUICI</h4>
+                    <div class="footer-social">
+                        <a href="https://www.instagram.com/amia_it" class="social-link instagram" aria-label="Seguici su Instagram" rel="noopener noreferrer" target="_blank">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" fill="currentColor"/>
+                            </svg>
+                        </a>
+                        <a href="https://www.linkedin.com/company/amia-it/" class="social-link linkedin" aria-label="Seguici su LinkedIn" rel="noopener noreferrer" target="_blank">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" fill="currentColor"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
-    <!-- Language Switcher -->
-    <div class="language-switcher" id="languageSwitcher" data-tooltip="Switch to English">
-        <div class="flag-button">
-            <img src="https://flagcdn.com/w40/it.png" alt="Italian Flag" class="flag-icon" id="flagIcon">
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="./script.js"></script>
 
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctaButtons = document.querySelectorAll('a[href="#lavora-con-noi"], .cta-button, .final-cta-button');
+    
+    ctaButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            gtag('event', 'cta_click', {
+                'event_category': 'engagement',
+                'event_label': 'lavora_con_noi',
+                'value': 1
+            });
+            console.log('GA Event: CTA clicked');
+        });
+    });
+
+    const socialLinks = document.querySelectorAll('.social-link');
+    
+    socialLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            const socialPlatform = this.classList.contains('instagram') ? 'instagram' : 'linkedin';
+            
+            gtag('event', 'social_click', {
+                'event_category': 'social',
+                'event_label': socialPlatform,
+                'value': 1
+            });
+            console.log('GA Event: Social clicked -', socialPlatform);
+        });
+    });
+});
+</script>
 </body>
-</html>
