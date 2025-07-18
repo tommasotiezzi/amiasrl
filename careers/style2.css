@@ -193,6 +193,18 @@ h1 {
     line-height: 1;
 }
 
+.tag.closed-pos {
+    display: inline-flex;
+    align-items: center;
+    background-color: #fca5a5 !important;
+    color: #7f1d1d !important;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+}
+
 .tag2 {
     display: inline-flex;
     align-items: center;
