@@ -407,7 +407,7 @@
     currentUser = user;
 
     if (user && !currentCandidate) {
-      const { data } = await sb.from('candidates').select('*').eq('user_id', user.id).single();
+      const { data } = await sb.from('candidates').select('*').eq('user_id', user.id).maybeSingle();
       currentCandidate = data;
     }
 
@@ -416,6 +416,9 @@
     } else if (parts[0] === 'portal') {
       if (!currentUser) { location.hash = '#/'; return; }
       await renderPortal();
+    } else if (parts[0] === 'quiz-overview' && parts[1]) {
+      if (!currentUser) { location.hash = '#/'; return; }
+      await renderQuizOverview(parts[1], parts[2]);
     } else if (parts[0] === 'quiz' && parts[1]) {
       if (!currentUser) { location.hash = '#/'; return; }
       await renderQuiz(parts[1], parts[2]);
@@ -500,11 +503,11 @@
     // Try by slug first, then by id
     let { data: position } = await sb
       .from('positions').select('*')
-      .eq('slug', slug).eq('status', 'published').single();
+      .eq('slug', slug).eq('status', 'published').maybeSingle();
 
     if (!position) {
       const res = await sb.from('positions').select('*')
-        .eq('id', slug).eq('status', 'published').single();
+        .eq('id', slug).eq('status', 'published').maybeSingle();
       position = res.data;
     }
 
@@ -514,6 +517,17 @@
     }
 
     const isLoggedIn = !!currentUser;
+
+    // If already applied, redirect to portal
+    if (isLoggedIn && currentCandidate) {
+      const { data: existing } = await sb.from('applications')
+        .select('id').eq('position_id', position.id).eq('candidate_id', currentCandidate.id).maybeSingle();
+      if (existing) {
+        toast('Hai già una candidatura per questa posizione');
+        location.hash = '#/portal';
+        return;
+      }
+    }
 
     app.innerHTML = `
       <div class="job-detail">
@@ -716,7 +730,7 @@
 
     // Check duplicate
     const { data: existing } = await sb.from('applications')
-      .select('id').eq('position_id', positionId).eq('candidate_id', candidateId).single();
+      .select('id').eq('position_id', positionId).eq('candidate_id', candidateId).maybeSingle();
     if (existing) { toast('Hai già una candidatura per questa posizione', true); btn.disabled = false; return; }
 
     // Upload CV
@@ -801,22 +815,89 @@
       <section class="portal-section">
         ${apps.length > 0 ? apps.map(a => {
           const p = a.position;
+
           const quizzes = [];
-          if (p.pre_quiz_id) quizzes.push({ type: 'pre', label: 'Quiz Logica', id: p.pre_quiz_id, done: !!a.pre_quiz_completed_at });
-          if (p.post_quiz_id) quizzes.push({ type: 'post', label: 'Quiz Skills', id: p.post_quiz_id, done: !!a.post_quiz_completed_at });
-          if (p.att_quiz_id) quizzes.push({ type: 'att', label: 'Attitudinale', id: p.att_quiz_id, done: !!a.att_quiz_completed_at });
+          if (p.pre_quiz_id) quizzes.push({
+            type: 'pre', label: 'Quiz Logica', icon: '🧠',
+            subtitle: 'Ragionamento logico e problem solving',
+            duration: '25 minuti',
+            done: !!a.pre_quiz_completed_at,
+            score: a.pre_quiz_score, max: a.pre_quiz_max_score,
+          });
+          if (p.post_quiz_id) quizzes.push({
+            type: 'post', label: 'Quiz Skills', icon: '💻',
+            subtitle: 'Competenze tecniche specifiche per il ruolo',
+            duration: '35 minuti',
+            done: !!a.post_quiz_completed_at,
+            score: a.post_quiz_score, max: a.post_quiz_max_score,
+          });
+          if (p.att_quiz_id) quizzes.push({
+            type: 'att', label: 'Domande Attitudinali', icon: '💬',
+            subtitle: 'Motivazione, cultura e modo di lavorare',
+            duration: 'Nessun limite di tempo',
+            done: !!a.att_quiz_completed_at,
+            score: null, max: null,
+          });
 
           return `
-            <div class="app-card">
-              <div class="app-card-header">
-                <h3>${p.title}</h3>
+            <div class="app-card" style="padding:28px 32px; margin-bottom:32px">
+              <div class="app-card-header" style="margin-bottom:24px">
+                <div>
+                  <h3 style="font-size:22px">${p.title}</h3>
+                  <span style="font-size:13px; color:#999; font-weight:300">${p.department}</span>
+                </div>
                 <span class="status-badge status-${a.status}">${statusLabels[a.status] || a.status}</span>
               </div>
-              <div class="quiz-progress">
-                ${quizzes.map(q => q.done
-                  ? `<span class="quiz-chip quiz-done">✓ ${q.label}</span>`
-                  : `<button class="quiz-btn" onclick="location.hash='#/quiz/${a.id}/${q.type}'">${q.label} →</button>`
-                ).join('')}
+
+              <div style="display:flex; flex-direction:column; gap:12px">
+                ${quizzes.map(q => {
+                  if (q.done) {
+                    const pct = q.max ? Math.round((q.score / q.max) * 100) : null;
+                    const pctColor = pct !== null ? (pct >= 80 ? '#1b7a3d' : pct >= 60 ? '#e65100' : '#c62828') : '#1b7a3d';
+                    return `
+                      <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 24px; background:#f8faf8; border:1px solid #e6f4ea; border-radius:14px">
+                        <div style="display:flex; align-items:center; gap:16px">
+                          <span style="font-size:24px">${q.icon}</span>
+                          <div>
+                            <p style="font-size:15px; font-weight:600; color:#141414">${q.label}</p>
+                            <p style="font-size:13px; color:#999; font-weight:300">${q.subtitle}</p>
+                          </div>
+                        </div>
+                        <div style="text-align:right">
+                          <span style="font-size:14px; font-weight:700; color:${pctColor}">
+                            ${pct !== null ? pct + '%' : '✓ Completato'}
+                          </span>
+                          <p style="font-size:11px; color:#999; margin-top:2px">Completato</p>
+                        </div>
+                      </div>
+                    `;
+                  } else {
+                    return `
+                      <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 24px; background:white; border:1px solid #eee; border-radius:14px">
+                        <div style="display:flex; align-items:center; gap:16px">
+                          <span style="font-size:24px">${q.icon}</span>
+                          <div>
+                            <p style="font-size:15px; font-weight:600; color:#141414">${q.label}</p>
+                            <p style="font-size:13px; color:#999; font-weight:300">${q.subtitle}</p>
+                          </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:16px">
+                          <div style="text-align:right">
+                            <span style="font-size:12px; color:#999; font-weight:500">⏱ ${q.duration}</span>
+                            <p style="font-size:11px; color:#ccc; margin-top:2px">Non completato</p>
+                          </div>
+                          <a href="#/quiz-overview/${a.id}/${q.type}"
+                             style="background:#141414; color:white; padding:10px 20px; border-radius:10px;
+                                    font-size:13px; font-weight:600; text-decoration:none; white-space:nowrap;
+                                    transition: background 0.2s;"
+                             onmouseover="this.style.background='#333'" onmouseout="this.style.background='#141414'">
+                            Vai alla Overview Task
+                          </a>
+                        </div>
+                      </div>
+                    `;
+                  }
+                }).join('')}
               </div>
             </div>
           `;
@@ -825,6 +906,124 @@
         `}
       </section>
     `;
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // PAGE: Quiz Overview (pre-quiz briefing)
+  // ═══════════════════════════════════════════════════════════
+
+  async function renderQuizOverview(applicationId, quizType) {
+    app.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
+
+    const { data: application } = await sb
+      .from('applications')
+      .select('*, position:positions(*)')
+      .eq('id', applicationId).single();
+
+    if (!application) { toast('Candidatura non trovata', true); location.hash = '#/portal'; return; }
+
+    const pos = Array.isArray(application.position) ? application.position[0] : application.position;
+    const quizIdMap = { pre: pos.pre_quiz_id, post: pos.post_quiz_id, att: pos.att_quiz_id };
+    const quizId = quizIdMap[quizType];
+
+    if (!quizId) { toast('Quiz non disponibile', true); location.hash = '#/portal'; return; }
+
+    const { data: quiz } = await sb.from('quizzes').select('*').eq('id', quizId).single();
+    const { count } = await sb.from('quiz_questions').select('*', { count: 'exact', head: true }).eq('quiz_id', quizId);
+
+    if (!quiz) { toast('Quiz non trovato', true); location.hash = '#/portal'; return; }
+
+    const typeInfo = {
+      pre: {
+        icon: '🧠', title: 'Quiz Logica',
+        desc: 'Questo quiz valuta le tue capacità di ragionamento logico, problem solving e pensiero critico. Include domande a scelta multipla e risposte aperte.',
+        rules: [
+          'Le domande a scelta multipla possono avere una o più risposte corrette',
+          'Le domande aperte verranno valutate dal team Amia',
+          'Rispondi con calma e attenzione — la qualità conta più della velocità',
+        ]
+      },
+      post: {
+        icon: '💻', title: 'Quiz Skills',
+        desc: 'Questo quiz valuta le tue competenze tecniche specifiche per il ruolo. Include domande teoriche e scenari pratici.',
+        rules: [
+          'Le domande sono specifiche per la posizione a cui ti sei candidato',
+          'Per le domande aperte, sii concreto e usa esempi reali quando possibile',
+          'Non c\'è penalità per le risposte errate — meglio provare che lasciare in bianco',
+        ]
+      },
+      att: {
+        icon: '💬', title: 'Domande Attitudinali',
+        desc: 'Queste domande ci aiutano a conoscerti meglio come persona e professionista. Non ci sono risposte giuste o sbagliate.',
+        rules: [
+          'Rispondi in modo autentico — vogliamo conoscerti davvero',
+          'Non c\'è un limite di tempo, prenditi tutto il tempo che ti serve',
+          'Le risposte non hanno punteggio, servono per il colloquio',
+        ]
+      }
+    };
+
+    const info = typeInfo[quizType] || typeInfo.pre;
+
+    app.innerHTML = `
+      <div class="quiz-page" style="max-width:640px">
+        <a href="#/portal" class="job-back">← Le mie candidature</a>
+
+        <div style="text-align:center; margin-bottom:40px">
+          <span style="font-size:48px; display:block; margin-bottom:16px">${info.icon}</span>
+          <h1 style="margin-bottom:8px">${info.title}</h1>
+          <p style="font-size:15px; color:#999; font-weight:300">${pos.title} · ${pos.department}</p>
+        </div>
+
+        <div style="background:white; border:1px solid #eee; border-radius:16px; padding:28px; margin-bottom:20px">
+          <p style="font-size:15px; color:#444; line-height:1.7; font-weight:300; margin-bottom:20px">
+            ${info.desc}
+          </p>
+          <div style="display:flex; gap:24px; padding:16px 0; border-top:1px solid #f0f0f0; border-bottom:1px solid #f0f0f0; margin-bottom:20px">
+            <div>
+              <p style="font-size:24px; font-weight:700; color:#141414">${count || '—'}</p>
+              <p style="font-size:12px; color:#999">Domande</p>
+            </div>
+            <div>
+              <p style="font-size:24px; font-weight:700; color:#141414">${quiz.duration_minutes ? quiz.duration_minutes + ' min' : '∞'}</p>
+              <p style="font-size:12px; color:#999">Tempo${quiz.duration_minutes ? '' : ' (illimitato)'}</p>
+            </div>
+          </div>
+          <div>
+            <p style="font-size:13px; font-weight:600; color:#141414; margin-bottom:10px">Da sapere prima di iniziare:</p>
+            <ul style="list-style:none; padding:0">
+              ${info.rules.map(r => `
+                <li style="font-size:14px; color:#666; font-weight:300; line-height:1.6; padding:4px 0; display:flex; gap:8px">
+                  <span style="color:#141414">·</span> ${r}
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        </div>
+
+        <div style="background:#fef3e0; border:1px solid #fde8c8; border-radius:14px; padding:20px 24px; margin-bottom:32px">
+          <p style="font-size:13px; color:#e65100; font-weight:500; margin-bottom:6px">⚠️ Importante</p>
+          <p style="font-size:13px; color:#bf5600; font-weight:300; line-height:1.6">
+            Non condividere, copiare o divulgare il contenuto di questo quiz in nessuna forma.
+            Le risposte devono essere il frutto del tuo lavoro personale.
+            ${quiz.duration_minutes ? 'Il timer partirà nel momento in cui clicchi "Inizia il quiz".' : ''}
+          </p>
+        </div>
+
+        <div style="text-align:center">
+          <a href="#/quiz/${applicationId}/${quizType}"
+             class="submit-btn" style="display:inline-flex; text-decoration:none">
+            Inizia il quiz
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+          </a>
+          <p style="font-size:12px; color:#ccc; margin-top:12px; font-weight:300">
+            Questa pagina non farà iniziare la tua task
+          </p>
+        </div>
+      </div>
+    `; 
   }
 
   // ═══════════════════════════════════════════════════════════
