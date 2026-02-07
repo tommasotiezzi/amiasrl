@@ -469,10 +469,16 @@
   async function renderApply(slug) {
     app.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
 
-    const { data: position } = await sb
+    // Try by slug first, then by id
+    let { data: position } = await sb
       .from('positions').select('*')
-      .or(`slug.eq.${slug},id.eq.${slug}`)
-      .eq('status', 'published').single();
+      .eq('slug', slug).eq('status', 'published').single();
+
+    if (!position) {
+      const res = await sb.from('positions').select('*')
+        .eq('id', slug).eq('status', 'published').single();
+      position = res.data;
+    }
 
     if (!position) {
       app.innerHTML = '<div class="job-detail"><p class="no-jobs">Posizione non trovata.</p></div>';
