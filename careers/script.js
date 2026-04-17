@@ -34,7 +34,19 @@
   const SUPABASE_URL = 'https://lekkiacgjhjdhfzztpwd.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxla2tpYWNnamhqZGhmenp0cHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0NjA3OTMsImV4cCI6MjA4NjAzNjc5M30.69UEjEoyV-v6ZYR4QgsyVusQhtWesCEA_EEizHSEyHg';
 
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // Singleton guard. Multiple GoTrueClient instances sharing the same
+  // localStorage key deadlock each other on token refresh — we saw this
+  // firsthand. If anything (including the script being loaded twice, or
+  // a console snippet) tries to createClient again, reuse ours.
+  const sb = (function () {
+    if (window.__amiaSupabaseClient) {
+      console.warn('[amia] reusing existing Supabase client (avoiding GoTrue deadlock)');
+      return window.__amiaSupabaseClient;
+    }
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    window.__amiaSupabaseClient = client;
+    return client;
+  })();
 
   const APP_EL = document.getElementById('app');
   const TOAST_EL = document.getElementById('toast');
@@ -146,6 +158,7 @@
   //   __amia.version        → build tag
   window.__amia = {
     version: 'careers-debug-1',
+    sb,                       // Use this in console instead of createClient!
     reset: async () => {
       try { await sb.auth.signOut(); } catch (e) { derr('signOut during reset', e); }
       nukeClientState();
@@ -244,6 +257,10 @@
       dlog('loadCandidate: candidate =', this._candidate ? this._candidate.id : '(none)');
     },
   };
+
+  // [DEBUG] Now that store exists, attach it to the debug handle.
+  // Read current state from console with: __amia.store.user / __amia.store.candidate
+  window.__amia.store = store;
 
 
   /* ─────────────────────────────────────────────────────────────
