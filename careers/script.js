@@ -41,6 +41,147 @@
 
 
   /* ─────────────────────────────────────────────────────────────
+     §1.5 — [DEBUG] Debug infrastructure
+       Prefixed logger + timeout wrapper + global escape hatch.
+       Every debug addition in this file is marked with [DEBUG] so
+       we can strip them out with a single sed once the flow is
+       stable.
+     ─────────────────────────────────────────────────────────── */
+
+  // Toggle this to silence logs without removing them.
+  const DEBUG = true;
+
+  // Timeout for any single network operation. Hangs become thrown errors
+  // with a line number instead of an infinite spinner.
+  const OP_TIMEOUT_MS = 12000;
+
+  function dlog() {
+    if (!DEBUG) return;
+    const args = Array.from(arguments);
+    const tag = `%c[amia]`;
+    console.log(tag, 'color:#FF6444;font-weight:600', ...args);
+  }
+  function dgroup(label) { if (DEBUG) console.groupCollapsed(`%c[amia] ${label}`, 'color:#FF6444;font-weight:600'); }
+  function dgroupEnd()   { if (DEBUG) console.groupEnd(); }
+  function derr(label, err) {
+    if (!DEBUG) return;
+    console.error(`%c[amia] ${label}`, 'color:#c62828;font-weight:600', err);
+  }
+
+  // Wrap any promise with a hard timeout. Use for every supabase / RPC
+  // call so a broken token / network hang surfaces as an error within
+  // OP_TIMEOUT_MS instead of spinning forever.
+  function withTimeout(promise, label, ms) {
+    const timeoutMs = ms || OP_TIMEOUT_MS;
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        const e = new Error(`Timeout (${timeoutMs}ms) on: ${label}`);
+        e.isTimeout = true;
+        derr(`TIMEOUT: ${label}`, e);
+        reject(e);
+      }, timeoutMs);
+      Promise.resolve(promise).then(
+        (v) => { clearTimeout(timer); resolve(v); },
+        (e) => { clearTimeout(timer); reject(e); }
+      );
+    });
+  }
+
+  // Time an async operation and log start/end.
+  async function timed(label, fn) {
+    dlog(`→ ${label}`);
+    const t0 = performance.now();
+    try {
+      const result = await fn();
+      const ms = Math.round(performance.now() - t0);
+      dlog(`← ${label} ok (${ms}ms)`);
+      return result;
+    } catch (e) {
+      const ms = Math.round(performance.now() - t0);
+      derr(`✗ ${label} failed (${ms}ms)`, e);
+      throw e;
+    }
+  }
+
+  // Catch any unhandled promise rejection so we see problems even when
+  // they escape a try/catch in user code.
+  window.addEventListener('unhandledrejection', (event) => {
+    derr('UNHANDLED REJECTION', event.reason);
+  });
+  window.addEventListener('error', (event) => {
+    derr('UNCAUGHT ERROR', event.error || event.message);
+  });
+
+  // Nuclear reset — clears everything we care about and reloads.
+  // Type `__amia.reset()` in the console to unstick a broken session.
+  function nukeClientState() {
+    dlog('nuking client state (localStorage + sessionStorage)');
+    try {
+      // Clear Supabase auth token (prefix varies; match ours explicitly)
+      const authKeys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (k.startsWith('sb-') || k.includes('supabase') || k.startsWith('amia-'))) {
+          authKeys.push(k);
+        }
+      }
+      authKeys.forEach((k) => { dlog('  removing localStorage:', k); localStorage.removeItem(k); });
+    } catch (e) { derr('localStorage clear failed', e); }
+
+    try {
+      const ssKeys = [];
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const k = sessionStorage.key(i);
+        if (k) ssKeys.push(k);
+      }
+      ssKeys.forEach((k) => { dlog('  removing sessionStorage:', k); sessionStorage.removeItem(k); });
+    } catch (e) { derr('sessionStorage clear failed', e); }
+  }
+
+  // Expose a tiny debug handle. You can run these in the console:
+  //   __amia.reset()        → full reset + reload
+  //   __amia.state()        → dump current user + candidate
+  //   __amia.cache()        → list all quiz caches
+  //   __amia.clearCache()   → wipe quiz caches only (keeps auth)
+  //   __amia.version        → build tag
+  window.__amia = {
+    version: 'careers-debug-1',
+    reset: async () => {
+      try { await sb.auth.signOut(); } catch (e) { derr('signOut during reset', e); }
+      nukeClientState();
+      location.hash = '#/';
+      setTimeout(() => location.reload(), 50);
+    },
+    state: () => ({
+      user: store._user ? { id: store._user.id, email: store._user.email } : null,
+      candidate: store._candidate ? { id: store._candidate.id, name: store._candidate.first_name } : null,
+      route: location.hash,
+    }),
+    cache: () => {
+      const out = {};
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const k = sessionStorage.key(i);
+        if (k && k.startsWith(QUIZ_CACHE_PREFIX)) {
+          try { out[k] = JSON.parse(sessionStorage.getItem(k)); } catch { out[k] = '<unparseable>'; }
+        }
+      }
+      return out;
+    },
+    clearCache: () => {
+      const keys = [];
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const k = sessionStorage.key(i);
+        if (k && k.startsWith(QUIZ_CACHE_PREFIX)) keys.push(k);
+      }
+      keys.forEach((k) => sessionStorage.removeItem(k));
+      dlog(`cleared ${keys.length} quiz cache entries`);
+    },
+  };
+
+  dlog('boot — script.js loaded, __amia helpers ready');
+
+
+  /* ─────────────────────────────────────────────────────────────
      §2 — State store
        Only two pieces of app-wide state: the auth session and
        the candidate row. Everything else is page-local.
@@ -63,21 +204,44 @@
     setCandidate(c) { this._candidate = c; },
 
     async hydrate() {
-      const { data } = await sb.auth.getUser();
-      this._user = data.user || null;
+      // [DEBUG] timeout on getUser — primary cause of infinite spinner
+      // if the stored token is corrupt (Supabase client hangs internally
+      // on refresh loop instead of erroring out).
+      try {
+        const { data } = await withTimeout(sb.auth.getUser(), 'auth.getUser');
+        this._user = data.user || null;
+        dlog('hydrate: user =', this._user ? this._user.email : '(none)');
+      } catch (e) {
+        derr('hydrate: getUser failed or timed out — wiping auth state', e);
+        // Broken token state: nuke and continue as anon.
+        try { await sb.auth.signOut(); } catch {}
+        nukeClientState();
+        this._user = null;
+      }
+
       if (this._user) {
-        await this.loadCandidate();
+        try {
+          await withTimeout(this.loadCandidate(), 'loadCandidate');
+        } catch (e) {
+          derr('hydrate: loadCandidate failed — continuing without candidate row', e);
+          this._candidate = null;
+        }
       }
       updateHeaderAuthUI();
     },
 
     async loadCandidate() {
       if (!this._user) { this._candidate = null; return; }
-      const { data } = await sb.from('candidates')
+      const { data, error } = await sb.from('candidates')
         .select('*')
         .eq('user_id', this._user.id)
         .maybeSingle();
+      if (error) {
+        derr('loadCandidate: query error', error);
+        throw error;
+      }
       this._candidate = data || null;
+      dlog('loadCandidate: candidate =', this._candidate ? this._candidate.id : '(none)');
     },
   };
 
@@ -169,8 +333,22 @@
   function readQuizCache(appId, quizType) {
     try {
       const raw = sessionStorage.getItem(quizCacheKey(appId, quizType));
-      return raw ? JSON.parse(raw) : null;
-    } catch { return null; }
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      // [DEBUG] Validate the cache payload looks like a real quiz row.
+      // If the schema drifted or the cache was written by an older build,
+      // discard rather than render garbage.
+      if (!parsed || typeof parsed !== 'object' || !parsed.quiz_id || !Array.isArray(parsed.questions)) {
+        dlog('readQuizCache: invalid payload, discarding', parsed);
+        sessionStorage.removeItem(quizCacheKey(appId, quizType));
+        return null;
+      }
+      return parsed;
+    } catch (e) {
+      derr('readQuizCache: parse failed, clearing', e);
+      try { sessionStorage.removeItem(quizCacheKey(appId, quizType)); } catch {}
+      return null;
+    }
   }
   function writeQuizCache(appId, quizType, payload) {
     try {
@@ -191,137 +369,214 @@
   const api = {
 
     async listPublishedPositions() {
-      const { data, error } = await sb.from('positions')
-        .select('id, slug, title, department, location, contract_type')
-        .eq('status', 'published')
-        .order('published_at', { ascending: false });
-      if (error) throw error;
-      return data || [];
+      return timed('api.listPublishedPositions', async () => {
+        const { data, error } = await withTimeout(
+          sb.from('positions')
+            .select('id, slug, title, department, location, contract_type')
+            .eq('status', 'published')
+            .order('published_at', { ascending: false }),
+          'positions.select'
+        );
+        if (error) throw error;
+        return data || [];
+      });
     },
 
     async getPositionBySlugOrId(slugOrId) {
-      // Try slug first
-      let res = await sb.from('positions').select('*')
-        .eq('slug', slugOrId).eq('status', 'published').maybeSingle();
-      if (res.data) return res.data;
-      // Fallback to id (UUIDs only, avoid error on bad input)
-      if (/^[0-9a-f-]{36}$/i.test(slugOrId)) {
-        res = await sb.from('positions').select('*')
-          .eq('id', slugOrId).eq('status', 'published').maybeSingle();
-        return res.data || null;
-      }
-      return null;
+      return timed(`api.getPositionBySlugOrId(${slugOrId})`, async () => {
+        let res = await withTimeout(
+          sb.from('positions').select('*')
+            .eq('slug', slugOrId).eq('status', 'published').maybeSingle(),
+          'position.bySlug'
+        );
+        if (res.data) return res.data;
+        if (/^[0-9a-f-]{36}$/i.test(slugOrId)) {
+          res = await withTimeout(
+            sb.from('positions').select('*')
+              .eq('id', slugOrId).eq('status', 'published').maybeSingle(),
+            'position.byId'
+          );
+          return res.data || null;
+        }
+        return null;
+      });
     },
 
     async signUp(email, password) {
-      const { data, error } = await sb.auth.signUp({ email, password });
-      if (error) throw error;
-      return data.user;
+      return timed('api.signUp', async () => {
+        const { data, error } = await withTimeout(
+          sb.auth.signUp({ email, password }),
+          'auth.signUp'
+        );
+        if (error) throw error;
+        return data.user;
+      });
     },
 
     async signIn(email, password) {
-      const { data, error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      return data.user;
+      return timed('api.signIn', async () => {
+        const { data, error } = await withTimeout(
+          sb.auth.signInWithPassword({ email, password }),
+          'auth.signIn'
+        );
+        if (error) throw error;
+        return data.user;
+      });
     },
 
     async signOut() {
-      await sb.auth.signOut();
+      return timed('api.signOut', async () => {
+        await withTimeout(sb.auth.signOut(), 'auth.signOut');
+      });
     },
 
     async upsertCandidate(payload) {
-      // If candidate row already exists, update; otherwise insert.
-      if (store.candidate) {
-        const { data, error } = await sb.from('candidates')
-          .update(payload).eq('id', store.candidate.id).select().single();
+      return timed('api.upsertCandidate', async () => {
+        if (store.candidate) {
+          const { data, error } = await withTimeout(
+            sb.from('candidates').update(payload).eq('id', store.candidate.id).select().single(),
+            'candidates.update'
+          );
+          if (error) throw error;
+          return data;
+        }
+        const { data, error } = await withTimeout(
+          sb.from('candidates').insert(payload).select().single(),
+          'candidates.insert'
+        );
         if (error) throw error;
         return data;
-      }
-      const { data, error } = await sb.from('candidates')
-        .insert(payload).select().single();
-      if (error) throw error;
-      return data;
+      });
     },
 
     async findExistingApplication(positionId, candidateId) {
-      const { data } = await sb.from('applications')
-        .select('id')
-        .eq('position_id', positionId)
-        .eq('candidate_id', candidateId)
-        .maybeSingle();
-      return data;
+      return timed('api.findExistingApplication', async () => {
+        const { data } = await withTimeout(
+          sb.from('applications')
+            .select('id')
+            .eq('position_id', positionId)
+            .eq('candidate_id', candidateId)
+            .maybeSingle(),
+          'applications.findExisting'
+        );
+        return data;
+      });
     },
 
     async uploadCV(candidateId, file) {
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const path = `${candidateId}/${Date.now()}_${safeName}`;
-      const { error } = await sb.storage.from('cvs').upload(path, file, {
-        contentType: 'application/pdf',
-        upsert: false,
+      return timed(`api.uploadCV (${(file.size / 1024).toFixed(0)}KB)`, async () => {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const path = `${candidateId}/${Date.now()}_${safeName}`;
+        // Upload timeout: larger than default since 10MB over slow 3G takes time
+        const { error } = await withTimeout(
+          sb.storage.from('cvs').upload(path, file, {
+            contentType: 'application/pdf',
+            upsert: false,
+          }),
+          'storage.upload',
+          30000
+        );
+        if (error) throw error;
+        return path;
       });
-      if (error) throw error;
-      return path;
     },
 
     async createApplication(payload) {
-      const { data, error } = await sb.from('applications')
-        .insert(payload).select().single();
-      if (error) throw error;
-      return data;
+      return timed('api.createApplication', async () => {
+        const { data, error } = await withTimeout(
+          sb.from('applications').insert(payload).select().single(),
+          'applications.insert'
+        );
+        if (error) throw error;
+        return data;
+      });
     },
 
     async listMyApplications(candidateId) {
-      const { data, error } = await sb.from('applications')
-        .select('*, position:positions(title, department, pre_quiz_id, post_quiz_id, att_quiz_id)')
-        .eq('candidate_id', candidateId)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return (data || []).map((a) => ({
-        ...a,
-        position: Array.isArray(a.position) ? a.position[0] : a.position,
-      }));
+      return timed('api.listMyApplications', async () => {
+        const { data, error } = await withTimeout(
+          sb.from('applications')
+            .select('*, position:positions(title, department, pre_quiz_id, post_quiz_id, att_quiz_id)')
+            .eq('candidate_id', candidateId)
+            .order('created_at', { ascending: false }),
+          'applications.listMine'
+        );
+        if (error) throw error;
+        return (data || []).map((a) => ({
+          ...a,
+          position: Array.isArray(a.position) ? a.position[0] : a.position,
+        }));
+      });
     },
 
     async getApplicationWithPosition(applicationId) {
-      const { data, error } = await sb.from('applications')
-        .select('*, position:positions(*)')
-        .eq('id', applicationId)
-        .maybeSingle();
-      if (error) throw error;
-      if (!data) return null;
-      return {
-        ...data,
-        position: Array.isArray(data.position) ? data.position[0] : data.position,
-      };
+      return timed(`api.getApplicationWithPosition(${applicationId})`, async () => {
+        const { data, error } = await withTimeout(
+          sb.from('applications')
+            .select('*, position:positions(*)')
+            .eq('id', applicationId)
+            .maybeSingle(),
+          'applications.byId'
+        );
+        if (error) throw error;
+        if (!data) return null;
+        return {
+          ...data,
+          position: Array.isArray(data.position) ? data.position[0] : data.position,
+        };
+      });
     },
 
     async getQuizQuestionCount(quizId) {
-      const { count } = await sb.from('quiz_questions')
-        .select('*', { count: 'exact', head: true })
-        .eq('quiz_id', quizId);
-      return count ?? 0;
+      return timed('api.getQuizQuestionCount', async () => {
+        const { count } = await withTimeout(
+          sb.from('quiz_questions')
+            .select('*', { count: 'exact', head: true })
+            .eq('quiz_id', quizId),
+          'quiz_questions.count'
+        );
+        return count ?? 0;
+      });
     },
 
     async getQuizForCandidate(applicationId, quizType) {
-      const { data, error } = await sb.rpc('get_quiz_for_candidate', {
-        p_application_id: applicationId,
-        p_quiz_type: quizType,
+      return timed(`api.getQuizForCandidate(${quizType})`, async () => {
+        const { data, error } = await withTimeout(
+          sb.rpc('get_quiz_for_candidate', {
+            p_application_id: applicationId,
+            p_quiz_type: quizType,
+          }),
+          'rpc.get_quiz_for_candidate'
+        );
+        if (error) { derr('RPC get_quiz_for_candidate error', error); throw error; }
+        const row = Array.isArray(data) ? data[0] : data;
+        dlog('RPC returned', {
+          quiz_id: row?.quiz_id, title: row?.title,
+          question_count: Array.isArray(row?.questions) ? row.questions.length : 0,
+          duration: row?.duration_minutes,
+        });
+        return row;
       });
-      if (error) throw error;
-      // RPC returns a table (array of rows); we expect exactly one
-      return Array.isArray(data) ? data[0] : data;
     },
 
     async submitQuiz(applicationId, quizType, answers, startedAt, completedAt) {
-      const { data, error } = await sb.rpc('submit_quiz', {
-        p_application_id: applicationId,
-        p_quiz_type: quizType,
-        p_answers: answers,
-        p_started_at: startedAt,
-        p_completed_at: completedAt,
+      return timed(`api.submitQuiz(${quizType})`, async () => {
+        dlog('submitQuiz payload keys:', Object.keys(answers).length, 'questions answered');
+        const { data, error } = await withTimeout(
+          sb.rpc('submit_quiz', {
+            p_application_id: applicationId,
+            p_quiz_type: quizType,
+            p_answers: answers,
+            p_started_at: startedAt,
+            p_completed_at: completedAt,
+          }),
+          'rpc.submit_quiz',
+          20000
+        );
+        if (error) { derr('RPC submit_quiz error', error); throw error; }
+        dlog('submit_quiz result:', data);
+        return data;
       });
-      if (error) throw error;
-      return data;
     },
   };
 
@@ -346,21 +601,33 @@
   ];
 
   async function route() {
+    const path = (location.hash || '#/').slice(1) || '/';
+    dlog(`route → ${path}`);                              // [DEBUG]
+
     // Teardown previous page
     if (typeof currentTeardown === 'function') {
-      try { currentTeardown(); } catch (e) { console.error('teardown error', e); }
+      dlog('  tearing down previous page');                // [DEBUG]
+      try { currentTeardown(); } catch (e) { derr('teardown error', e); }
       currentTeardown = null;
     }
 
-    const path = (location.hash || '#/').slice(1) || '/';
-
     // Ensure auth state is fresh before routing
-    // (hash changes can happen faster than auth events)
-    await store.hydrate();
+    try {
+      await withTimeout(store.hydrate(), 'store.hydrate (in route)');
+    } catch (e) {
+      derr('route: hydrate failed — showing error and bailing to /', e);
+      APP_EL.innerHTML = emptyState(
+        'Errore di connessione',
+        'Non riusciamo a caricare questa pagina. Prova a ricaricare o a resettare la sessione (apri la console e digita __amia.reset()).',
+        '#/', 'Torna alla home'
+      );
+      return;
+    }
 
     // Auth guard for pages that need it
     const needsAuth = /^\/(portal|quiz|quiz-overview)/.test(path);
     if (needsAuth && !store.isAuthed) {
+      dlog('  auth required but not authed → redirecting to /');  // [DEBUG]
       location.hash = '#/';
       return;
     }
@@ -370,15 +637,26 @@
       const m = path.match(regex);
       if (m) {
         const args = m.slice(1);
+        dlog(`  matched ${regex} with args`, args);         // [DEBUG]
         APP_EL.innerHTML = loadingCenter();
-        const maybeTeardown = await handler(...args);
-        if (typeof maybeTeardown === 'function') currentTeardown = maybeTeardown;
-        setPageTransition(APP_EL);
+        try {
+          const maybeTeardown = await handler(...args);
+          if (typeof maybeTeardown === 'function') currentTeardown = maybeTeardown;
+          setPageTransition(APP_EL);
+        } catch (e) {
+          derr(`page handler threw: ${path}`, e);
+          APP_EL.innerHTML = emptyState(
+            'Qualcosa è andato storto',
+            (e && e.message) ? e.message : 'Errore inatteso nel caricamento della pagina.',
+            '#/', 'Torna alla home'
+          );
+        }
         return;
       }
     }
 
     // Fallback → jobs list
+    dlog('  no route matched → falling back to /');        // [DEBUG]
     location.hash = '#/';
   }
 
@@ -700,9 +978,11 @@
 
     btn.disabled = true;
     btn.textContent = 'Invio in corso...';
+    dlog('submitApplication: starting', { positionId: position.id });
 
     try {
       // 1. Upsert candidate row
+      dlog('submitApplication: step 1/4 — candidate upsert');
       const candidate = await api.upsertCandidate({
         user_id: store.user.id,
         first_name: first,
@@ -715,6 +995,7 @@
 
       // 2. Guard against duplicate applications (could happen if they
       //    opened two tabs and applied on both).
+      dlog('submitApplication: step 2/4 — duplicate check');
       const existing = await api.findExistingApplication(position.id, candidate.id);
       if (existing) {
         toast('Hai già una candidatura per questa posizione', true);
@@ -723,9 +1004,11 @@
       }
 
       // 3. Upload CV
+      dlog('submitApplication: step 3/4 — CV upload');
       const cvPath = await api.uploadCV(candidate.id, cvFile);
 
       // 4. Create application
+      dlog('submitApplication: step 4/4 — application insert');
       await api.createApplication({
         position_id: position.id,
         candidate_id: candidate.id,
@@ -734,11 +1017,12 @@
         cover_letter: cover || null,
       });
 
+      dlog('submitApplication: done');
       toast('Candidatura inviata! 🎉');
       setTimeout(() => { location.hash = '#/portal'; }, 1200);
 
     } catch (err) {
-      console.error('application submission failed', err);
+      derr('submitApplication: failed', err);
       toast(err.message || 'Errore durante l\'invio', true);
       btn.disabled = false;
       btn.innerHTML = `
@@ -1087,6 +1371,11 @@
     }
 
     const questions = Array.isArray(quiz.questions) ? quiz.questions : [];
+    dlog('renderQuiz: mounted', {
+      quizId: quiz.quiz_id, title: quiz.title,
+      questionCount: questions.length, types: questions.map((q) => q.question_type),
+      duration: quiz.duration_minutes, fromCache: !!readQuizCache(applicationId, quizType),
+    });
     if (questions.length === 0) {
       APP_EL.innerHTML = emptyState(
         'Quiz non disponibile',
@@ -1176,10 +1465,11 @@
 
     let submitting = false;
     async function doSubmit() {
-      if (submitting) return;
+      if (submitting) { dlog('doSubmit: already submitting, ignoring');  return; }
       submitting = true;
       submitBtn.disabled = true;
       submitBtn.textContent = 'Invio in corso...';
+      dlog('doSubmit: starting', { quizType, answerCount: Object.keys(answers).length });
 
       const completedAt = new Date();
 
@@ -1189,6 +1479,7 @@
           startedAt.toISOString(), completedAt.toISOString()
         );
         clearQuizCache(applicationId, quizType);
+        dlog('doSubmit: success', result);
 
         // For logic/skills, show a small thank-you with score; for att, no score.
         const hasScore = quizType !== 'att' && result && result.max_score > 0;
@@ -1200,7 +1491,30 @@
         }
         setTimeout(() => { location.hash = '#/portal'; }, 1500);
       } catch (err) {
-        console.error('submit failed', err);
+        derr('doSubmit: submit failed', err);
+
+        // [DEBUG] If we timed out, the RPC may have actually succeeded server-side.
+        // Check the application row to see if the quiz was recorded — if yes,
+        // don't let the user re-submit (we'd overwrite).
+        if (err && err.isTimeout) {
+          dlog('doSubmit: timeout → checking if submission actually landed');
+          try {
+            const check = await api.getApplicationWithPosition(applicationId);
+            const completedField = quizType === 'pre'  ? check?.pre_quiz_completed_at
+                                 : quizType === 'post' ? check?.post_quiz_completed_at
+                                 :                       check?.att_quiz_completed_at;
+            if (completedField) {
+              dlog('doSubmit: quiz actually landed — redirecting to portal');
+              clearQuizCache(applicationId, quizType);
+              toast('Quiz completato! 🎉');
+              setTimeout(() => { location.hash = '#/portal'; }, 1200);
+              return;
+            }
+          } catch (checkErr) {
+            derr('doSubmit: post-timeout check also failed', checkErr);
+          }
+        }
+
         toast(err.message || 'Errore durante l\'invio', true);
         submitting = false;
         submitBtn.disabled = false;
@@ -1447,19 +1761,25 @@
 
   // Keep local store in sync when the user logs in/out elsewhere
   // (e.g. multi-tab) and route if the session changes.
-  sb.auth.onAuthStateChange(async (_event, session) => {
+  sb.auth.onAuthStateChange(async (event, session) => {
+    dlog('auth event:', event, 'user:', session?.user?.email || '(none)');   // [DEBUG]
     store.setUser(session?.user || null);
-    if (session?.user) await store.loadCandidate();
+    if (session?.user) {
+      try { await store.loadCandidate(); }
+      catch (e) { derr('loadCandidate on auth event', e); }
+    }
   });
 
   window.addEventListener('hashchange', route);
 
   (async function boot() {
+    dlog('boot: starting');                                                   // [DEBUG]
     try {
-      await store.hydrate();
+      await withTimeout(store.hydrate(), 'boot.hydrate', 10000);
     } catch (e) {
-      console.error('hydrate failed', e);
+      derr('boot: hydrate failed — continuing as anon', e);
     }
+    dlog('boot: routing');                                                    // [DEBUG]
     route();
   })();
 
