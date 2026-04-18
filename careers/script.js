@@ -663,7 +663,12 @@
     `;
   }
 
-  // ─── 9.2 Apply (single form, auth section visible) ──
+  // ─── 9.2 Apply ──────────────────────────────────────
+  // Three shapes depending on user state:
+  //   - not authed, signup mode (default) → full apply form with inline signup
+  //   - not authed, signin mode            → email+password only, standalone
+  //   - authed, already applied            → redirect to portal (never renders)
+  //   - authed, not applied                → full apply form, prefilled, no signup block
 
   async function renderApply(slugOrId) {
     let position;
@@ -679,7 +684,7 @@
       return;
     }
 
-    // Already applied? Redirect.
+    // Authed? Check if they already applied — redirect if so.
     if (store.isAuthed && store.candidate) {
       try {
         const ex = await api.findExistingApplication(position.id, store.candidate.id);
@@ -692,6 +697,101 @@
     }
 
     renderApplyForm(position);
+  }
+
+  // Standalone sign-in view. Authenticates, then branches based on
+  // whether the signed-in candidate already has an application for this
+  // position.
+  async function renderSigninView(position) {
+    APP_EL.innerHTML = `
+      <div class="job-detail">
+        <a href="#/" class="job-back">← All positions</a>
+        <h1>${escapeHtml(position.title)}</h1>
+        <div class="job-detail-meta">
+          <span>${escapeHtml(position.department)}</span>
+          <span>·</span>
+          <span>${escapeHtml(position.location)}</span>
+          <span>·</span>
+          <span>${escapeHtml(contractLabel(position.contract_type))}</span>
+        </div>
+
+        <form id="signin-form" class="apply-form" novalidate style="max-width:480px">
+          <fieldset class="form-section form-section-account">
+            <legend class="form-section-title">Sign in to your account</legend>
+            <p class="form-section-desc">
+              Sign in to continue with your application.
+              New here? <button type="button" class="link-btn" id="switch-to-signup">Create an account</button>.
+            </p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="si-email">Email <span class="required">*</span></label>
+                <input type="email" id="si-email" class="form-input" placeholder="you@example.com"
+                  autocomplete="email" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="si-pass">Password <span class="required">*</span></label>
+                <input type="password" id="si-pass" class="form-input" placeholder="••••••••"
+                  autocomplete="current-password" required>
+              </div>
+            </div>
+          </fieldset>
+
+          <button type="submit" class="submit-btn" id="signin-btn">
+            Sign in
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    `;
+
+    // Back to signup
+    APP_EL.querySelector('#switch-to-signup').addEventListener('click', () => {
+      renderApplyForm(position);
+    });
+
+    // Submit
+    APP_EL.querySelector('#signin-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = APP_EL.querySelector('#si-email').value.trim();
+      const pass  = APP_EL.querySelector('#si-pass').value;
+      if (!email || !pass) { toast('Enter email and password', true); return; }
+
+      const btn = APP_EL.querySelector('#signin-btn');
+      const originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+
+      try {
+        await api.signIn(email, pass);
+        // Load their candidate row so the "already applied?" check below
+        // has the candidate id.
+        await store.hydrate();
+
+        if (store.candidate) {
+          try {
+            const ex = await api.findExistingApplication(position.id, store.candidate.id);
+            if (ex) {
+              toast('You have already applied — redirecting to your area');
+              location.hash = '#/portal';
+              return;
+            }
+          } catch (err) {
+            dlog('existing-app check after signin failed (non-fatal)', err.message);
+          }
+        }
+
+        // Not applied yet (or no candidate row) → show apply form prefilled
+        toast('Signed in');
+        renderApplyForm(position);
+      } catch (err) {
+        derr('signin failed', err);
+        toast(err.message || 'Invalid email or password', true);
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+      }
+    });
   }
 
   function renderApplyForm(position) {
@@ -799,7 +899,7 @@
         <div class="form-grid" id="account-fields">
           <div class="form-group">
             <label class="form-label" for="f-email">Email <span class="required">*</span></label>
-            <input type="email" id="f-email" class="form-input" placeholder="la.tua@email.com"
+            <input type="email" id="f-email" class="form-input" placeholder="you@example.com"
               autocomplete="email" required>
           </div>
           <div class="form-group">
@@ -812,39 +912,12 @@
     `;
   }
 
-  function accountBlockSignin() {
-    const user = store.user;
-    return `
-      <fieldset class="form-section form-section-account">
-        <legend class="form-section-title">
-          Sign in to your account
-        </legend>
-        <p class="form-section-desc">
-          Already have an account? Sign in to continue.
-          Se non ne hai uno, <button type="button" class="link-btn" id="switch-to-signup">sign up here</button>.
-        </p>
-        <div class="form-grid" id="account-fields">
-          <div class="form-group">
-            <label class="form-label" for="f-email">Email <span class="required">*</span></label>
-            <input type="email" id="f-email" class="form-input" placeholder="la.tua@email.com"
-              autocomplete="email" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="f-pass">Password <span class="required">*</span></label>
-            <input type="password" id="f-pass" class="form-input" placeholder="••••••••"
-              autocomplete="current-password" required>
-          </div>
-        </div>
-      </fieldset>
-    `;
-  }
-
   function accountBlockAuthed() {
     const user = store.user;
     return `
       <fieldset class="form-section form-section-account form-section-authed">
         <div class="auth-status">
-          <p>Stai candidandoti come <strong>${escapeHtml(user.email)}</strong></p>
+          <p>Applying as <strong>${escapeHtml(user.email)}</strong></p>
           <button type="button" class="link-btn" id="logout-btn">Logout</button>
         </div>
       </fieldset>
@@ -887,44 +960,17 @@
       });
     }
 
-    // Signup ↔ signin toggle
+    // "Sign in here" → standalone signin view (not an inline swap).
+    // The signin flow handles the "already applied? redirect" logic itself.
     const toSignin = APP_EL.querySelector('#switch-to-signin');
     if (toSignin) {
-      toSignin.addEventListener('click', () => {
-        APP_EL.querySelector('.form-section-account').outerHTML = accountBlockSignin();
-        const back = APP_EL.querySelector('#switch-to-signup');
-        if (back) back.addEventListener('click', () => {
-          APP_EL.querySelector('.form-section-account').outerHTML = accountBlockSignup();
-          bindApplyFormToggles(position);
-        });
-      });
-    }
-    const toSignup = APP_EL.querySelector('#switch-to-signup');
-    if (toSignup) {
-      toSignup.addEventListener('click', () => {
-        APP_EL.querySelector('.form-section-account').outerHTML = accountBlockSignup();
-        bindApplyFormToggles(position);
-      });
+      toSignin.addEventListener('click', () => renderSigninView(position));
     }
 
     // Submit
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       submitApplication(position);
-    });
-  }
-
-  // Re-bind toggle links after account block swaps
-  function bindApplyFormToggles(position) {
-    const toSignin = APP_EL.querySelector('#switch-to-signin');
-    if (toSignin) toSignin.addEventListener('click', () => {
-      APP_EL.querySelector('.form-section-account').outerHTML = accountBlockSignin();
-      bindApplyFormToggles(position);
-    });
-    const toSignup = APP_EL.querySelector('#switch-to-signup');
-    if (toSignup) toSignup.addEventListener('click', () => {
-      APP_EL.querySelector('.form-section-account').outerHTML = accountBlockSignup();
-      bindApplyFormToggles(position);
     });
   }
 
@@ -971,7 +1017,7 @@
         if (isSignup) await api.signUp(email, password);
         else          await api.signIn(email, password);
         // After signup with confirmation disabled, session exists.
-        if (!store.isAuthed) throw new Error('Could not create session. Check your email to confirm your account.\'account.');
+        if (!store.isAuthed) throw new Error('Could not create session. Check your email to confirm your account.');
       }
 
       // Step 1: ensure candidate row
@@ -1478,7 +1524,7 @@
     if (q.question_type === 'multiple_choice') body = mcHtml(q);
     else if (q.question_type === 'ranking') body = rankingHtml(q);
     else if (q.question_type === 'open_text') {
-      body = `<textarea class="open-textarea" data-question-id="${escapeHtml(q.id)}" placeholder="Scrivi la tua risposta..." rows="6"></textarea>`;
+      body = `<textarea class="open-textarea" data-question-id="${escapeHtml(q.id)}" placeholder="Write your answer..." rows="6"></textarea>`;
     } else if (q.question_type === 'file_upload') {
       body = `<div class="file-upload-placeholder">Upload file disponibile a breve. Puoi proseguire senza caricare nulla.</div>`;
     } else {
