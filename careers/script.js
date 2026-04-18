@@ -1,25 +1,22 @@
 /* ═══════════════════════════════════════════════════════════════
- * AMIA CAREERS — script.js
+ * AMIA CAREERS — script.js  (v2, no supabase-js)
  *
- * Vanilla JS SPA for the candidate side of the Amia ATS.
- *
- * Flow (constrained by RLS policies):
- *   1. Browse published positions (anon, no auth needed)
- *   2. Job detail + apply form
- *   3. On submit:  signUp (if needed) → candidate row → CV upload → application
- *   4. Portal: own applications + quiz launchers
- *   5. Quiz overview → quiz taking (via get_quiz_for_candidate + submit_quiz RPCs)
+ * Direct-to-PostgREST client. No supabase-js dependency. No Web
+ * Locks. No hidden session manager. Auth + HTTP in ~120 lines, the
+ * rest is pages.
  *
  * Structure:
- *   §1 Config + Supabase client
- *   §2 State store  (session + candidate)
- *   §3 Utils        (toast, escape, format, image URLs, etc.)
- *   §4 API layer    (wrappers around supabase calls)
- *   §5 Router       (hash-based, with per-page teardown)
- *   §6 Pages
- *   §7 Quiz renderers (MC, ranking, open_text)
- *   §8 Ranking drag-drop
- *   §9 Bootstrap
+ *   §1  Config
+ *   §2  Debug helpers
+ *   §3  Session (localStorage)
+ *   §4  HTTP client  — core fetch wrapper
+ *   §5  API          — typed calls to /auth, /rest, /storage, /rpc
+ *   §6  State store
+ *   §7  Utils
+ *   §8  Router
+ *   §9  Pages
+ *   §10 Quiz renderers + ranking drag-drop
+ *   §11 Bootstrap
  * ══════════════════════════════════════════════════════════════ */
 
 (function () {
@@ -27,244 +24,425 @@
 
 
   /* ─────────────────────────────────────────────────────────────
-     §1 — Config + Supabase client
+     §1 — Config
      ─────────────────────────────────────────────────────────── */
 
-  // Anon key is safe in client code — security enforced by RLS.
   const SUPABASE_URL = 'https://lekkiacgjhjdhfzztpwd.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxla2tpYWNnamhqZGhmenp0cHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0NjA3OTMsImV4cCI6MjA4NjAzNjc5M30.69UEjEoyV-v6ZYR4QgsyVusQhtWesCEA_EEizHSEyHg';
 
-  // Singleton guard. Multiple GoTrueClient instances sharing the same
-  // localStorage key deadlock each other on token refresh — we saw this
-  // firsthand. If anything (including the script being loaded twice, or
-  // a console snippet) tries to createClient again, reuse ours.
-  const sb = (function () {
-    if (window.__amiaSupabaseClient) {
-      console.warn('[amia] reusing existing Supabase client (avoiding GoTrue deadlock)');
-      return window.__amiaSupabaseClient;
-    }
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    window.__amiaSupabaseClient = client;
-    return client;
-  })();
+  const SESSION_KEY = 'amia-careers-session';
+  const QUIZ_CACHE_PREFIX = 'amia-careers:quiz:';
+  const REQUEST_TIMEOUT_MS = 15000;
+  const UPLOAD_TIMEOUT_MS = 45000;
 
   const APP_EL = document.getElementById('app');
   const TOAST_EL = document.getElementById('toast');
 
 
   /* ─────────────────────────────────────────────────────────────
-     §1.5 — [DEBUG] Debug infrastructure
-       Prefixed logger + timeout wrapper + global escape hatch.
-       Every debug addition in this file is marked with [DEBUG] so
-       we can strip them out with a single sed once the flow is
-       stable.
+     §2 — Debug helpers
+       Tagged so they can be stripped later with a grep.
      ─────────────────────────────────────────────────────────── */
 
-  // Toggle this to silence logs without removing them.
   const DEBUG = true;
-
-  // Timeout for any single network operation. Hangs become thrown errors
-  // with a line number instead of an infinite spinner.
-  const OP_TIMEOUT_MS = 12000;
-
   function dlog() {
     if (!DEBUG) return;
-    const args = Array.from(arguments);
-    const tag = `%c[amia]`;
-    console.log(tag, 'color:#FF6444;font-weight:600', ...args);
+    console.log('%c[amia]', 'color:#FF6444;font-weight:600', ...arguments);
   }
-  function dgroup(label) { if (DEBUG) console.groupCollapsed(`%c[amia] ${label}`, 'color:#FF6444;font-weight:600'); }
-  function dgroupEnd()   { if (DEBUG) console.groupEnd(); }
   function derr(label, err) {
     if (!DEBUG) return;
-    console.error(`%c[amia] ${label}`, 'color:#c62828;font-weight:600', err);
+    console.error('%c[amia] ' + label, 'color:#c62828;font-weight:600', err);
   }
 
-  // Wrap any promise with a hard timeout. Use for every supabase / RPC
-  // call so a broken token / network hang surfaces as an error within
-  // OP_TIMEOUT_MS instead of spinning forever.
-  function withTimeout(promise, label, ms) {
-    const timeoutMs = ms || OP_TIMEOUT_MS;
-    return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        const e = new Error(`Timeout (${timeoutMs}ms) on: ${label}`);
-        e.isTimeout = true;
-        derr(`TIMEOUT: ${label}`, e);
-        reject(e);
-      }, timeoutMs);
-      Promise.resolve(promise).then(
-        (v) => { clearTimeout(timer); resolve(v); },
-        (e) => { clearTimeout(timer); reject(e); }
-      );
-    });
-  }
-
-  // Time an async operation and log start/end.
-  async function timed(label, fn) {
-    dlog(`→ ${label}`);
-    const t0 = performance.now();
-    try {
-      const result = await fn();
-      const ms = Math.round(performance.now() - t0);
-      dlog(`← ${label} ok (${ms}ms)`);
-      return result;
-    } catch (e) {
-      const ms = Math.round(performance.now() - t0);
-      derr(`✗ ${label} failed (${ms}ms)`, e);
-      throw e;
-    }
-  }
-
-  // Catch any unhandled promise rejection so we see problems even when
-  // they escape a try/catch in user code.
-  window.addEventListener('unhandledrejection', (event) => {
-    derr('UNHANDLED REJECTION', event.reason);
-  });
-  window.addEventListener('error', (event) => {
-    derr('UNCAUGHT ERROR', event.error || event.message);
-  });
-
-  // Nuclear reset — clears everything we care about and reloads.
-  // Type `__amia.reset()` in the console to unstick a broken session.
-  function nukeClientState() {
-    dlog('nuking client state (localStorage + sessionStorage)');
-    try {
-      // Clear Supabase auth token (prefix varies; match ours explicitly)
-      const authKeys = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && (k.startsWith('sb-') || k.includes('supabase') || k.startsWith('amia-'))) {
-          authKeys.push(k);
-        }
-      }
-      authKeys.forEach((k) => { dlog('  removing localStorage:', k); localStorage.removeItem(k); });
-    } catch (e) { derr('localStorage clear failed', e); }
-
-    try {
-      const ssKeys = [];
-      for (let i = 0; i < sessionStorage.length; i++) {
-        const k = sessionStorage.key(i);
-        if (k) ssKeys.push(k);
-      }
-      ssKeys.forEach((k) => { dlog('  removing sessionStorage:', k); sessionStorage.removeItem(k); });
-    } catch (e) { derr('sessionStorage clear failed', e); }
-  }
-
-  // Expose a tiny debug handle. You can run these in the console:
-  //   __amia.reset()        → full reset + reload
-  //   __amia.state()        → dump current user + candidate
-  //   __amia.cache()        → list all quiz caches
-  //   __amia.clearCache()   → wipe quiz caches only (keeps auth)
-  //   __amia.version        → build tag
-  window.__amia = {
-    version: 'careers-debug-1',
-    sb,                       // Use this in console instead of createClient!
-    reset: async () => {
-      try { await sb.auth.signOut(); } catch (e) { derr('signOut during reset', e); }
-      nukeClientState();
-      location.hash = '#/';
-      setTimeout(() => location.reload(), 50);
-    },
-    state: () => ({
-      user: store._user ? { id: store._user.id, email: store._user.email } : null,
-      candidate: store._candidate ? { id: store._candidate.id, name: store._candidate.first_name } : null,
-      route: location.hash,
-    }),
-    cache: () => {
-      const out = {};
-      for (let i = 0; i < sessionStorage.length; i++) {
-        const k = sessionStorage.key(i);
-        if (k && k.startsWith(QUIZ_CACHE_PREFIX)) {
-          try { out[k] = JSON.parse(sessionStorage.getItem(k)); } catch { out[k] = '<unparseable>'; }
-        }
-      }
-      return out;
-    },
-    clearCache: () => {
-      const keys = [];
-      for (let i = 0; i < sessionStorage.length; i++) {
-        const k = sessionStorage.key(i);
-        if (k && k.startsWith(QUIZ_CACHE_PREFIX)) keys.push(k);
-      }
-      keys.forEach((k) => sessionStorage.removeItem(k));
-      dlog(`cleared ${keys.length} quiz cache entries`);
-    },
-  };
-
-  dlog('boot — script.js loaded, __amia helpers ready');
+  window.addEventListener('unhandledrejection', (e) => derr('UNHANDLED REJECTION', e.reason));
+  window.addEventListener('error', (e) => derr('UNCAUGHT ERROR', e.error || e.message));
 
 
   /* ─────────────────────────────────────────────────────────────
-     §2 — State store
-       Only two pieces of app-wide state: the auth session and
-       the candidate row. Everything else is page-local.
+     §3 — Session storage
+       Owns the access token + refresh token. Plain object in
+       localStorage under one key. We read it on every request.
+     ─────────────────────────────────────────────────────────── */
+
+  const session = {
+    read() {
+      try {
+        const raw = localStorage.getItem(SESSION_KEY);
+        if (!raw) return null;
+        const s = JSON.parse(raw);
+        if (!s || !s.access_token) return null;
+        return s;
+      } catch { return null; }
+    },
+    write(s) {
+      if (s) localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+      else localStorage.removeItem(SESSION_KEY);
+    },
+    clear() { localStorage.removeItem(SESSION_KEY); },
+    isExpired(s) {
+      if (!s || !s.expires_at) return true;
+      return (s.expires_at * 1000) < Date.now() + 30000; // 30s safety margin
+    },
+    user(s) {
+      return (s && s.user) || null;
+    },
+  };
+
+
+  /* ─────────────────────────────────────────────────────────────
+     §4 — HTTP client
+       One place where HTTP happens. Handles auth header, timeout,
+       error shape, JSON body encoding. No retries — if the server
+       said no, the server said no.
+     ─────────────────────────────────────────────────────────── */
+
+  async function request(path, opts = {}) {
+    const {
+      method = 'GET',
+      headers = {},
+      body,
+      auth = true,           // attach Bearer token if we have one
+      raw = false,           // skip JSON parse (for storage uploads)
+      timeout = REQUEST_TIMEOUT_MS,
+    } = opts;
+
+    const url = SUPABASE_URL + path;
+    const h = {
+      'apikey': SUPABASE_ANON_KEY,
+      ...headers,
+    };
+
+    if (auth) {
+      const s = session.read();
+      if (s && s.access_token) {
+        h['Authorization'] = 'Bearer ' + s.access_token;
+      }
+    }
+
+    let payload;
+    if (body !== undefined) {
+      if (body instanceof Blob || body instanceof File) {
+        payload = body;
+      } else if (typeof body === 'string') {
+        payload = body;
+      } else {
+        payload = JSON.stringify(body);
+        if (!h['Content-Type']) h['Content-Type'] = 'application/json';
+      }
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+
+    dlog('→', method, path);
+    const t0 = performance.now();
+    let res;
+    try {
+      res = await fetch(url, {
+        method,
+        headers: h,
+        body: payload,
+        signal: controller.signal,
+      });
+    } catch (e) {
+      clearTimeout(timer);
+      const ms = Math.round(performance.now() - t0);
+      if (e.name === 'AbortError') {
+        derr(`✗ ${method} ${path} timed out (${ms}ms)`, e);
+        const err = new Error(`Timeout after ${timeout}ms`);
+        err.isTimeout = true;
+        throw err;
+      }
+      derr(`✗ ${method} ${path} network error (${ms}ms)`, e);
+      throw e;
+    }
+    clearTimeout(timer);
+    const ms = Math.round(performance.now() - t0);
+
+    if (raw) {
+      dlog('←', method, path, res.status, `(${ms}ms)`);
+      return res;
+    }
+
+    const contentType = res.headers.get('content-type') || '';
+    let data = null;
+    if (contentType.includes('application/json')) {
+      try { data = await res.json(); } catch { data = null; }
+    } else {
+      try { data = await res.text(); } catch { data = null; }
+    }
+
+    if (!res.ok) {
+      const msg = (data && (data.message || data.msg || data.error_description || data.error)) || `HTTP ${res.status}`;
+      derr(`✗ ${method} ${path} ${res.status} (${ms}ms)`, data);
+      const err = new Error(msg);
+      err.status = res.status;
+      err.data = data;
+      throw err;
+    }
+
+    dlog('←', method, path, res.status, `(${ms}ms)`);
+    return data;
+  }
+
+
+  /* ─────────────────────────────────────────────────────────────
+     §5 — API
+       Every call the careers page makes. One function per endpoint.
+     ─────────────────────────────────────────────────────────── */
+
+  const api = {
+
+    // Auth ─────────────────────────────────────────────
+
+    async signUp(email, password) {
+      const data = await request('/auth/v1/signup', {
+        method: 'POST',
+        body: { email, password },
+        auth: false,
+      });
+      // With email confirmation disabled, signup returns a full session.
+      // We still normalize shape: auth-v1/signup returns the User object
+      // merged with access_token/refresh_token at top level.
+      if (data && data.access_token) {
+        session.write({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+          expires_at: data.expires_at,
+          user: data.user || { id: data.id, email: data.email },
+        });
+      }
+      return session.read();
+    },
+
+    async signIn(email, password) {
+      const data = await request('/auth/v1/token?grant_type=password', {
+        method: 'POST',
+        body: { email, password },
+        auth: false,
+      });
+      session.write({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        expires_at: data.expires_at,
+        user: data.user,
+      });
+      return session.read();
+    },
+
+    async signOut() {
+      const s = session.read();
+      if (s && s.access_token) {
+        try {
+          await request('/auth/v1/logout', { method: 'POST' });
+        } catch (e) {
+          // A logout error doesn't matter — we clear locally either way.
+          dlog('signOut server call failed (continuing)', e.message);
+        }
+      }
+      session.clear();
+    },
+
+    async refreshSession() {
+      const s = session.read();
+      if (!s || !s.refresh_token) return null;
+      try {
+        const data = await request('/auth/v1/token?grant_type=refresh_token', {
+          method: 'POST',
+          body: { refresh_token: s.refresh_token },
+          auth: false,
+        });
+        session.write({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+          expires_at: data.expires_at,
+          user: data.user,
+        });
+        return session.read();
+      } catch (e) {
+        derr('refreshSession failed — clearing session', e);
+        session.clear();
+        return null;
+      }
+    },
+
+    // PostgREST ─────────────────────────────────────────
+
+    async listPublishedPositions() {
+      return await request(
+        '/rest/v1/positions?select=id,slug,title,department,location,contract_type&status=eq.published&order=published_at.desc',
+        { auth: false }
+      );
+    },
+
+    async getPositionBySlugOrId(slugOrId) {
+      // Try slug first
+      const bySlug = await request(
+        `/rest/v1/positions?select=*&slug=eq.${encodeURIComponent(slugOrId)}&status=eq.published`,
+        { auth: false }
+      );
+      if (bySlug && bySlug.length) return bySlug[0];
+      // UUID fallback
+      if (/^[0-9a-f-]{36}$/i.test(slugOrId)) {
+        const byId = await request(
+          `/rest/v1/positions?select=*&id=eq.${encodeURIComponent(slugOrId)}&status=eq.published`,
+          { auth: false }
+        );
+        if (byId && byId.length) return byId[0];
+      }
+      return null;
+    },
+
+    async getMyCandidate() {
+      const s = session.read();
+      if (!s || !s.user) return null;
+      const rows = await request(
+        `/rest/v1/candidates?select=*&user_id=eq.${s.user.id}`,
+      );
+      return rows && rows.length ? rows[0] : null;
+    },
+
+    async insertCandidate(payload) {
+      const rows = await request('/rest/v1/candidates', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=representation' },
+        body: payload,
+      });
+      return rows[0];
+    },
+
+    async updateCandidate(id, payload) {
+      const rows = await request(`/rest/v1/candidates?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: { 'Prefer': 'return=representation' },
+        body: payload,
+      });
+      return rows[0];
+    },
+
+    async findExistingApplication(positionId, candidateId) {
+      const rows = await request(
+        `/rest/v1/applications?select=id&position_id=eq.${positionId}&candidate_id=eq.${candidateId}`
+      );
+      return rows && rows.length ? rows[0] : null;
+    },
+
+    async createApplication(payload) {
+      const rows = await request('/rest/v1/applications', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=representation' },
+        body: payload,
+      });
+      return rows[0];
+    },
+
+    async listMyApplications(candidateId) {
+      const rows = await request(
+        `/rest/v1/applications?select=*,position:positions(title,department,pre_quiz_id,post_quiz_id,att_quiz_id)&candidate_id=eq.${candidateId}&order=created_at.desc`
+      );
+      // PostgREST returns embedded row as nested object when using FK hint; as array only for m2m.
+      // Normalize just in case:
+      return (rows || []).map((a) => ({
+        ...a,
+        position: Array.isArray(a.position) ? a.position[0] : a.position,
+      }));
+    },
+
+    async getApplicationWithPosition(applicationId) {
+      const rows = await request(
+        `/rest/v1/applications?select=*,position:positions(*)&id=eq.${applicationId}`
+      );
+      if (!rows || !rows.length) return null;
+      const a = rows[0];
+      return { ...a, position: Array.isArray(a.position) ? a.position[0] : a.position };
+    },
+
+    // Storage ───────────────────────────────────────────
+
+    async uploadCV(candidateId, file) {
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const path = `${candidateId}/${Date.now()}_${safeName}`;
+      await request(`/storage/v1/object/cvs/${path}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': file.type || 'application/pdf',
+          'x-upsert': 'false',
+        },
+        body: file,
+        raw: true,
+        timeout: UPLOAD_TIMEOUT_MS,
+      });
+      return path;
+    },
+
+    // RPCs ──────────────────────────────────────────────
+
+    async getQuizForCandidate(applicationId, quizType) {
+      const data = await request('/rest/v1/rpc/get_quiz_for_candidate', {
+        method: 'POST',
+        body: {
+          p_application_id: applicationId,
+          p_quiz_type: quizType,
+        },
+      });
+      // RPC returning TABLE arrives as an array of rows in PostgREST
+      return Array.isArray(data) ? data[0] : data;
+    },
+
+    async submitQuiz(applicationId, quizType, answers, startedAt, completedAt) {
+      return await request('/rest/v1/rpc/submit_quiz', {
+        method: 'POST',
+        body: {
+          p_application_id: applicationId,
+          p_quiz_type: quizType,
+          p_answers: answers,
+          p_started_at: startedAt,
+          p_completed_at: completedAt,
+        },
+        timeout: 25000,
+      });
+    },
+  };
+
+
+  /* ─────────────────────────────────────────────────────────────
+     §6 — State store
+       Two values: current candidate, anything derived from session.
      ─────────────────────────────────────────────────────────── */
 
   const store = {
-    _user: null,
     _candidate: null,
 
-    get user() { return this._user; },
-    get candidate() { return this._candidate; },
-    get isAuthed() { return !!this._user; },
-
-    setUser(u) {
-      this._user = u;
-      // candidate row is tied to user; clear when user changes
-      if (!u) this._candidate = null;
-      updateHeaderAuthUI();
+    get user() {
+      const s = session.read();
+      return s ? s.user : null;
     },
+    get isAuthed() { return !!this.user; },
+    get candidate() { return this._candidate; },
+
     setCandidate(c) { this._candidate = c; },
 
     async hydrate() {
-      // [DEBUG] timeout on getUser — primary cause of infinite spinner
-      // if the stored token is corrupt (Supabase client hangs internally
-      // on refresh loop instead of erroring out).
-      try {
-        const { data } = await withTimeout(sb.auth.getUser(), 'auth.getUser');
-        this._user = data.user || null;
-        dlog('hydrate: user =', this._user ? this._user.email : '(none)');
-      } catch (e) {
-        derr('hydrate: getUser failed or timed out — wiping auth state', e);
-        // Broken token state: nuke and continue as anon.
-        try { await sb.auth.signOut(); } catch {}
-        nukeClientState();
-        this._user = null;
+      const s = session.read();
+      if (!s) { this._candidate = null; updateHeaderAuthUI(); return; }
+      if (session.isExpired(s)) {
+        dlog('session expired, attempting refresh');
+        const refreshed = await api.refreshSession();
+        if (!refreshed) { this._candidate = null; updateHeaderAuthUI(); return; }
       }
-
-      if (this._user) {
-        try {
-          await withTimeout(this.loadCandidate(), 'loadCandidate');
-        } catch (e) {
-          derr('hydrate: loadCandidate failed — continuing without candidate row', e);
-          this._candidate = null;
-        }
+      try {
+        this._candidate = await api.getMyCandidate();
+      } catch (e) {
+        derr('hydrate: getMyCandidate failed', e);
+        this._candidate = null;
       }
       updateHeaderAuthUI();
     },
-
-    async loadCandidate() {
-      if (!this._user) { this._candidate = null; return; }
-      const { data, error } = await sb.from('candidates')
-        .select('*')
-        .eq('user_id', this._user.id)
-        .maybeSingle();
-      if (error) {
-        derr('loadCandidate: query error', error);
-        throw error;
-      }
-      this._candidate = data || null;
-      dlog('loadCandidate: candidate =', this._candidate ? this._candidate.id : '(none)');
-    },
   };
-
-  // [DEBUG] Now that store exists, attach it to the debug handle.
-  // Read current state from console with: __amia.store.user / __amia.store.candidate
-  window.__amia.store = store;
 
 
   /* ─────────────────────────────────────────────────────────────
-     §3 — Utils
+     §7 — Utils
      ─────────────────────────────────────────────────────────── */
 
   let toastTimer = null;
@@ -282,31 +460,19 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
-
-  // Convert newlines to <br>, but escape everything else.
-  function escapeHtmlMultiline(s) {
-    return escapeHtml(s).replace(/\n/g, '<br>');
-  }
+  function escapeHtmlMultiline(s) { return escapeHtml(s).replace(/\n/g, '<br>'); }
 
   const CONTRACT_LABELS = {
-    full_time:   'Full-time',
-    part_time:   'Part-time',
-    freelance:   'Freelance',
-    internship:  'Stage',
+    full_time: 'Full-time', part_time: 'Part-time',
+    freelance: 'Freelance', internship: 'Stage',
   };
   function contractLabel(t) { return CONTRACT_LABELS[t] || t; }
 
   const APP_STATUS_LABELS = {
-    applied:   'Candidato',
-    interview: 'Colloquio',
-    hired:     'Assunto',
-    rejected:  'Scartato',
+    applied: 'Candidato', interview: 'Colloquio',
+    hired: 'Assunto', rejected: 'Scartato',
   };
 
-  // Question-images bucket is public → direct URL, no signing needed.
-  // Defensive: look in both question-level and option-level `image_path` /
-  // `image_url` fields. Admin can settle on a convention later without
-  // breaking us.
   function questionImageUrl(config) {
     if (!config) return null;
     return resolveImage(config.image_path || config.image_url);
@@ -315,10 +481,10 @@
     if (!opt || typeof opt !== 'object') return null;
     return resolveImage(opt.image_path || opt.image_url);
   }
-  function resolveImage(pathOrUrl) {
-    if (!pathOrUrl) return null;
-    if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
-    return `${SUPABASE_URL}/storage/v1/object/public/question-images/${pathOrUrl}`;
+  function resolveImage(p) {
+    if (!p) return null;
+    if (/^https?:\/\//i.test(p)) return p;
+    return `${SUPABASE_URL}/storage/v1/object/public/question-images/${p}`;
   }
 
   function setPageTransition(container) {
@@ -334,7 +500,6 @@
     return '<div class="loading-center"><div class="spinner"></div></div>';
   }
 
-  // Keep "La mia area" link hidden when logged out.
   function updateHeaderAuthUI() {
     document.querySelectorAll('[data-requires-auth="true"]').forEach((el) => {
       if (store.isAuthed) el.removeAttribute('hidden');
@@ -342,348 +507,108 @@
     });
   }
 
-  // SessionStorage: cache quiz payload so refresh mid-quiz doesn't re-shuffle
-  const QUIZ_CACHE_PREFIX = 'amia-careers:quiz:';
-  function quizCacheKey(appId, quizType) {
-    return `${QUIZ_CACHE_PREFIX}${appId}:${quizType}`;
-  }
-  function readQuizCache(appId, quizType) {
+  // Quiz cache — keeps shuffled question order stable across refresh
+  function quizCacheKey(appId, t) { return `${QUIZ_CACHE_PREFIX}${appId}:${t}`; }
+  function readQuizCache(appId, t) {
     try {
-      const raw = sessionStorage.getItem(quizCacheKey(appId, quizType));
+      const raw = sessionStorage.getItem(quizCacheKey(appId, t));
       if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      // [DEBUG] Validate the cache payload looks like a real quiz row.
-      // If the schema drifted or the cache was written by an older build,
-      // discard rather than render garbage.
-      if (!parsed || typeof parsed !== 'object' || !parsed.quiz_id || !Array.isArray(parsed.questions)) {
-        dlog('readQuizCache: invalid payload, discarding', parsed);
-        sessionStorage.removeItem(quizCacheKey(appId, quizType));
+      const p = JSON.parse(raw);
+      if (!p || !p.quiz_id || !Array.isArray(p.questions)) {
+        sessionStorage.removeItem(quizCacheKey(appId, t));
         return null;
       }
-      return parsed;
-    } catch (e) {
-      derr('readQuizCache: parse failed, clearing', e);
-      try { sessionStorage.removeItem(quizCacheKey(appId, quizType)); } catch {}
+      return p;
+    } catch {
+      try { sessionStorage.removeItem(quizCacheKey(appId, t)); } catch {}
       return null;
     }
   }
-  function writeQuizCache(appId, quizType, payload) {
-    try {
-      sessionStorage.setItem(quizCacheKey(appId, quizType), JSON.stringify(payload));
-    } catch { /* quota, ignore */ }
+  function writeQuizCache(appId, t, payload) {
+    try { sessionStorage.setItem(quizCacheKey(appId, t), JSON.stringify(payload)); } catch {}
   }
-  function clearQuizCache(appId, quizType) {
-    try { sessionStorage.removeItem(quizCacheKey(appId, quizType)); } catch {}
+  function clearQuizCache(appId, t) {
+    try { sessionStorage.removeItem(quizCacheKey(appId, t)); } catch {}
+  }
+
+  function emptyState(title, body, href, linkLabel) {
+    return `
+      <div class="empty-state">
+        <h2>${escapeHtml(title)}</h2>
+        <p>${escapeHtml(body)}</p>
+        <a href="${escapeHtml(href)}" class="submit-btn" style="text-decoration:none">
+          ${escapeHtml(linkLabel)}
+        </a>
+      </div>
+    `;
   }
 
 
   /* ─────────────────────────────────────────────────────────────
-     §4 — API layer
-       One place where RPC argument names live. If Supabase renames
-       something, only this section changes.
-     ─────────────────────────────────────────────────────────── */
-
-  const api = {
-
-    async listPublishedPositions() {
-      return timed('api.listPublishedPositions', async () => {
-        const { data, error } = await withTimeout(
-          sb.from('positions')
-            .select('id, slug, title, department, location, contract_type')
-            .eq('status', 'published')
-            .order('published_at', { ascending: false }),
-          'positions.select'
-        );
-        if (error) throw error;
-        return data || [];
-      });
-    },
-
-    async getPositionBySlugOrId(slugOrId) {
-      return timed(`api.getPositionBySlugOrId(${slugOrId})`, async () => {
-        let res = await withTimeout(
-          sb.from('positions').select('*')
-            .eq('slug', slugOrId).eq('status', 'published').maybeSingle(),
-          'position.bySlug'
-        );
-        if (res.data) return res.data;
-        if (/^[0-9a-f-]{36}$/i.test(slugOrId)) {
-          res = await withTimeout(
-            sb.from('positions').select('*')
-              .eq('id', slugOrId).eq('status', 'published').maybeSingle(),
-            'position.byId'
-          );
-          return res.data || null;
-        }
-        return null;
-      });
-    },
-
-    async signUp(email, password) {
-      return timed('api.signUp', async () => {
-        const { data, error } = await withTimeout(
-          sb.auth.signUp({ email, password }),
-          'auth.signUp'
-        );
-        if (error) throw error;
-        return data.user;
-      });
-    },
-
-    async signIn(email, password) {
-      return timed('api.signIn', async () => {
-        const { data, error } = await withTimeout(
-          sb.auth.signInWithPassword({ email, password }),
-          'auth.signIn'
-        );
-        if (error) throw error;
-        return data.user;
-      });
-    },
-
-    async signOut() {
-      return timed('api.signOut', async () => {
-        await withTimeout(sb.auth.signOut(), 'auth.signOut');
-      });
-    },
-
-    async upsertCandidate(payload) {
-      return timed('api.upsertCandidate', async () => {
-        if (store.candidate) {
-          const { data, error } = await withTimeout(
-            sb.from('candidates').update(payload).eq('id', store.candidate.id).select().single(),
-            'candidates.update'
-          );
-          if (error) throw error;
-          return data;
-        }
-        const { data, error } = await withTimeout(
-          sb.from('candidates').insert(payload).select().single(),
-          'candidates.insert'
-        );
-        if (error) throw error;
-        return data;
-      });
-    },
-
-    async findExistingApplication(positionId, candidateId) {
-      return timed('api.findExistingApplication', async () => {
-        const { data } = await withTimeout(
-          sb.from('applications')
-            .select('id')
-            .eq('position_id', positionId)
-            .eq('candidate_id', candidateId)
-            .maybeSingle(),
-          'applications.findExisting'
-        );
-        return data;
-      });
-    },
-
-    async uploadCV(candidateId, file) {
-      return timed(`api.uploadCV (${(file.size / 1024).toFixed(0)}KB)`, async () => {
-        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const path = `${candidateId}/${Date.now()}_${safeName}`;
-        // Upload timeout: larger than default since 10MB over slow 3G takes time
-        const { error } = await withTimeout(
-          sb.storage.from('cvs').upload(path, file, {
-            contentType: 'application/pdf',
-            upsert: false,
-          }),
-          'storage.upload',
-          30000
-        );
-        if (error) throw error;
-        return path;
-      });
-    },
-
-    async createApplication(payload) {
-      return timed('api.createApplication', async () => {
-        const { data, error } = await withTimeout(
-          sb.from('applications').insert(payload).select().single(),
-          'applications.insert'
-        );
-        if (error) throw error;
-        return data;
-      });
-    },
-
-    async listMyApplications(candidateId) {
-      return timed('api.listMyApplications', async () => {
-        const { data, error } = await withTimeout(
-          sb.from('applications')
-            .select('*, position:positions(title, department, pre_quiz_id, post_quiz_id, att_quiz_id)')
-            .eq('candidate_id', candidateId)
-            .order('created_at', { ascending: false }),
-          'applications.listMine'
-        );
-        if (error) throw error;
-        return (data || []).map((a) => ({
-          ...a,
-          position: Array.isArray(a.position) ? a.position[0] : a.position,
-        }));
-      });
-    },
-
-    async getApplicationWithPosition(applicationId) {
-      return timed(`api.getApplicationWithPosition(${applicationId})`, async () => {
-        const { data, error } = await withTimeout(
-          sb.from('applications')
-            .select('*, position:positions(*)')
-            .eq('id', applicationId)
-            .maybeSingle(),
-          'applications.byId'
-        );
-        if (error) throw error;
-        if (!data) return null;
-        return {
-          ...data,
-          position: Array.isArray(data.position) ? data.position[0] : data.position,
-        };
-      });
-    },
-
-    async getQuizQuestionCount(quizId) {
-      return timed('api.getQuizQuestionCount', async () => {
-        const { count } = await withTimeout(
-          sb.from('quiz_questions')
-            .select('*', { count: 'exact', head: true })
-            .eq('quiz_id', quizId),
-          'quiz_questions.count'
-        );
-        return count ?? 0;
-      });
-    },
-
-    async getQuizForCandidate(applicationId, quizType) {
-      return timed(`api.getQuizForCandidate(${quizType})`, async () => {
-        const { data, error } = await withTimeout(
-          sb.rpc('get_quiz_for_candidate', {
-            p_application_id: applicationId,
-            p_quiz_type: quizType,
-          }),
-          'rpc.get_quiz_for_candidate'
-        );
-        if (error) { derr('RPC get_quiz_for_candidate error', error); throw error; }
-        const row = Array.isArray(data) ? data[0] : data;
-        dlog('RPC returned', {
-          quiz_id: row?.quiz_id, title: row?.title,
-          question_count: Array.isArray(row?.questions) ? row.questions.length : 0,
-          duration: row?.duration_minutes,
-        });
-        return row;
-      });
-    },
-
-    async submitQuiz(applicationId, quizType, answers, startedAt, completedAt) {
-      return timed(`api.submitQuiz(${quizType})`, async () => {
-        dlog('submitQuiz payload keys:', Object.keys(answers).length, 'questions answered');
-        const { data, error } = await withTimeout(
-          sb.rpc('submit_quiz', {
-            p_application_id: applicationId,
-            p_quiz_type: quizType,
-            p_answers: answers,
-            p_started_at: startedAt,
-            p_completed_at: completedAt,
-          }),
-          'rpc.submit_quiz',
-          20000
-        );
-        if (error) { derr('RPC submit_quiz error', error); throw error; }
-        dlog('submit_quiz result:', data);
-        return data;
-      });
-    },
-  };
-
-
-  /* ─────────────────────────────────────────────────────────────
-     §5 — Router
-       Each page's render function may return a `teardown` callback
-       (to clear timers / listeners). We call it before the next
-       page mounts. This replaces the old module-level state leaks.
+     §8 — Router
      ─────────────────────────────────────────────────────────── */
 
   let currentTeardown = null;
 
-  // Route patterns: [regex, handler(args...)]
-  // The handler receives captured groups in order.
   const routes = [
     [/^\/$/,                                () => renderJobsList()],
     [/^\/apply\/([^/]+)$/,                  (slug) => renderApply(slug)],
     [/^\/portal$/,                          () => renderPortal()],
-    [/^\/quiz-overview\/([^/]+)\/([^/]+)$/, (appId, type) => renderQuizOverview(appId, type)],
-    [/^\/quiz\/([^/]+)\/([^/]+)$/,          (appId, type) => renderQuiz(appId, type)],
+    [/^\/quiz-overview\/([^/]+)\/([^/]+)$/, (id, t) => renderQuizOverview(id, t)],
+    [/^\/quiz\/([^/]+)\/([^/]+)$/,          (id, t) => renderQuiz(id, t)],
   ];
 
   async function route() {
     const path = (location.hash || '#/').slice(1) || '/';
-    dlog(`route → ${path}`);                              // [DEBUG]
+    dlog('route →', path);
 
-    // Teardown previous page
     if (typeof currentTeardown === 'function') {
-      dlog('  tearing down previous page');                // [DEBUG]
-      try { currentTeardown(); } catch (e) { derr('teardown error', e); }
+      try { currentTeardown(); } catch (e) { derr('teardown', e); }
       currentTeardown = null;
     }
 
-    // Ensure auth state is fresh before routing
     try {
-      await withTimeout(store.hydrate(), 'store.hydrate (in route)');
+      await store.hydrate();
     } catch (e) {
-      derr('route: hydrate failed — showing error and bailing to /', e);
-      APP_EL.innerHTML = emptyState(
-        'Errore di connessione',
-        'Non riusciamo a caricare questa pagina. Prova a ricaricare o a resettare la sessione (apri la console e digita __amia.reset()).',
-        '#/', 'Torna alla home'
-      );
-      return;
+      derr('route: hydrate failed', e);
+      // Non-fatal: continue as anon
     }
 
-    // Auth guard for pages that need it
     const needsAuth = /^\/(portal|quiz|quiz-overview)/.test(path);
     if (needsAuth && !store.isAuthed) {
-      dlog('  auth required but not authed → redirecting to /');  // [DEBUG]
+      dlog('auth required, redirecting to /');
       location.hash = '#/';
       return;
     }
 
-    // Match and dispatch
     for (const [regex, handler] of routes) {
       const m = path.match(regex);
       if (m) {
-        const args = m.slice(1);
-        dlog(`  matched ${regex} with args`, args);         // [DEBUG]
         APP_EL.innerHTML = loadingCenter();
         try {
-          const maybeTeardown = await handler(...args);
-          if (typeof maybeTeardown === 'function') currentTeardown = maybeTeardown;
+          const td = await handler(...m.slice(1));
+          if (typeof td === 'function') currentTeardown = td;
           setPageTransition(APP_EL);
         } catch (e) {
-          derr(`page handler threw: ${path}`, e);
+          derr(`page error: ${path}`, e);
           APP_EL.innerHTML = emptyState(
             'Qualcosa è andato storto',
-            (e && e.message) ? e.message : 'Errore inatteso nel caricamento della pagina.',
+            e.message || 'Errore nel caricamento della pagina.',
             '#/', 'Torna alla home'
           );
         }
         return;
       }
     }
-
-    // Fallback → jobs list
-    dlog('  no route matched → falling back to /');        // [DEBUG]
     location.hash = '#/';
   }
 
 
   /* ─────────────────────────────────────────────────────────────
-     §6 — Pages
+     §9 — Pages
      ─────────────────────────────────────────────────────────── */
 
-
-  /* ── 6.1 — Jobs list (public) ── */
+  // ─── 9.1 Jobs list ──────────────────────────────────
 
   async function renderJobsList() {
     let jobs;
@@ -697,12 +622,11 @@
           <p>Unisciti al team che sta costruendo il futuro di Amia. Cerchiamo persone curiose, appassionate e con voglia di fare.</p>
         </div>
       </section>
-
       <section class="jobs-section">
         <div class="container">
-          ${jobs.length > 0 ? `
+          ${jobs.length ? `
             <div class="jobs-grid">
-              ${jobs.map((j) => jobCard(j)).join('')}
+              ${jobs.map(jobCard).join('')}
             </div>
           ` : `
             <p class="no-jobs">Al momento non ci sono posizioni aperte, ma torna a trovarci!</p>
@@ -735,13 +659,12 @@
     `;
   }
 
-
-  /* ── 6.2 — Apply page (public → authed on submit) ── */
+  // ─── 9.2 Apply (single form, auth section visible) ──
 
   async function renderApply(slugOrId) {
     let position;
     try { position = await api.getPositionBySlugOrId(slugOrId); }
-    catch (e) { position = null; }
+    catch { position = null; }
 
     if (!position) {
       APP_EL.innerHTML = emptyState(
@@ -752,27 +675,28 @@
       return;
     }
 
-    // If already applied, redirect to portal
+    // Already applied? Redirect.
     if (store.isAuthed && store.candidate) {
-      const existing = await api.findExistingApplication(position.id, store.candidate.id);
-      if (existing) {
-        toast('Hai già una candidatura per questa posizione');
-        location.hash = '#/portal';
-        return;
-      }
+      try {
+        const ex = await api.findExistingApplication(position.id, store.candidate.id);
+        if (ex) {
+          toast('Hai già una candidatura per questa posizione');
+          location.hash = '#/portal';
+          return;
+        }
+      } catch (e) { dlog('existing-app check failed (non-fatal)', e.message); }
     }
 
-    APP_EL.innerHTML = applyPageHtml(position);
-    bindApplyPage(position);
+    renderApplyForm(position);
   }
 
-  function applyPageHtml(position) {
+  function renderApplyForm(position) {
     const authed = store.isAuthed;
     const cand = store.candidate;
-    return `
+
+    APP_EL.innerHTML = `
       <div class="job-detail">
         <a href="#/" class="job-back">← Tutte le posizioni</a>
-
         <h1>${escapeHtml(position.title)}</h1>
         <div class="job-detail-meta">
           <span>${escapeHtml(position.department)}</span>
@@ -784,25 +708,23 @@
 
         <div class="job-description">${escapeHtmlMultiline(position.description || '')}</div>
 
-        <div class="apply-section">
-          <h2>Candidati</h2>
-          <p class="subtitle">Compila il form per candidarti a questa posizione.</p>
+        <form id="apply-form" class="apply-form" novalidate>
+          ${authed ? accountBlockAuthed() : accountBlockSignup()}
 
-          <div class="auth-box" id="auth-box">
-            ${authed ? authedStatusHtml() : authFormHtml()}
-          </div>
-
-          <form id="apply-form" class="${authed ? '' : 'form-disabled'}" novalidate>
+          <fieldset class="form-section">
+            <legend class="form-section-title">
+              Informazioni di contatto
+            </legend>
             <div class="form-grid">
               <div class="form-group">
                 <label class="form-label" for="f-first">Nome <span class="required">*</span></label>
-                <input type="text" id="f-first" class="form-input" placeholder="Mario"
-                  value="${escapeHtml(cand?.first_name || '')}" required>
+                <input type="text" id="f-first" class="form-input" placeholder="Mario" required
+                  value="${escapeHtml(cand?.first_name || '')}">
               </div>
               <div class="form-group">
                 <label class="form-label" for="f-last">Cognome <span class="required">*</span></label>
-                <input type="text" id="f-last" class="form-input" placeholder="Rossi"
-                  value="${escapeHtml(cand?.last_name || '')}" required>
+                <input type="text" id="f-last" class="form-input" placeholder="Rossi" required
+                  value="${escapeHtml(cand?.last_name || '')}">
               </div>
               <div class="form-group">
                 <label class="form-label" for="f-phone">Telefono</label>
@@ -814,6 +736,12 @@
                 <input type="url" id="f-linkedin" class="form-input" placeholder="https://linkedin.com/in/..."
                   value="${escapeHtml(cand?.linkedin_url || '')}">
               </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="form-section">
+            <legend class="form-section-title">La tua candidatura</legend>
+            <div class="form-grid">
               <div class="form-group full">
                 <label class="form-label" for="f-cover">Lettera di presentazione</label>
                 <textarea id="f-cover" class="form-textarea"
@@ -826,62 +754,103 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                   </svg>
                   <span id="cv-label-text">Carica il tuo CV</span>
-                  <input type="file" id="f-cv" class="form-file-input" accept=".pdf,application/pdf">
+                  <input type="file" id="f-cv" class="form-file-input" accept=".pdf,application/pdf" required>
                 </label>
               </div>
             </div>
-            <button type="submit" class="submit-btn" id="apply-submit-btn">
-              Invia candidatura
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-              </svg>
-            </button>
-          </form>
-        </div>
+          </fieldset>
+
+          <div class="form-consent">
+            <label class="consent-label">
+              <input type="checkbox" id="f-consent" required>
+              <span>Accetto il trattamento dei miei dati personali per finalità di selezione,
+                secondo la <a href="https://amia.technology/privacy" target="_blank" rel="noopener">privacy policy</a>.
+                <span class="required">*</span></span>
+            </label>
+          </div>
+
+          <button type="submit" class="submit-btn" id="apply-submit-btn">
+            ${authed ? 'Invia candidatura' : 'Crea account e invia candidatura'}
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+          </button>
+        </form>
       </div>
     `;
+
+    bindApplyForm(position);
   }
 
-  function authedStatusHtml() {
+  function accountBlockSignup() {
     return `
-      <div class="auth-status">
-        <p>Stai candidandoti come <strong>${escapeHtml(store.user.email)}</strong></p>
-        <button type="button" class="link-btn" id="logout-btn">Esci</button>
-      </div>
-    `;
-  }
-
-  function authFormHtml() {
-    return `
-      <div id="auth-form" data-mode="signup">
-        <h3 id="auth-title">Crea il tuo account</h3>
-        <p class="subtitle" id="auth-subtitle">Serve un account per candidarti e completare i quiz.</p>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label" for="auth-email">Email <span class="required">*</span></label>
-            <input type="email" id="auth-email" class="form-input" placeholder="la.tua@email.com" autocomplete="email">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="auth-pass">Password <span class="required">*</span></label>
-            <input type="password" id="auth-pass" class="form-input" placeholder="Minimo 6 caratteri"
-              autocomplete="new-password" minlength="6">
-          </div>
-        </div>
-        <button type="button" class="submit-btn compact" id="auth-btn">
-          <span id="auth-btn-text">Crea account</span>
-        </button>
-        <p class="auth-toggle">
-          <span id="auth-toggle-text">Hai già un account?</span>
-          <a id="auth-toggle-link">Accedi</a>
+      <fieldset class="form-section form-section-account">
+        <legend class="form-section-title">
+          Crea il tuo account candidato
+        </legend>
+        <p class="form-section-desc">
+          Un account ti serve per seguire la candidatura e completare i quiz di valutazione.
+          Se ne hai già uno, <button type="button" class="link-btn" id="switch-to-signin">accedi qui</button>.
         </p>
-      </div>
+        <div class="form-grid" id="account-fields">
+          <div class="form-group">
+            <label class="form-label" for="f-email">Email <span class="required">*</span></label>
+            <input type="email" id="f-email" class="form-input" placeholder="la.tua@email.com"
+              autocomplete="email" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-pass">Password <span class="required">*</span></label>
+            <input type="password" id="f-pass" class="form-input" placeholder="Minimo 6 caratteri"
+              autocomplete="new-password" minlength="6" required>
+          </div>
+        </div>
+      </fieldset>
     `;
   }
 
-  function bindApplyPage(position) {
+  function accountBlockSignin() {
+    const user = store.user;
+    return `
+      <fieldset class="form-section form-section-account">
+        <legend class="form-section-title">
+          Accedi al tuo account
+        </legend>
+        <p class="form-section-desc">
+          Hai già un account? Accedi per continuare.
+          Se non ne hai uno, <button type="button" class="link-btn" id="switch-to-signup">registrati qui</button>.
+        </p>
+        <div class="form-grid" id="account-fields">
+          <div class="form-group">
+            <label class="form-label" for="f-email">Email <span class="required">*</span></label>
+            <input type="email" id="f-email" class="form-input" placeholder="la.tua@email.com"
+              autocomplete="email" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="f-pass">Password <span class="required">*</span></label>
+            <input type="password" id="f-pass" class="form-input" placeholder="••••••••"
+              autocomplete="current-password" required>
+          </div>
+        </div>
+      </fieldset>
+    `;
+  }
+
+  function accountBlockAuthed() {
+    const user = store.user;
+    return `
+      <fieldset class="form-section form-section-account form-section-authed">
+        <div class="auth-status">
+          <p>Stai candidandoti come <strong>${escapeHtml(user.email)}</strong></p>
+          <button type="button" class="link-btn" id="logout-btn">Esci</button>
+        </div>
+      </fieldset>
+    `;
+  }
+
+  function bindApplyForm(position) {
     const form = APP_EL.querySelector('#apply-form');
 
-    // CV file chooser
+    // CV file input — validate on change, update label
     const cvInput = APP_EL.querySelector('#f-cv');
     const cvLabel = APP_EL.querySelector('#cv-label');
     const cvText  = APP_EL.querySelector('#cv-label-text');
@@ -902,82 +871,57 @@
       cvText.textContent = `${file.name} (${(file.size / (1024*1024)).toFixed(1)} MB)`;
     });
 
-    // Auth box bindings (signup/signin toggle + submit)
-    const authBox = APP_EL.querySelector('#auth-box');
-    if (store.isAuthed) {
-      authBox.querySelector('#logout-btn').addEventListener('click', async () => {
+    // Logout (when authed)
+    const logoutBtn = APP_EL.querySelector('#logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
         await api.signOut();
-        store.setUser(null);
         toast('Disconnesso');
-        // Stay on this page; re-render so the form becomes disabled again
-        route();
+        renderApply(position.slug || position.id);
       });
-    } else {
-      bindAuthForm(authBox, position);
     }
 
-    // Form submit — only runs when authed; otherwise the form is disabled.
+    // Signup ↔ signin toggle
+    const toSignin = APP_EL.querySelector('#switch-to-signin');
+    if (toSignin) {
+      toSignin.addEventListener('click', () => {
+        APP_EL.querySelector('.form-section-account').outerHTML = accountBlockSignin();
+        const back = APP_EL.querySelector('#switch-to-signup');
+        if (back) back.addEventListener('click', () => {
+          APP_EL.querySelector('.form-section-account').outerHTML = accountBlockSignup();
+          bindApplyFormToggles(position);
+        });
+      });
+    }
+    const toSignup = APP_EL.querySelector('#switch-to-signup');
+    if (toSignup) {
+      toSignup.addEventListener('click', () => {
+        APP_EL.querySelector('.form-section-account').outerHTML = accountBlockSignup();
+        bindApplyFormToggles(position);
+      });
+    }
+
+    // Submit
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      if (!store.isAuthed) { toast('Devi prima creare un account o accedere', true); return; }
       submitApplication(position);
     });
   }
 
-  function bindAuthForm(root, position) {
-    const authForm = root.querySelector('#auth-form');
-    const toggleLink = root.querySelector('#auth-toggle-link');
-    const titleEl    = root.querySelector('#auth-title');
-    const subEl      = root.querySelector('#auth-subtitle');
-    const btnText    = root.querySelector('#auth-btn-text');
-    const toggleText = root.querySelector('#auth-toggle-text');
-    const btn        = root.querySelector('#auth-btn');
-    const emailInp   = root.querySelector('#auth-email');
-    const passInp    = root.querySelector('#auth-pass');
-
-    toggleLink.addEventListener('click', () => {
-      const isSignup = authForm.dataset.mode === 'signup';
-      authForm.dataset.mode = isSignup ? 'signin' : 'signup';
-      titleEl.textContent    = isSignup ? 'Accedi' : 'Crea il tuo account';
-      subEl.textContent      = isSignup ? 'Usa le credenziali del tuo account.'
-                                        : 'Serve un account per candidarti e completare i quiz.';
-      btnText.textContent    = isSignup ? 'Accedi' : 'Crea account';
-      toggleText.textContent = isSignup ? 'Non hai un account?' : 'Hai già un account?';
-      toggleLink.textContent = isSignup ? 'Registrati' : 'Accedi';
+  // Re-bind toggle links after account block swaps
+  function bindApplyFormToggles(position) {
+    const toSignin = APP_EL.querySelector('#switch-to-signin');
+    if (toSignin) toSignin.addEventListener('click', () => {
+      APP_EL.querySelector('.form-section-account').outerHTML = accountBlockSignin();
+      bindApplyFormToggles(position);
     });
-
-    btn.addEventListener('click', async () => {
-      const email = emailInp.value.trim();
-      const pass  = passInp.value;
-      if (!email || !pass) { toast('Compila email e password', true); return; }
-      if (pass.length < 6) { toast('La password deve essere di almeno 6 caratteri', true); return; }
-
-      btn.disabled = true;
-      const original = btnText.textContent;
-      btnText.textContent = 'Attendere...';
-
-      try {
-        if (authForm.dataset.mode === 'signup') {
-          await api.signUp(email, pass);
-          toast('Account creato!');
-        } else {
-          await api.signIn(email, pass);
-          toast('Accesso effettuato!');
-        }
-        await store.hydrate();
-        // Re-render apply page with authed state (prefills name fields if candidate exists)
-        renderApply(position.slug || position.id);
-      } catch (err) {
-        toast(err.message || 'Errore di autenticazione', true);
-        btn.disabled = false;
-        btnText.textContent = original;
-      }
+    const toSignup = APP_EL.querySelector('#switch-to-signup');
+    if (toSignup) toSignup.addEventListener('click', () => {
+      APP_EL.querySelector('.form-section-account').outerHTML = accountBlockSignup();
+      bindApplyFormToggles(position);
     });
   }
 
-  // The sequenced submit: candidate → CV → application.
-  // Must be this order because of RLS (CV path must match candidate id;
-  // application requires cv_file_path NOT NULL).
   async function submitApplication(position) {
     const btn = APP_EL.querySelector('#apply-submit-btn');
     const first = APP_EL.querySelector('#f-first').value.trim();
@@ -986,33 +930,68 @@
     const linkedin = APP_EL.querySelector('#f-linkedin').value.trim();
     const cover = APP_EL.querySelector('#f-cover').value.trim();
     const cvFile = APP_EL.querySelector('#f-cv').files[0];
+    const consent = APP_EL.querySelector('#f-consent').checked;
 
     // Validation
+    if (!consent) { toast('Devi accettare il trattamento dei dati', true); return; }
     if (!first || !last) { toast('Nome e cognome sono obbligatori', true); return; }
     if (!cvFile) { toast('Il CV è obbligatorio', true); return; }
     if (cvFile.type !== 'application/pdf') { toast('Il CV deve essere in formato PDF', true); return; }
     if (cvFile.size > 10 * 1024 * 1024) { toast('Il CV non può superare 10 MB', true); return; }
 
+    // Auth fields (only present when not logged in)
+    const accountSection = APP_EL.querySelector('.form-section-account');
+    const needsAuth = accountSection && !accountSection.classList.contains('form-section-authed');
+    let email, password, isSignup;
+    if (needsAuth) {
+      email = APP_EL.querySelector('#f-email').value.trim();
+      password = APP_EL.querySelector('#f-pass').value;
+      if (!email || !password) { toast('Compila email e password', true); return; }
+      // "signup" mode if the block shows "Crea il tuo account"
+      isSignup = !!accountSection.querySelector('#switch-to-signin');
+      if (isSignup && password.length < 6) {
+        toast('La password deve essere di almeno 6 caratteri', true); return;
+      }
+    }
+
     btn.disabled = true;
+    const originalBtnHtml = btn.innerHTML;
     btn.textContent = 'Invio in corso...';
-    dlog('submitApplication: starting', { positionId: position.id });
 
     try {
-      // 1. Upsert candidate row
-      dlog('submitApplication: step 1/4 — candidate upsert');
-      const candidate = await api.upsertCandidate({
+      // Step 0: auth (signup or signin) if not logged in
+      if (needsAuth) {
+        dlog('submit step 0: auth', isSignup ? 'signup' : 'signin');
+        if (isSignup) await api.signUp(email, password);
+        else          await api.signIn(email, password);
+        // After signup with confirmation disabled, session exists.
+        if (!store.isAuthed) throw new Error('Impossibile creare la sessione. Controlla la mail per confermare l\'account.');
+      }
+
+      // Step 1: ensure candidate row
+      dlog('submit step 1: candidate row');
+      let candidate = store.candidate;
+      if (!candidate) {
+        // Might exist from a previous session
+        candidate = await api.getMyCandidate();
+      }
+      const candidatePayload = {
         user_id: store.user.id,
         first_name: first,
         last_name: last,
         email: store.user.email,
         phone: phone || null,
         linkedin_url: linkedin || null,
-      });
+      };
+      if (candidate) {
+        candidate = await api.updateCandidate(candidate.id, candidatePayload);
+      } else {
+        candidate = await api.insertCandidate(candidatePayload);
+      }
       store.setCandidate(candidate);
 
-      // 2. Guard against duplicate applications (could happen if they
-      //    opened two tabs and applied on both).
-      dlog('submitApplication: step 2/4 — duplicate check');
+      // Step 2: duplicate guard
+      dlog('submit step 2: duplicate check');
       const existing = await api.findExistingApplication(position.id, candidate.id);
       if (existing) {
         toast('Hai già una candidatura per questa posizione', true);
@@ -1020,12 +999,12 @@
         return;
       }
 
-      // 3. Upload CV
-      dlog('submitApplication: step 3/4 — CV upload');
+      // Step 3: CV upload
+      dlog('submit step 3: CV upload');
       const cvPath = await api.uploadCV(candidate.id, cvFile);
 
-      // 4. Create application
-      dlog('submitApplication: step 4/4 — application insert');
+      // Step 4: application insert
+      dlog('submit step 4: application insert');
       await api.createApplication({
         position_id: position.id,
         candidate_id: candidate.id,
@@ -1034,25 +1013,20 @@
         cover_letter: cover || null,
       });
 
-      dlog('submitApplication: done');
+      dlog('submit: all steps complete');
       toast('Candidatura inviata! 🎉');
       setTimeout(() => { location.hash = '#/portal'; }, 1200);
 
     } catch (err) {
-      derr('submitApplication: failed', err);
+      derr('submit failed', err);
       toast(err.message || 'Errore durante l\'invio', true);
       btn.disabled = false;
-      btn.innerHTML = `
-        Invia candidatura
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-        </svg>
-      `;
+      btn.innerHTML = originalBtnHtml;
     }
   }
 
 
-  /* ── 6.3 — Portal (candidate dashboard) ── */
+  // ─── 9.3 Portal ─────────────────────────────────────
 
   async function renderPortal() {
     if (!store.candidate) {
@@ -1095,13 +1069,9 @@
         </div>
       </section>
       <section class="portal-section">
-        ${apps.length > 0
+        ${apps.length
           ? apps.map(applicationCard).join('')
-          : emptyState(
-              'Nessuna candidatura',
-              'Inizia dando un\'occhiata alle posizioni aperte.',
-              '#/', 'Vedi posizioni aperte'
-            )
+          : emptyState('Nessuna candidatura', 'Inizia dando un\'occhiata alle posizioni aperte.', '#/', 'Vedi posizioni aperte')
         }
       </section>
     `;
@@ -1115,23 +1085,22 @@
     if (p.pre_quiz_id) quizzes.push({
       type: 'pre', label: 'Quiz Logica', icon: '🧠',
       subtitle: 'Ragionamento logico e problem solving',
-      duration: '25 minuti',
+      duration: '25 min',
       done: !!app.pre_quiz_completed_at,
       score: app.pre_quiz_score, max: app.pre_quiz_max_score,
     });
     if (p.post_quiz_id) quizzes.push({
       type: 'post', label: 'Quiz Skills', icon: '💻',
       subtitle: 'Competenze tecniche per il ruolo',
-      duration: '35 minuti',
+      duration: '35 min',
       done: !!app.post_quiz_completed_at,
       score: app.post_quiz_score, max: app.post_quiz_max_score,
     });
     if (p.att_quiz_id) quizzes.push({
       type: 'att', label: 'Domande Attitudinali', icon: '💬',
       subtitle: 'Motivazione, cultura e modo di lavorare',
-      duration: 'Nessun limite',
+      duration: 'Libero',
       done: !!app.att_quiz_completed_at,
-      score: null, max: null,
     });
 
     return `
@@ -1143,15 +1112,10 @@
           </div>
           <span class="status-badge status-${escapeHtml(app.status)}">${escapeHtml(APP_STATUS_LABELS[app.status] || app.status)}</span>
         </div>
-        ${quizzes.length > 0 ? `
-          <div class="quiz-rows">
-            ${quizzes.map((q) => quizRow(app.id, q)).join('')}
-          </div>
-        ` : `
-          <p style="font-size:13px; color:var(--muted-soft); font-weight:300">
-            Nessun quiz per questa posizione.
-          </p>
-        `}
+        ${quizzes.length
+          ? `<div class="quiz-rows">${quizzes.map((q) => quizRow(app.id, q)).join('')}</div>`
+          : '<p class="quiz-empty">Nessun quiz per questa posizione.</p>'
+        }
       </div>
     `;
   }
@@ -1160,7 +1124,6 @@
     if (q.done) {
       let scoreEl;
       if (q.type === 'att') {
-        // Attitudinal: no percentage to show (composite is admin-only)
         scoreEl = `<div class="quiz-row-score score-good">✓<div class="score-sub">Completato</div></div>`;
       } else if (q.score != null && q.max) {
         const pct = Math.round((q.score / q.max) * 100);
@@ -1196,9 +1159,7 @@
             <div class="meta-duration">⏱ ${escapeHtml(q.duration)}</div>
             <div class="meta-sub">Non completato</div>
           </div>
-          <a href="#/quiz-overview/${encodeURIComponent(appId)}/${encodeURIComponent(q.type)}" class="quiz-go-btn">
-            Inizia
-          </a>
+          <a href="#/quiz-overview/${encodeURIComponent(appId)}/${encodeURIComponent(q.type)}" class="quiz-go-btn">Inizia</a>
         </div>
       </div>
     `;
@@ -1209,40 +1170,39 @@
     if (!btn) return;
     btn.addEventListener('click', async () => {
       await api.signOut();
-      store.setUser(null);
       toast('Disconnesso');
       location.hash = '#/';
     });
   }
 
 
-  /* ── 6.4 — Quiz overview (briefing page) ── */
+  // ─── 9.4 Quiz overview ──────────────────────────────
 
   const QUIZ_TYPE_INFO = {
     pre: {
       icon: '🧠', title: 'Quiz Logica',
-      desc: 'Questo quiz valuta le tue capacità di ragionamento logico, problem solving e pensiero critico. Include domande a scelta multipla e domande di ranking.',
+      desc: 'Valutiamo le tue capacità di ragionamento logico, problem solving e pensiero critico. Include domande a scelta multipla e domande di ranking.',
       rules: [
         'Alcune domande a scelta multipla possono avere più risposte corrette',
         'Nelle domande di ranking trascina gli elementi per ordinarli',
-        'Rispondi con calma — la qualità conta più della velocità',
+        'La qualità conta più della velocità',
       ],
     },
     post: {
       icon: '💻', title: 'Quiz Skills',
-      desc: 'Questo quiz valuta le tue competenze tecniche specifiche per il ruolo. Include domande teoriche, scenari pratici e ranking di opzioni.',
+      desc: 'Valutiamo le tue competenze tecniche specifiche per il ruolo. Include domande teoriche, scenari pratici e ranking.',
       rules: [
         'Le domande sono specifiche per la posizione a cui ti sei candidato',
         'Per le domande aperte, sii concreto e usa esempi reali',
-        'Non c\'è penalità per risposte errate — meglio provare che lasciare in bianco',
+        'Meglio provare che lasciare in bianco',
       ],
     },
     att: {
       icon: '💬', title: 'Domande Attitudinali',
-      desc: 'Queste domande ci aiutano a conoscerti meglio come persona e professionista. Non ci sono risposte giuste o sbagliate — vogliamo capire come lavori.',
+      desc: 'Queste domande ci aiutano a conoscerti meglio. Non ci sono risposte giuste o sbagliate — vogliamo capire come lavori.',
       rules: [
-        'Rispondi in modo autentico — la coerenza conta più della "risposta giusta"',
-        'Non c\'è un limite di tempo: prenditi tutto lo spazio che ti serve',
+        'Rispondi in modo autentico: la coerenza conta più della "risposta giusta"',
+        'Non c\'è un limite di tempo',
         'Le tue risposte guidano il colloquio, non lo sostituiscono',
       ],
     },
@@ -1252,52 +1212,40 @@
     const info = QUIZ_TYPE_INFO[quizType];
     if (!info) { toast('Quiz non valido', true); location.hash = '#/portal'; return; }
 
-    let app, quiz, count;
+    let app, quiz;
     try {
       app = await api.getApplicationWithPosition(applicationId);
-      if (!app) throw new Error('not found');
-      const p = app.position;
-      const quizId = quizType === 'pre' ? p.pre_quiz_id
-                   : quizType === 'post' ? p.post_quiz_id
-                   : p.att_quiz_id;
-      if (!quizId) throw new Error('quiz not configured');
+      if (!app) throw new Error('Candidatura non trovata');
 
-      // Fetch quiz meta (RLS blocks this for candidates — fall back to the RPC,
-      // which we'll call with an intermediate path: use the quiz row inside the
-      // payload for title/description/duration, and ask for question count via RPC).
-      // Simpler: the RPC returns title + description + duration_minutes + questions.
-      // We use the RPC here *just to populate the overview*. It's the same RPC the
-      // quiz page will use; both call sites go through the session cache so the
-      // shuffle order is stable.
       const cached = readQuizCache(applicationId, quizType);
       if (cached) {
         quiz = cached;
       } else {
         quiz = await api.getQuizForCandidate(applicationId, quizType);
-        if (!quiz) throw new Error('quiz not found');
+        if (!quiz) throw new Error('Quiz non disponibile');
         writeQuizCache(applicationId, quizType, quiz);
       }
-      count = Array.isArray(quiz.questions) ? quiz.questions.length : 0;
     } catch (err) {
-      console.error('overview load failed', err);
-      toast(err.message || 'Errore nel caricamento', true);
+      derr('overview load', err);
+      toast(err.message || 'Errore', true);
       location.hash = '#/portal';
       return;
     }
 
-    // Completion guard: if already done, send back to portal
-    const completedMap = {
+    const doneMap = {
       pre: app.pre_quiz_completed_at,
       post: app.post_quiz_completed_at,
       att: app.att_quiz_completed_at,
     };
-    if (completedMap[quizType]) {
+    if (doneMap[quizType]) {
       toast('Hai già completato questo quiz');
       location.hash = '#/portal';
       return;
     }
 
+    const count = Array.isArray(quiz.questions) ? quiz.questions.length : 0;
     const p = app.position;
+
     APP_EL.innerHTML = `
       <div class="quiz-overview">
         <a href="#/portal" class="job-back">← Le mie candidature</a>
@@ -1322,16 +1270,14 @@
           </div>
           <div class="quiz-overview-rules">
             <p class="rules-title">Da sapere prima di iniziare:</p>
-            <ul>
-              ${info.rules.map((r) => `<li>${escapeHtml(r)}</li>`).join('')}
-            </ul>
+            <ul>${info.rules.map((r) => `<li>${escapeHtml(r)}</li>`).join('')}</ul>
           </div>
         </div>
 
         <div class="quiz-overview-warn">
           <p class="warn-title">⚠️ Importante</p>
           <p class="warn-body">
-            Non condividere, copiare o divulgare il contenuto di questo quiz in nessuna forma.
+            Non condividere, copiare o divulgare il contenuto di questo quiz.
             Le risposte devono essere il frutto del tuo lavoro personale.
             ${quiz.duration_minutes ? 'Il timer partirà nel momento in cui clicchi "Inizia il quiz".' : ''}
           </p>
@@ -1352,74 +1298,57 @@
   }
 
 
-  /* ── 6.5 — Quiz (taking page) ── */
+  // ─── 9.5 Quiz ───────────────────────────────────────
 
   async function renderQuiz(applicationId, quizType) {
     let app, quiz;
     try {
       app = await api.getApplicationWithPosition(applicationId);
-      if (!app) throw new Error('not found');
-      // Completion guard
-      const completedMap = {
+      if (!app) throw new Error('Candidatura non trovata');
+
+      const doneMap = {
         pre: app.pre_quiz_completed_at,
         post: app.post_quiz_completed_at,
         att: app.att_quiz_completed_at,
       };
-      if (completedMap[quizType]) {
+      if (doneMap[quizType]) {
         toast('Hai già completato questo quiz');
         location.hash = '#/portal';
         return;
       }
 
-      // Reuse cached payload if present — keeps shuffle stable on refresh.
       const cached = readQuizCache(applicationId, quizType);
-      if (cached) {
-        quiz = cached;
-      } else {
+      if (cached) quiz = cached;
+      else {
         quiz = await api.getQuizForCandidate(applicationId, quizType);
-        if (!quiz) throw new Error('quiz not found');
+        if (!quiz) throw new Error('Quiz non disponibile');
         writeQuizCache(applicationId, quizType, quiz);
       }
     } catch (err) {
-      console.error('quiz load failed', err);
-      toast(err.message || 'Errore nel caricamento', true);
+      derr('quiz load', err);
+      toast(err.message || 'Errore', true);
       location.hash = '#/portal';
       return;
     }
 
     const questions = Array.isArray(quiz.questions) ? quiz.questions : [];
-    dlog('renderQuiz: mounted', {
-      quizId: quiz.quiz_id, title: quiz.title,
-      questionCount: questions.length, types: questions.map((q) => q.question_type),
-      duration: quiz.duration_minutes, fromCache: !!readQuizCache(applicationId, quizType),
-    });
-    if (questions.length === 0) {
-      APP_EL.innerHTML = emptyState(
-        'Quiz non disponibile',
-        'Questo quiz non ha ancora domande configurate.',
-        '#/portal', 'Torna al portale'
-      );
+    if (!questions.length) {
+      APP_EL.innerHTML = emptyState('Quiz non disponibile', 'Questo quiz non ha ancora domande configurate.', '#/portal', 'Torna al portale');
       return;
     }
+    dlog('renderQuiz:', { quizId: quiz.quiz_id, count: questions.length, types: questions.map((q) => q.question_type) });
 
-    // Timer: captured when the quiz is first mounted on this page,
-    // passed unchanged through to submit_quiz.
     const startedAt = new Date();
     const durationMs = quiz.duration_minutes ? quiz.duration_minutes * 60000 : null;
 
-    // Answers map: { [question_id]: answer }
-    //   MC:      [index, index, ...]   (0-based indices into options)
-    //   ranking: [id, id, id, ...]     (option ids, ordered top→bottom)
+    // answers shape:
+    //   MC:      [index, ...]           0-based indices
+    //   ranking: ["id", ...]            option IDs, top→bottom
     //   open:    "string"
     const answers = {};
-
-    // For ranking questions: initial order is the RPC's shuffled order.
-    // Seed the answers map with current visual order so a submit-without-
-    // interaction still records a valid (if random) ranking.
     for (const q of questions) {
       if (q.question_type === 'ranking') {
-        const opts = (q.config && q.config.options) || [];
-        answers[q.id] = opts.map((o) => o.id);
+        answers[q.id] = ((q.config && q.config.options) || []).map((o) => o.id);
       } else if (q.question_type === 'multiple_choice') {
         answers[q.id] = [];
       } else if (q.question_type === 'open_text') {
@@ -1447,21 +1376,20 @@
       </div>
     `;
 
-    // Bindings
     bindMultipleChoice(questions, answers);
     bindOpenText(questions, answers);
     const rankingTeardown = bindRanking(questions, answers);
 
-    let timerId = null;
-    let expired = false;
+    // Timer
+    let timerId = null, expired = false;
     if (durationMs) {
       const timerEl = APP_EL.querySelector('#quiz-timer');
       const tick = () => {
         const elapsed = Date.now() - startedAt.getTime();
         const remaining = Math.max(0, durationMs - elapsed);
-        const mins = Math.floor(remaining / 60000);
-        const secs = Math.floor((remaining % 60000) / 1000);
-        timerEl.textContent = `⏱ ${mins}:${String(secs).padStart(2, '0')}`;
+        const m = Math.floor(remaining / 60000);
+        const s = Math.floor((remaining % 60000) / 1000);
+        timerEl.textContent = `⏱ ${m}:${String(s).padStart(2, '0')}`;
         if (remaining < 300000) timerEl.classList.add('warning');
         if (remaining <= 0 && !expired) {
           expired = true;
@@ -1482,13 +1410,12 @@
 
     let submitting = false;
     async function doSubmit() {
-      if (submitting) { dlog('doSubmit: already submitting, ignoring');  return; }
+      if (submitting) { dlog('doSubmit: already submitting'); return; }
       submitting = true;
       submitBtn.disabled = true;
       submitBtn.textContent = 'Invio in corso...';
-      dlog('doSubmit: starting', { quizType, answerCount: Object.keys(answers).length });
-
       const completedAt = new Date();
+      dlog('doSubmit:', { quizType, answerCount: Object.keys(answers).length });
 
       try {
         const result = await api.submitQuiz(
@@ -1496,9 +1423,8 @@
           startedAt.toISOString(), completedAt.toISOString()
         );
         clearQuizCache(applicationId, quizType);
-        dlog('doSubmit: success', result);
+        dlog('doSubmit success', result);
 
-        // For logic/skills, show a small thank-you with score; for att, no score.
         const hasScore = quizType !== 'att' && result && result.max_score > 0;
         if (hasScore) {
           const pct = Math.round((result.total_score / result.max_score) * 100);
@@ -1508,28 +1434,22 @@
         }
         setTimeout(() => { location.hash = '#/portal'; }, 1500);
       } catch (err) {
-        derr('doSubmit: submit failed', err);
+        derr('doSubmit failed', err);
 
-        // [DEBUG] If we timed out, the RPC may have actually succeeded server-side.
-        // Check the application row to see if the quiz was recorded — if yes,
-        // don't let the user re-submit (we'd overwrite).
+        // Timeout-safety: the RPC may have actually landed
         if (err && err.isTimeout) {
-          dlog('doSubmit: timeout → checking if submission actually landed');
           try {
             const check = await api.getApplicationWithPosition(applicationId);
-            const completedField = quizType === 'pre'  ? check?.pre_quiz_completed_at
-                                 : quizType === 'post' ? check?.post_quiz_completed_at
-                                 :                       check?.att_quiz_completed_at;
-            if (completedField) {
-              dlog('doSubmit: quiz actually landed — redirecting to portal');
+            const field = quizType === 'pre'  ? check?.pre_quiz_completed_at
+                        : quizType === 'post' ? check?.post_quiz_completed_at
+                        :                       check?.att_quiz_completed_at;
+            if (field) {
               clearQuizCache(applicationId, quizType);
               toast('Quiz completato! 🎉');
               setTimeout(() => { location.hash = '#/portal'; }, 1200);
               return;
             }
-          } catch (checkErr) {
-            derr('doSubmit: post-timeout check also failed', checkErr);
-          }
+          } catch (e2) { derr('post-timeout check', e2); }
         }
 
         toast(err.message || 'Errore durante l\'invio', true);
@@ -1544,7 +1464,6 @@
       }
     }
 
-    // Teardown
     return () => {
       if (timerId) clearInterval(timerId);
       if (typeof rankingTeardown === 'function') rankingTeardown();
@@ -1553,7 +1472,7 @@
 
 
   /* ─────────────────────────────────────────────────────────────
-     §7 — Quiz renderers (markup + bindings per question type)
+     §10 — Quiz renderers + ranking drag-drop
      ─────────────────────────────────────────────────────────── */
 
   function questionHtml(q, index, total) {
@@ -1561,17 +1480,12 @@
     const points = q.points > 0 ? ` · ${q.points} punti` : '';
 
     let body;
-    if (q.question_type === 'multiple_choice') {
-      body = mcHtml(q);
-    } else if (q.question_type === 'ranking') {
-      body = rankingHtml(q);
-    } else if (q.question_type === 'open_text') {
-      body = `<textarea class="open-textarea" data-question-id="${escapeHtml(q.id)}"
-                placeholder="Scrivi la tua risposta..." rows="6"></textarea>`;
+    if (q.question_type === 'multiple_choice') body = mcHtml(q);
+    else if (q.question_type === 'ranking') body = rankingHtml(q);
+    else if (q.question_type === 'open_text') {
+      body = `<textarea class="open-textarea" data-question-id="${escapeHtml(q.id)}" placeholder="Scrivi la tua risposta..." rows="6"></textarea>`;
     } else if (q.question_type === 'file_upload') {
-      body = `<div class="file-upload-placeholder">
-        Upload di file sarà disponibile a breve. Puoi proseguire senza caricare nulla per ora.
-      </div>`;
+      body = `<div class="file-upload-placeholder">Upload file disponibile a breve. Puoi proseguire senza caricare nulla.</div>`;
     } else {
       body = `<div class="file-upload-placeholder">Tipo di domanda non supportato: ${escapeHtml(q.question_type)}</div>`;
     }
@@ -1589,31 +1503,22 @@
   function mcHtml(q) {
     const options = (q.config && q.config.options) || [];
     const multi = !!(q.config && q.config.allow_multiple);
-    if (multi) {
-      // Small hint so candidates know multi is allowed
-      const hint = `<p class="question-hint">Puoi selezionare più risposte.</p>`;
-      return hint + options.map((opt, j) => mcOptionHtml(q.id, opt, j, true)).join('');
-    }
-    return options.map((opt, j) => mcOptionHtml(q.id, opt, j, false)).join('');
+    const hint = multi ? `<p class="question-hint">Puoi selezionare più risposte.</p>` : '';
+    return hint + options.map((opt, j) => mcOptionHtml(q.id, opt, j, multi)).join('');
   }
 
   function mcOptionHtml(qId, opt, index, multi) {
-    // Options are strings (per schema); but be defensive in case admin
-    // swaps to object-options with images later.
     let label, imgUrl = null;
-    if (typeof opt === 'string') {
-      label = opt;
-    } else if (opt && typeof opt === 'object') {
+    if (typeof opt === 'string') label = opt;
+    else if (opt && typeof opt === 'object') {
       label = opt.label || opt.text || '';
       imgUrl = optionImageUrl(opt);
-    } else {
-      label = String(opt);
-    }
+    } else label = String(opt);
     const box = multi ? '<div class="mc-checkbox"></div>' : '<div class="mc-radio"></div>';
     return `
       <div class="mc-option" data-question-id="${escapeHtml(qId)}" data-value="${index}">
         ${box}
-        <div style="flex:1; min-width:0">
+        <div style="flex:1;min-width:0">
           <span class="mc-label">${escapeHtml(label)}</span>
           ${imgUrl ? `<img class="mc-option-image" src="${escapeHtml(imgUrl)}" alt="">` : ''}
         </div>
@@ -1648,7 +1553,6 @@
         const q = questions.find((x) => x.id === qId);
         if (!q) return;
         const multi = !!(q.config && q.config.allow_multiple);
-
         if (multi) {
           if (!Array.isArray(answers[qId])) answers[qId] = [];
           const idx = answers[qId].indexOf(val);
@@ -1657,13 +1561,10 @@
         } else {
           answers[qId] = [val];
         }
-
-        // Update UI within this question's options
         const card = opt.closest('.question-card');
         card.querySelectorAll('.mc-option').forEach((o) => {
           const v = parseInt(o.dataset.value, 10);
-          const selected = (answers[qId] || []).includes(v);
-          o.classList.toggle('selected', selected);
+          o.classList.toggle('selected', (answers[qId] || []).includes(v));
         });
       });
     });
@@ -1671,18 +1572,9 @@
 
   function bindOpenText(questions, answers) {
     APP_EL.querySelectorAll('.open-textarea').forEach((ta) => {
-      ta.addEventListener('input', () => {
-        answers[ta.dataset.questionId] = ta.value;
-      });
+      ta.addEventListener('input', () => { answers[ta.dataset.questionId] = ta.value; });
     });
   }
-
-
-  /* ─────────────────────────────────────────────────────────────
-     §8 — Ranking drag-drop
-       HTML5 DnD, no library. On drop, rewrite the answers[] array
-       for that question in the new visual order.
-     ─────────────────────────────────────────────────────────── */
 
   function bindRanking(questions, answers) {
     const lists = APP_EL.querySelectorAll('.ranking-list');
@@ -1697,16 +1589,13 @@
         dragged = item;
         item.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
-        // Firefox requires setData to start a drag
         try { e.dataTransfer.setData('text/plain', item.dataset.optionId || ''); } catch {}
       };
-
       const onDragEnd = () => {
         if (dragged) dragged.classList.remove('dragging');
         dragged = null;
         list.querySelectorAll('.drop-target').forEach((el) => el.classList.remove('drop-target'));
       };
-
       const onDragOver = (e) => {
         e.preventDefault();
         if (!dragged) return;
@@ -1715,34 +1604,24 @@
         list.querySelectorAll('.drop-target').forEach((el) => el.classList.remove('drop-target'));
         if (!target || target === dragged || target.parentElement !== list) return;
         target.classList.add('drop-target');
-
-        // Decide insert before or after based on midline
         const rect = target.getBoundingClientRect();
-        const midpoint = rect.top + rect.height / 2;
-        if (e.clientY < midpoint) {
-          list.insertBefore(dragged, target);
-        } else {
-          list.insertBefore(dragged, target.nextSibling);
-        }
+        const mid = rect.top + rect.height / 2;
+        if (e.clientY < mid) list.insertBefore(dragged, target);
+        else list.insertBefore(dragged, target.nextSibling);
       };
-
       const onDrop = (e) => {
         e.preventDefault();
         list.querySelectorAll('.drop-target').forEach((el) => el.classList.remove('drop-target'));
-        // Rewrite answer array & rank badges from current DOM order
         const qId = list.dataset.questionId;
         const items = Array.from(list.querySelectorAll('.ranking-item'));
         answers[qId] = items.map((it) => it.dataset.optionId);
-        items.forEach((it, i) => {
-          it.querySelector('.ranking-rank').textContent = String(i + 1);
-        });
+        items.forEach((it, i) => { it.querySelector('.ranking-rank').textContent = String(i + 1); });
       };
 
       list.addEventListener('dragstart', onDragStart);
       list.addEventListener('dragend', onDragEnd);
       list.addEventListener('dragover', onDragOver);
       list.addEventListener('drop', onDrop);
-
       cleanups.push(() => {
         list.removeEventListener('dragstart', onDragStart);
         list.removeEventListener('dragend', onDragEnd);
@@ -1756,47 +1635,38 @@
 
 
   /* ─────────────────────────────────────────────────────────────
-     Empty state helper
+     §11 — Bootstrap
      ─────────────────────────────────────────────────────────── */
 
-  function emptyState(title, body, href, linkLabel) {
-    return `
-      <div class="empty-state">
-        <h2>${escapeHtml(title)}</h2>
-        <p>${escapeHtml(body)}</p>
-        <a href="${escapeHtml(href)}" class="submit-btn" style="text-decoration:none">
-          ${escapeHtml(linkLabel)}
-        </a>
-      </div>
-    `;
-  }
-
-
-  /* ─────────────────────────────────────────────────────────────
-     §9 — Bootstrap
-     ─────────────────────────────────────────────────────────── */
-
-  // Keep local store in sync when the user logs in/out elsewhere
-  // (e.g. multi-tab) and route if the session changes.
-  sb.auth.onAuthStateChange(async (event, session) => {
-    dlog('auth event:', event, 'user:', session?.user?.email || '(none)');   // [DEBUG]
-    store.setUser(session?.user || null);
-    if (session?.user) {
-      try { await store.loadCandidate(); }
-      catch (e) { derr('loadCandidate on auth event', e); }
-    }
-  });
+  // Console escape hatch
+  window.__amia = {
+    version: 'careers-v2',
+    session, store, api,
+    reset: async () => {
+      try { await api.signOut(); } catch {}
+      for (let i = sessionStorage.length - 1; i >= 0; i--) {
+        const k = sessionStorage.key(i);
+        if (k && k.startsWith(QUIZ_CACHE_PREFIX)) sessionStorage.removeItem(k);
+      }
+      location.hash = '#/';
+      location.reload();
+    },
+    state: () => ({
+      user: store.user && { id: store.user.id, email: store.user.email },
+      candidate: store.candidate && { id: store.candidate.id, name: store.candidate.first_name },
+      route: location.hash,
+    }),
+  };
 
   window.addEventListener('hashchange', route);
 
   (async function boot() {
-    dlog('boot: starting');                                                   // [DEBUG]
+    dlog('boot — script.js v2 loaded');
     try {
-      await withTimeout(store.hydrate(), 'boot.hydrate', 10000);
+      await store.hydrate();
     } catch (e) {
-      derr('boot: hydrate failed — continuing as anon', e);
+      derr('boot hydrate failed (continuing)', e);
     }
-    dlog('boot: routing');                                                    // [DEBUG]
     route();
   })();
 

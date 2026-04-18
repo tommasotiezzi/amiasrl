@@ -1,61 +1,64 @@
 /* ─────────────────────────────────────────────────────────────
-   Amia Careers — stylesheet
-   Visual language based on the marketing site style2.css:
-   Manrope, amia grayscale, gradient accent bar, 16px radius.
+   Amia Careers — stylesheet (v2)
+
+   Visual language:
+     - Manrope font
+     - amia grayscale palette
+     - Gradient accent bars on cards (yellow → coral → pink)
+     - 16px radii
    ─────────────────────────────────────────────────────────── */
 
 
-/* ── Tokens ── */
+/* ═══ §1 — Tokens ══════════════════════════════════════════ */
 
 :root {
-  --bg:            #ffffff;
-  --bg-soft:       #f7f6f3;
-  --bg-subtle:     #fafafa;
-  --ink:           #141414;
-  --ink-soft:      #444;
-  --muted:         #666;
-  --muted-soft:    #999;
-  --muted-light:   #bbb;
-  --border:        #e6e6e6;
-  --border-soft:   #eee;
-  --hover-bg:      #f1f1ef;
+  --bg:           #ffffff;
+  --bg-soft:      #f7f6f3;
+  --bg-subtle:    #fafafa;
+  --ink:          #141414;
+  --ink-soft:     #444;
+  --muted:        #666;
+  --muted-soft:   #999;
+  --muted-light:  #bbb;
+  --border:       #e6e6e6;
+  --border-soft:  #eee;
 
-  --tag-bg:        #ebeced;
-  --tag-ink:       #787774;
+  --tag-bg:       #ebeced;
+  --tag-ink:      #787774;
 
-  --good-bg:       #e6f4ea;
-  --good-bg-soft:  #f8faf8;
-  --good-border:   #d4e8da;
-  --good-ink:      #1b7a3d;
+  --good-bg:      #e6f4ea;
+  --good-bg-soft: #f8faf8;
+  --good-border:  #d4e8da;
+  --good-ink:     #1b7a3d;
 
-  --warn-bg:       #fef3e0;
-  --warn-bg-soft:  #fff9f0;
-  --warn-border:   #fde8c8;
-  --warn-ink:      #e65100;
-  --warn-ink-soft: #bf5600;
+  --warn-bg:      #fef3e0;
+  --warn-bg-soft: #fff9f0;
+  --warn-border:  #fde8c8;
+  --warn-ink:     #e65100;
+  --warn-ink-soft:#bf5600;
 
-  --bad-bg:        #fce8e6;
-  --bad-ink:       #c62828;
+  --bad-bg:       #fce8e6;
+  --bad-ink:      #c62828;
 
-  --info-bg:       #e8f0fe;
-  --info-ink:      #1a73e8;
+  --info-bg:      #e8f0fe;
+  --info-ink:     #1a73e8;
 
-  --accent-grad:   linear-gradient(180deg, #FFE367 0%, #FF6444 50%, #FF6ADE 100%);
-  --brand-grad:    linear-gradient(135deg, #FF6444 0%, #FF6ADE 100%);
+  --accent-grad:  linear-gradient(180deg, #FFE367 0%, #FF6444 50%, #FF6ADE 100%);
+  --brand-grad:   linear-gradient(135deg, #FF6444 0%, #FF6ADE 100%);
 
-  --shadow-sm:     0 4px 16px rgba(0,0,0,0.06);
-  --shadow-md:     0 8px 32px rgba(0,0,0,0.08);
-  --shadow-lg:     0 8px 32px rgba(0,0,0,0.12);
-  --shadow-btn:    0 8px 32px rgba(0,0,0,0.15);
+  --shadow-sm:    0 4px 16px rgba(0,0,0,0.06);
+  --shadow-md:    0 8px 32px rgba(0,0,0,0.08);
+  --shadow-lg:    0 8px 32px rgba(0,0,0,0.12);
+  --shadow-btn:   0 8px 32px rgba(0,0,0,0.15);
 
-  --radius-sm:     8px;
-  --radius-md:     12px;
-  --radius-lg:     16px;
-  --radius-pill:   50px;
+  --radius-sm:    8px;
+  --radius-md:    12px;
+  --radius-lg:    16px;
+  --radius-pill:  50px;
 }
 
 
-/* ── Reset & base ── */
+/* ═══ §2 — Reset & base ════════════════════════════════════ */
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -72,15 +75,15 @@ body {
 }
 
 a { color: inherit; text-decoration: none; }
-
 button { font-family: inherit; }
-
 img { max-width: 100%; display: block; }
+fieldset { border: none; }
+legend { display: block; }
 
 .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
 
-/* ── Header ── */
+/* ═══ §3 — Header ══════════════════════════════════════════ */
 
 .site-header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
@@ -117,7 +120,7 @@ img { max-width: 100%; display: block; }
 .site-nav-btn:hover { background: #333; }
 
 
-/* ── App container & page transitions ── */
+/* ═══ §4 — App container & page transitions ══════════════ */
 
 #app { min-height: calc(100vh - 200px); padding-top: 80px; }
 
@@ -128,7 +131,7 @@ img { max-width: 100%; display: block; }
 }
 
 
-/* ── Spinner ── */
+/* ═══ §5 — Spinner ═════════════════════════════════════════ */
 
 .spinner {
   width: 24px; height: 24px;
@@ -146,7 +149,7 @@ img { max-width: 100%; display: block; }
 }
 
 
-/* ── Toast ── */
+/* ═══ §6 — Toast ═══════════════════════════════════════════ */
 
 .toast {
   position: fixed; bottom: 24px; left: 50%;
@@ -166,9 +169,7 @@ img { max-width: 100%; display: block; }
 .toast.error { background: var(--bad-ink); }
 
 
-/* ─────────────────────────────────────────────────────────────
-   PAGE: Jobs list
-   ─────────────────────────────────────────────────────────── */
+/* ═══ §7 — Jobs list ═══════════════════════════════════════ */
 
 .jobs-hero {
   text-align: center;
@@ -194,7 +195,6 @@ img { max-width: 100%; display: block; }
   max-width: 800px; margin: 0 auto;
 }
 
-/* Job card — with gradient accent bar on the left */
 .job-card {
   position: relative;
   display: flex; align-items: center; justify-content: space-between;
@@ -247,9 +247,7 @@ img { max-width: 100%; display: block; }
 }
 
 
-/* ─────────────────────────────────────────────────────────────
-   PAGE: Job detail & apply
-   ─────────────────────────────────────────────────────────── */
+/* ═══ §8 — Job detail ══════════════════════════════════════ */
 
 .job-detail {
   max-width: 800px; margin: 0 auto;
@@ -284,59 +282,68 @@ img { max-width: 100%; display: block; }
 }
 
 
-/* ── Apply section & form ── */
+/* ═══ §9 — Apply form (NEW — sectioned layout) ═══════════ */
 
-.apply-section {
-  border-top: 1px solid var(--border-soft);
-  padding-top: 48px;
-}
-.apply-section h2 {
-  font-size: 28px; font-weight: 600;
-  margin-bottom: 8px;
-}
-.apply-section .subtitle {
-  font-size: 15px; color: var(--muted-soft);
-  font-weight: 300;
-  margin-bottom: 32px;
+.apply-form {
+  display: flex; flex-direction: column;
+  gap: 28px;
 }
 
-.auth-box {
-  background: var(--bg-soft);
+.form-section {
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
-  padding: 32px;
-  margin-bottom: 32px;
+  padding: 28px 32px;
+  position: relative;
 }
-.auth-box h3 {
+
+/* Account section — marked by a subtle left accent so it stands out */
+.form-section-account {
+  position: relative;
+  background: var(--bg-soft);
+  border-color: var(--border);
+  overflow: hidden;
+}
+.form-section-account::before {
+  content: '';
+  position: absolute; left: 0; top: 24px; bottom: 24px;
+  width: 3px; border-radius: 2px;
+  background: var(--accent-grad);
+}
+
+.form-section-authed {
+  padding: 20px 32px;
+  background: var(--good-bg-soft);
+  border-color: var(--good-border);
+}
+.form-section-authed::before {
+  background: var(--good-ink);
+  opacity: 0.5;
+}
+
+.form-section-title {
   font-size: 18px; font-weight: 600;
-  margin-bottom: 4px;
+  color: var(--ink);
+  margin-bottom: 8px;
+  padding-bottom: 0;
+  display: block;
 }
 
-.auth-status {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 16px; flex-wrap: wrap;
-  font-size: 14px; color: var(--ink-soft);
+.form-section-desc {
+  font-size: 14px; color: var(--muted);
+  font-weight: 300; line-height: 1.6;
+  margin-bottom: 20px;
 }
-.auth-status strong { font-weight: 600; }
+.form-section-desc .link-btn {
+  font-weight: 500; color: var(--ink);
+}
 
-.auth-toggle {
-  font-size: 13px; color: var(--muted-soft);
-  margin-top: 16px;
-}
-.auth-toggle a {
-  color: var(--ink); font-weight: 500; cursor: pointer;
-}
-.auth-toggle a:hover { text-decoration: underline; }
 
-.link-btn {
-  background: none; border: none; color: var(--muted-soft);
-  font-size: 13px; cursor: pointer;
-  text-decoration: underline; padding: 0;
-}
-.link-btn:hover { color: var(--ink); }
+/* Form grid & fields */
 
 .form-grid {
   display: grid; grid-template-columns: 1fr 1fr;
-  gap: 16px; margin-bottom: 16px;
+  gap: 16px;
 }
 .form-group { display: flex; flex-direction: column; }
 .form-group.full { grid-column: 1 / -1; }
@@ -372,7 +379,9 @@ img { max-width: 100%; display: block; }
   font-size: 14px; color: var(--muted-soft);
   cursor: pointer; transition: all 0.2s;
 }
-.form-file-label:hover { border-color: var(--muted-soft); color: var(--muted); }
+.form-file-label:hover {
+  border-color: var(--muted-soft); color: var(--muted);
+}
 .form-file-label.has-file {
   border-color: var(--ink); color: var(--ink);
   border-style: solid;
@@ -380,10 +389,59 @@ img { max-width: 100%; display: block; }
 }
 .form-file-input { display: none; }
 
-.form-disabled { opacity: 0.5; pointer-events: none; }
+
+/* Consent checkbox */
+
+.form-consent {
+  padding: 16px 20px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+}
+.consent-label {
+  display: flex; gap: 12px;
+  font-size: 14px; color: var(--ink-soft);
+  font-weight: 400; line-height: 1.5;
+  cursor: pointer;
+}
+.consent-label input[type="checkbox"] {
+  flex-shrink: 0;
+  width: 18px; height: 18px;
+  margin-top: 2px;
+  accent-color: var(--ink);
+  cursor: pointer;
+}
+.consent-label a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 
 
-/* ── Submit button ── */
+/* Auth status (when already logged in) */
+
+.auth-status {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  font-size: 14px; color: var(--ink-soft);
+}
+.auth-status strong { font-weight: 600; color: var(--ink); }
+
+
+/* Small inline text button */
+
+.link-btn {
+  background: none; border: none; color: var(--muted-soft);
+  font-size: inherit; cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
+  font-family: inherit;
+}
+.link-btn:hover { color: var(--ink); }
+
+
+/* ═══ §10 — Submit button ══════════════════════════════════ */
 
 .submit-btn {
   display: inline-flex; align-items: center; gap: 8px;
@@ -393,7 +451,7 @@ img { max-width: 100%; display: block; }
   font-family: inherit; border: none;
   cursor: pointer;
   transition: all 0.3s;
-  margin-top: 24px;
+  align-self: flex-start;
 }
 .submit-btn:hover:not(:disabled) {
   background: #333;
@@ -405,12 +463,10 @@ img { max-width: 100%; display: block; }
   transform: none; box-shadow: none;
 }
 .submit-btn svg { width: 16px; height: 16px; }
-.submit-btn.compact { padding: 12px 24px; font-size: 14px; margin-top: 0; }
+.submit-btn.compact { padding: 12px 24px; font-size: 14px; }
 
 
-/* ─────────────────────────────────────────────────────────────
-   PAGE: Portal (candidate dashboard)
-   ─────────────────────────────────────────────────────────── */
+/* ═══ §11 — Portal ═════════════════════════════════════════ */
 
 .portal-hero { padding: 60px 20px 40px; text-align: center; }
 .portal-hero h1 { font-size: 36px; font-weight: 300; margin-bottom: 8px; }
@@ -457,6 +513,11 @@ img { max-width: 100%; display: block; }
   display: block;
 }
 
+.quiz-empty {
+  font-size: 13px; color: var(--muted-soft);
+  font-weight: 300;
+}
+
 /* Status badges */
 .status-badge {
   font-size: 12px; font-weight: 600;
@@ -468,7 +529,7 @@ img { max-width: 100%; display: block; }
 .status-hired     { background: var(--good-bg); color: var(--good-ink); }
 .status-rejected  { background: var(--bad-bg);  color: var(--bad-ink); }
 
-/* Quiz row in portal card */
+/* Quiz row */
 .quiz-rows { display: flex; flex-direction: column; gap: 12px; }
 
 .quiz-row {
@@ -488,8 +549,7 @@ img { max-width: 100%; display: block; }
 .quiz-row-left { display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0; }
 .quiz-row-icon { font-size: 24px; flex-shrink: 0; }
 .quiz-row-text p.label {
-  font-size: 15px; font-weight: 600;
-  color: var(--ink);
+  font-size: 15px; font-weight: 600; color: var(--ink);
 }
 .quiz-row-text p.subtitle {
   font-size: 13px; color: var(--muted-soft); font-weight: 300;
@@ -532,9 +592,7 @@ img { max-width: 100%; display: block; }
 .quiz-go-btn:hover { background: #333; }
 
 
-/* ─────────────────────────────────────────────────────────────
-   PAGE: Quiz overview (briefing)
-   ─────────────────────────────────────────────────────────── */
+/* ═══ §12 — Quiz overview ══════════════════════════════════ */
 
 .quiz-overview {
   max-width: 640px; margin: 0 auto;
@@ -617,15 +675,16 @@ img { max-width: 100%; display: block; }
 .quiz-overview-actions {
   text-align: center;
 }
+.quiz-overview-actions .submit-btn {
+  align-self: center;
+}
 .quiz-overview-actions .hint {
   font-size: 12px; color: var(--muted-light);
   font-weight: 300; margin-top: 12px;
 }
 
 
-/* ─────────────────────────────────────────────────────────────
-   PAGE: Quiz (taking)
-   ─────────────────────────────────────────────────────────── */
+/* ═══ §13 — Quiz (taking) ══════════════════════════════════ */
 
 .quiz-page {
   max-width: 720px; margin: 0 auto;
@@ -652,7 +711,7 @@ img { max-width: 100%; display: block; }
 .quiz-timer.expired { background: var(--bad-ink); color: #fff; }
 
 
-/* ── Question card ── */
+/* Question card */
 
 .question-card {
   background: var(--bg);
@@ -690,7 +749,7 @@ img { max-width: 100%; display: block; }
 }
 
 
-/* ── Multiple choice ── */
+/* Multiple choice */
 
 .mc-option {
   display: flex; align-items: flex-start; gap: 12px;
@@ -747,7 +806,7 @@ img { max-width: 100%; display: block; }
 }
 
 
-/* ── Ranking ── */
+/* Ranking */
 
 .ranking-list {
   list-style: none; padding: 0;
@@ -806,7 +865,7 @@ img { max-width: 100%; display: block; }
 .ranking-handle svg { width: 16px; height: 16px; }
 
 
-/* ── Open text ── */
+/* Open text */
 
 .open-textarea {
   width: 100%; padding: 14px 16px;
@@ -822,7 +881,7 @@ img { max-width: 100%; display: block; }
 }
 
 
-/* ── File upload (quiz question) ── */
+/* File upload placeholder */
 
 .file-upload-placeholder {
   padding: 16px;
@@ -834,9 +893,7 @@ img { max-width: 100%; display: block; }
 }
 
 
-/* ─────────────────────────────────────────────────────────────
-   Footer
-   ─────────────────────────────────────────────────────────── */
+/* ═══ §14 — Footer ═════════════════════════════════════════ */
 
 .site-footer {
   background: var(--ink); color: #fff;
@@ -872,9 +929,7 @@ img { max-width: 100%; display: block; }
 .footer-contact a { color: #fff; }
 
 
-/* ─────────────────────────────────────────────────────────────
-   Empty / error states
-   ─────────────────────────────────────────────────────────── */
+/* ═══ §15 — Empty states ═══════════════════════════════════ */
 
 .empty-state {
   text-align: center; padding: 80px 20px;
@@ -890,9 +945,7 @@ img { max-width: 100%; display: block; }
 }
 
 
-/* ─────────────────────────────────────────────────────────────
-   Responsive
-   ─────────────────────────────────────────────────────────── */
+/* ═══ §16 — Responsive ═════════════════════════════════════ */
 
 @media (max-width: 768px) {
   .jobs-hero { padding: 60px 20px 40px; }
@@ -906,6 +959,7 @@ img { max-width: 100%; display: block; }
   .job-detail h1 { font-size: 28px; }
 
   .form-grid { grid-template-columns: 1fr; }
+  .form-section { padding: 22px 20px; }
 
   .site-nav { gap: 20px; }
   .site-nav-link { display: none; }
@@ -929,17 +983,22 @@ img { max-width: 100%; display: block; }
 
   .quiz-row { flex-wrap: wrap; padding: 16px; }
   .quiz-row-right { width: 100%; justify-content: space-between; }
+
+  .submit-btn { align-self: stretch; justify-content: center; }
 }
 
 @media (max-width: 480px) {
   .jobs-hero h1 { font-size: 28px; }
   .job-detail h1 { font-size: 24px; }
-  .apply-section h2 { font-size: 22px; }
-  .auth-box { padding: 24px 20px; }
 
   .submit-btn { padding: 14px 24px; font-size: 15px; }
 
   .ranking-item { padding: 12px; gap: 10px; }
   .ranking-rank { width: 24px; height: 24px; font-size: 12px; }
   .ranking-label { font-size: 14px; }
+
+  .form-section-title { font-size: 16px; }
+  .form-section-desc { font-size: 13px; }
+
+  .consent-label { font-size: 13px; }
 }
