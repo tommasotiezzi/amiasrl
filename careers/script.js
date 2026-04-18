@@ -35,6 +35,11 @@
   const REQUEST_TIMEOUT_MS = 15000;
   const UPLOAD_TIMEOUT_MS = 45000;
 
+  // Terms/privacy policy version. Bump this date string whenever the
+  // policy text changes — candidates who accepted an older version may
+  // need to re-accept under GDPR, depending on the change.
+  const TOS_VERSION = '2026-04-18';
+
   const APP_EL = document.getElementById('app');
   const TOAST_EL = document.getElementById('toast');
 
@@ -195,15 +200,18 @@
 
     // Auth ─────────────────────────────────────────────
 
-    async signUp(email, password) {
+    async signUp(email, password, metadata) {
+      // `data` on signup becomes `raw_user_meta_data` on auth.users,
+      // which our create_profile_on_signup trigger reads to fill in
+      // tos_accepted_at / tos_version on the profiles row.
+      const body = { email, password };
+      if (metadata && typeof metadata === 'object') body.data = metadata;
       const data = await request('/auth/v1/signup', {
         method: 'POST',
-        body: { email, password },
+        body,
         auth: false,
       });
       // With email confirmation disabled, signup returns a full session.
-      // We still normalize shape: auth-v1/signup returns the User object
-      // merged with access_token/refresh_token at top level.
       if (data && data.access_token) {
         session.write({
           access_token: data.access_token,
@@ -1008,14 +1016,22 @@
 
     btn.disabled = true;
     const originalBtnHtml = btn.innerHTML;
-    btn.textContent = 'Invio in corso...';
+    btn.textContent = 'Submitting...';
 
     try {
       // Step 0: auth (signup or signin) if not logged in
       if (needsAuth) {
         dlog('submit step 0: auth', isSignup ? 'signup' : 'signin');
-        if (isSignup) await api.signUp(email, password);
-        else          await api.signIn(email, password);
+        if (isSignup) {
+          // Record TOS consent at signup time. The checkbox has already
+          // been validated above, so if we got here the user ticked it.
+          await api.signUp(email, password, {
+            tos_accepted_at: new Date().toISOString(),
+            tos_version: TOS_VERSION,
+          });
+        } else {
+          await api.signIn(email, password);
+        }
         // After signup with confirmation disabled, session exists.
         if (!store.isAuthed) throw new Error('Could not create session. Check your email to confirm your account.');
       }
@@ -1309,11 +1325,11 @@
           <div class="quiz-overview-stats">
             <div>
               <p class="stat-num">${count || '—'}</p>
-              <p class="stat-label">Questions</p>
+              <p class="stat-label">Domande</p>
             </div>
             <div>
               <p class="stat-num">${quiz.duration_minutes ? escapeHtml(String(quiz.duration_minutes)) + ' min' : '∞'}</p>
-              <p class="stat-label">Time${quiz.duration_minutes ? '' : ' (illimitato)'}</p>
+              <p class="stat-label">Tempo${quiz.duration_minutes ? '' : ' (illimitato)'}</p>
             </div>
           </div>
           <div class="quiz-overview-rules">
@@ -1325,7 +1341,8 @@
         <div class="quiz-overview-warn">
           <p class="warn-title">⚠️ Important</p>
           <p class="warn-body">
-            Do not share, copy, or disclose the contents of this quiz. Your answers must be the result of your own work.
+            Non condividere, copiare o divulgare il contenuto di questo quiz.
+            Le risposte devono essere il frutto del tuo lavoro personale.
             ${quiz.duration_minutes ? 'The timer starts the moment you click "Start quiz".' : ''}
           </p>
         </div>
@@ -1333,7 +1350,7 @@
         <div class="quiz-overview-actions">
           <a href="#/quiz/${encodeURIComponent(applicationId)}/${encodeURIComponent(quizType)}"
              class="submit-btn" style="text-decoration:none">
-            Start the quiz
+            Inizia il quiz
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
             </svg>
@@ -1460,7 +1477,7 @@
       if (submitting) { dlog('doSubmit: already submitting'); return; }
       submitting = true;
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Invio in corso...';
+      submitBtn.textContent = 'Submitting...';
       const completedAt = new Date();
       dlog('doSubmit:', { quizType, answerCount: Object.keys(answers).length });
 
