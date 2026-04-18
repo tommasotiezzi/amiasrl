@@ -241,6 +241,10 @@
         }
       }
       session.clear();
+      // [DEBUG] Explicitly clear dependent state so next render is consistent.
+      store.setCandidate(null);
+      updateHeaderAuthUI();
+      dlog('signOut: done, session cleared');
     },
 
     async refreshSession() {
@@ -464,13 +468,13 @@
 
   const CONTRACT_LABELS = {
     full_time: 'Full-time', part_time: 'Part-time',
-    freelance: 'Freelance', internship: 'Stage',
+    freelance: 'Freelance', internship: 'Internship',
   };
   function contractLabel(t) { return CONTRACT_LABELS[t] || t; }
 
   const APP_STATUS_LABELS = {
-    applied: 'Candidato', interview: 'Colloquio',
-    hired: 'Assunto', rejected: 'Scartato',
+    applied: 'Applied', interview: 'Interview',
+    hired: 'Hired', rejected: 'Rejected',
   };
 
   function questionImageUrl(config) {
@@ -592,9 +596,9 @@
         } catch (e) {
           derr(`page error: ${path}`, e);
           APP_EL.innerHTML = emptyState(
-            'Qualcosa è andato storto',
-            e.message || 'Errore nel caricamento della pagina.',
-            '#/', 'Torna alla home'
+            'Something went wrong',
+            e.message || 'Error loading this page.',
+            '#/', 'Back to home'
           );
         }
         return;
@@ -613,13 +617,13 @@
   async function renderJobsList() {
     let jobs;
     try { jobs = await api.listPublishedPositions(); }
-    catch (e) { jobs = []; toast('Errore nel caricamento', true); }
+    catch (e) { jobs = []; toast('Could not load positions', true); }
 
     APP_EL.innerHTML = `
       <section class="jobs-hero">
         <div class="container">
-          <h1>Lavora con noi</h1>
-          <p>Unisciti al team che sta costruendo il futuro di Amia. Cerchiamo persone curiose, appassionate e con voglia di fare.</p>
+          <h1>Work with us</h1>
+          <p>Join the team building Amia's future. We're looking for curious, passionate people who love getting things done.</p>
         </div>
       </section>
       <section class="jobs-section">
@@ -629,7 +633,7 @@
               ${jobs.map(jobCard).join('')}
             </div>
           ` : `
-            <p class="no-jobs">Al momento non ci sono posizioni aperte, ma torna a trovarci!</p>
+            <p class="no-jobs">No open positions at the moment — check back soon!</p>
           `}
         </div>
       </section>
@@ -668,9 +672,9 @@
 
     if (!position) {
       APP_EL.innerHTML = emptyState(
-        'Posizione non disponibile',
-        'Questa posizione non esiste o non è più aperta.',
-        '#/', 'Vedi posizioni aperte'
+        'Position unavailable',
+        'This position does not exist or is no longer open.',
+        '#/', 'See open positions'
       );
       return;
     }
@@ -680,7 +684,7 @@
       try {
         const ex = await api.findExistingApplication(position.id, store.candidate.id);
         if (ex) {
-          toast('Hai già una candidatura per questa posizione');
+          toast('You have already applied for this position');
           location.hash = '#/portal';
           return;
         }
@@ -696,7 +700,7 @@
 
     APP_EL.innerHTML = `
       <div class="job-detail">
-        <a href="#/" class="job-back">← Tutte le posizioni</a>
+        <a href="#/" class="job-back">← All positions</a>
         <h1>${escapeHtml(position.title)}</h1>
         <div class="job-detail-meta">
           <span>${escapeHtml(position.department)}</span>
@@ -717,17 +721,17 @@
             </legend>
             <div class="form-grid">
               <div class="form-group">
-                <label class="form-label" for="f-first">Nome <span class="required">*</span></label>
-                <input type="text" id="f-first" class="form-input" placeholder="Mario" required
+                <label class="form-label" for="f-first">First name <span class="required">*</span></label>
+                <input type="text" id="f-first" class="form-input" placeholder="Jane" required
                   value="${escapeHtml(cand?.first_name || '')}">
               </div>
               <div class="form-group">
-                <label class="form-label" for="f-last">Cognome <span class="required">*</span></label>
-                <input type="text" id="f-last" class="form-input" placeholder="Rossi" required
+                <label class="form-label" for="f-last">Last name <span class="required">*</span></label>
+                <input type="text" id="f-last" class="form-input" placeholder="Doe" required
                   value="${escapeHtml(cand?.last_name || '')}">
               </div>
               <div class="form-group">
-                <label class="form-label" for="f-phone">Telefono</label>
+                <label class="form-label" for="f-phone">Phone</label>
                 <input type="tel" id="f-phone" class="form-input" placeholder="+39 333 1234567"
                   value="${escapeHtml(cand?.phone || '')}">
               </div>
@@ -740,12 +744,12 @@
           </fieldset>
 
           <fieldset class="form-section">
-            <legend class="form-section-title">La tua candidatura</legend>
+            <legend class="form-section-title">Your application</legend>
             <div class="form-grid">
               <div class="form-group full">
-                <label class="form-label" for="f-cover">Lettera di presentazione</label>
+                <label class="form-label" for="f-cover">Cover letter</label>
                 <textarea id="f-cover" class="form-textarea"
-                  placeholder="Raccontaci perché ti piacerebbe lavorare con noi..."></textarea>
+                  placeholder="Tell us why you'd like to work with us..."></textarea>
               </div>
               <div class="form-group full">
                 <label class="form-label">CV (PDF) <span class="required">*</span></label>
@@ -753,7 +757,7 @@
                   <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                   </svg>
-                  <span id="cv-label-text">Carica il tuo CV</span>
+                  <span id="cv-label-text">Upload your CV</span>
                   <input type="file" id="f-cv" class="form-file-input" accept=".pdf,application/pdf" required>
                 </label>
               </div>
@@ -763,14 +767,14 @@
           <div class="form-consent">
             <label class="consent-label">
               <input type="checkbox" id="f-consent" required>
-              <span>Accetto il trattamento dei miei dati personali per finalità di selezione,
-                secondo la <a href="https://amia.technology/privacy" target="_blank" rel="noopener">privacy policy</a>.
+              <span>I consent to the processing of my personal data for recruitment purposes,
+                as stated in the <a href="https://amia.technology/privacy" target="_blank" rel="noopener">privacy policy</a>.
                 <span class="required">*</span></span>
             </label>
           </div>
 
           <button type="submit" class="submit-btn" id="apply-submit-btn">
-            ${authed ? 'Invia candidatura' : 'Crea account e invia candidatura'}
+            ${authed ? 'Submit application' : 'Create account and apply'}
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
             </svg>
@@ -786,11 +790,11 @@
     return `
       <fieldset class="form-section form-section-account">
         <legend class="form-section-title">
-          Crea il tuo account candidato
+          Create your candidate account
         </legend>
         <p class="form-section-desc">
-          Un account ti serve per seguire la candidatura e completare i quiz di valutazione.
-          Se ne hai già uno, <button type="button" class="link-btn" id="switch-to-signin">accedi qui</button>.
+          You'll need an account to track your application and complete the assessment quizzes.
+          If you already have one, <button type="button" class="link-btn" id="switch-to-signin">sign in here</button>.
         </p>
         <div class="form-grid" id="account-fields">
           <div class="form-group">
@@ -800,7 +804,7 @@
           </div>
           <div class="form-group">
             <label class="form-label" for="f-pass">Password <span class="required">*</span></label>
-            <input type="password" id="f-pass" class="form-input" placeholder="Minimo 6 caratteri"
+            <input type="password" id="f-pass" class="form-input" placeholder="Minimum 6 characters"
               autocomplete="new-password" minlength="6" required>
           </div>
         </div>
@@ -813,11 +817,11 @@
     return `
       <fieldset class="form-section form-section-account">
         <legend class="form-section-title">
-          Accedi al tuo account
+          Sign in to your account
         </legend>
         <p class="form-section-desc">
-          Hai già un account? Accedi per continuare.
-          Se non ne hai uno, <button type="button" class="link-btn" id="switch-to-signup">registrati qui</button>.
+          Already have an account? Sign in to continue.
+          Se non ne hai uno, <button type="button" class="link-btn" id="switch-to-signup">sign up here</button>.
         </p>
         <div class="form-grid" id="account-fields">
           <div class="form-group">
@@ -841,7 +845,7 @@
       <fieldset class="form-section form-section-account form-section-authed">
         <div class="auth-status">
           <p>Stai candidandoti come <strong>${escapeHtml(user.email)}</strong></p>
-          <button type="button" class="link-btn" id="logout-btn">Esci</button>
+          <button type="button" class="link-btn" id="logout-btn">Logout</button>
         </div>
       </fieldset>
     `;
@@ -858,14 +862,14 @@
       const file = cvInput.files[0];
       if (!file) {
         cvLabel.classList.remove('has-file');
-        cvText.textContent = 'Carica il tuo CV';
+        cvText.textContent = 'Upload your CV';
         return;
       }
       if (file.type !== 'application/pdf') {
-        toast('Solo file PDF', true); cvInput.value = ''; return;
+        toast('PDF files only', true); cvInput.value = ''; return;
       }
       if (file.size > 10 * 1024 * 1024) {
-        toast('Il file supera 10 MB', true); cvInput.value = ''; return;
+        toast('File exceeds 10 MB', true); cvInput.value = ''; return;
       }
       cvLabel.classList.add('has-file');
       cvText.textContent = `${file.name} (${(file.size / (1024*1024)).toFixed(1)} MB)`;
@@ -874,9 +878,11 @@
     // Logout (when authed)
     const logoutBtn = APP_EL.querySelector('#logout-btn');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', async () => {
+      logoutBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        dlog('apply-logout: clicked');
         await api.signOut();
-        toast('Disconnesso');
+        toast('Logged out');
         renderApply(position.slug || position.id);
       });
     }
@@ -933,11 +939,11 @@
     const consent = APP_EL.querySelector('#f-consent').checked;
 
     // Validation
-    if (!consent) { toast('Devi accettare il trattamento dei dati', true); return; }
-    if (!first || !last) { toast('Nome e cognome sono obbligatori', true); return; }
-    if (!cvFile) { toast('Il CV è obbligatorio', true); return; }
-    if (cvFile.type !== 'application/pdf') { toast('Il CV deve essere in formato PDF', true); return; }
-    if (cvFile.size > 10 * 1024 * 1024) { toast('Il CV non può superare 10 MB', true); return; }
+    if (!consent) { toast('You must accept the data processing consent', true); return; }
+    if (!first || !last) { toast('First and last name are required', true); return; }
+    if (!cvFile) { toast('CV is required', true); return; }
+    if (cvFile.type !== 'application/pdf') { toast('CV must be in PDF format', true); return; }
+    if (cvFile.size > 10 * 1024 * 1024) { toast('CV cannot exceed 10 MB', true); return; }
 
     // Auth fields (only present when not logged in)
     const accountSection = APP_EL.querySelector('.form-section-account');
@@ -946,11 +952,11 @@
     if (needsAuth) {
       email = APP_EL.querySelector('#f-email').value.trim();
       password = APP_EL.querySelector('#f-pass').value;
-      if (!email || !password) { toast('Compila email e password', true); return; }
+      if (!email || !password) { toast('Enter email and password', true); return; }
       // "signup" mode if the block shows "Crea il tuo account"
       isSignup = !!accountSection.querySelector('#switch-to-signin');
       if (isSignup && password.length < 6) {
-        toast('La password deve essere di almeno 6 caratteri', true); return;
+        toast('Password must be at least 6 characters', true); return;
       }
     }
 
@@ -965,7 +971,7 @@
         if (isSignup) await api.signUp(email, password);
         else          await api.signIn(email, password);
         // After signup with confirmation disabled, session exists.
-        if (!store.isAuthed) throw new Error('Impossibile creare la sessione. Controlla la mail per confermare l\'account.');
+        if (!store.isAuthed) throw new Error('Could not create session. Check your email to confirm your account.\'account.');
       }
 
       // Step 1: ensure candidate row
@@ -994,7 +1000,7 @@
       dlog('submit step 2: duplicate check');
       const existing = await api.findExistingApplication(position.id, candidate.id);
       if (existing) {
-        toast('Hai già una candidatura per questa posizione', true);
+        toast('You have already applied for this position', true);
         location.hash = '#/portal';
         return;
       }
@@ -1014,12 +1020,12 @@
       });
 
       dlog('submit: all steps complete');
-      toast('Candidatura inviata! 🎉');
+      toast('Application submitted! 🎉');
       setTimeout(() => { location.hash = '#/portal'; }, 1200);
 
     } catch (err) {
       derr('submit failed', err);
-      toast(err.message || 'Errore durante l\'invio', true);
+      toast(err.message || 'Submission error', true);
       btn.disabled = false;
       btn.innerHTML = originalBtnHtml;
     }
@@ -1033,19 +1039,19 @@
       APP_EL.innerHTML = `
         <section class="portal-hero">
           <div class="container">
-            <h1>La mia area</h1>
-            <p>Non hai ancora candidature.</p>
+            <h1>My area</h1>
+            <p>No applications yet.</p>
             <div class="portal-userbar">
               <span>${escapeHtml(store.user?.email || '')}</span>
-              <button class="link-btn" id="logout-btn">Esci</button>
+              <button class="link-btn" id="logout-btn">Logout</button>
             </div>
           </div>
         </section>
         <section class="portal-section">
           ${emptyState(
-            'Nessuna candidatura',
-            'Inizia dando un\'occhiata alle posizioni aperte.',
-            '#/', 'Vedi posizioni aperte'
+            'No applications',
+            'Start by checking out our open positions.',
+            '#/', 'See open positions'
           )}
         </section>
       `;
@@ -1055,23 +1061,23 @@
 
     let apps;
     try { apps = await api.listMyApplications(store.candidate.id); }
-    catch (e) { apps = []; toast('Errore nel caricamento', true); }
+    catch (e) { apps = []; toast('Could not load data', true); }
 
     APP_EL.innerHTML = `
       <section class="portal-hero">
         <div class="container">
-          <h1>Ciao, ${escapeHtml(store.candidate.first_name)} 👋</h1>
-          <p>Ecco le tue candidature e i quiz da completare.</p>
+          <h1>Hi, ${escapeHtml(store.candidate.first_name)} 👋</h1>
+          <p>Your applications and pending quizzes.</p>
           <div class="portal-userbar">
             <span>${escapeHtml(store.user.email)}</span>
-            <button class="link-btn" id="logout-btn">Esci</button>
+            <button class="link-btn" id="logout-btn">Logout</button>
           </div>
         </div>
       </section>
       <section class="portal-section">
         ${apps.length
           ? apps.map(applicationCard).join('')
-          : emptyState('Nessuna candidatura', 'Inizia dando un\'occhiata alle posizioni aperte.', '#/', 'Vedi posizioni aperte')
+          : emptyState('No applications', 'Start by checking out our open positions.', '#/', 'See open positions')
         }
       </section>
     `;
@@ -1083,23 +1089,23 @@
     const p = app.position || {};
     const quizzes = [];
     if (p.pre_quiz_id) quizzes.push({
-      type: 'pre', label: 'Quiz Logica', icon: '🧠',
-      subtitle: 'Ragionamento logico e problem solving',
+      type: 'pre', label: 'Logic Quiz', icon: '🧠',
+      subtitle: 'Logical reasoning and problem solving',
       duration: '25 min',
       done: !!app.pre_quiz_completed_at,
       score: app.pre_quiz_score, max: app.pre_quiz_max_score,
     });
     if (p.post_quiz_id) quizzes.push({
-      type: 'post', label: 'Quiz Skills', icon: '💻',
-      subtitle: 'Competenze tecniche per il ruolo',
+      type: 'post', label: 'Skills Quiz', icon: '💻',
+      subtitle: 'Role-specific technical skills',
       duration: '35 min',
       done: !!app.post_quiz_completed_at,
       score: app.post_quiz_score, max: app.post_quiz_max_score,
     });
     if (p.att_quiz_id) quizzes.push({
-      type: 'att', label: 'Domande Attitudinali', icon: '💬',
-      subtitle: 'Motivazione, cultura e modo di lavorare',
-      duration: 'Libero',
+      type: 'att', label: 'Attitudinal Questions', icon: '💬',
+      subtitle: 'Motivation, culture and work style',
+      duration: 'Untimed',
       done: !!app.att_quiz_completed_at,
     });
 
@@ -1114,7 +1120,7 @@
         </div>
         ${quizzes.length
           ? `<div class="quiz-rows">${quizzes.map((q) => quizRow(app.id, q)).join('')}</div>`
-          : '<p class="quiz-empty">Nessun quiz per questa posizione.</p>'
+          : '<p class="quiz-empty">No quizzes for this position.</p>'
         }
       </div>
     `;
@@ -1122,16 +1128,7 @@
 
   function quizRow(appId, q) {
     if (q.done) {
-      let scoreEl;
-      if (q.type === 'att') {
-        scoreEl = `<div class="quiz-row-score score-good">✓<div class="score-sub">Completato</div></div>`;
-      } else if (q.score != null && q.max) {
-        const pct = Math.round((q.score / q.max) * 100);
-        const cls = pct >= 80 ? 'score-good' : pct >= 60 ? 'score-mid' : 'score-low';
-        scoreEl = `<div class="quiz-row-score ${cls}">${pct}%<div class="score-sub">Completato</div></div>`;
-      } else {
-        scoreEl = `<div class="quiz-row-score score-good">✓<div class="score-sub">Completato</div></div>`;
-      }
+      const scoreEl = `<div class="quiz-row-score score-good">✓<div class="score-sub">Completed</div></div>`;
       return `
         <div class="quiz-row done">
           <div class="quiz-row-left">
@@ -1157,9 +1154,9 @@
         <div class="quiz-row-right">
           <div class="quiz-row-meta">
             <div class="meta-duration">⏱ ${escapeHtml(q.duration)}</div>
-            <div class="meta-sub">Non completato</div>
+            <div class="meta-sub">Not started</div>
           </div>
-          <a href="#/quiz-overview/${encodeURIComponent(appId)}/${encodeURIComponent(q.type)}" class="quiz-go-btn">Inizia</a>
+          <a href="#/quiz-overview/${encodeURIComponent(appId)}/${encodeURIComponent(q.type)}" class="quiz-go-btn">Start</a>
         </div>
       </div>
     `;
@@ -1167,11 +1164,16 @@
 
   function bindLogout() {
     const btn = APP_EL.querySelector('#logout-btn');
-    if (!btn) return;
-    btn.addEventListener('click', async () => {
+    if (!btn) { dlog('bindLogout: no #logout-btn in DOM'); return; }
+    dlog('bindLogout: attaching click handler');
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      dlog('logout: clicked');
       await api.signOut();
-      toast('Disconnesso');
+      toast('Logged out');
       location.hash = '#/';
+      // Force a re-route in case we were already at #/
+      if ((location.hash || '#/') === '#/') route();
     });
   }
 
@@ -1180,30 +1182,30 @@
 
   const QUIZ_TYPE_INFO = {
     pre: {
-      icon: '🧠', title: 'Quiz Logica',
-      desc: 'Valutiamo le tue capacità di ragionamento logico, problem solving e pensiero critico. Include domande a scelta multipla e domande di ranking.',
+      icon: '🧠', title: 'Logic Quiz',
+      desc: 'We assess your logical reasoning, problem solving, and critical thinking. Includes multiple-choice and ranking questions.',
       rules: [
-        'Alcune domande a scelta multipla possono avere più risposte corrette',
-        'Nelle domande di ranking trascina gli elementi per ordinarli',
-        'La qualità conta più della velocità',
+        'Some multiple-choice questions may have more than one correct answer',
+        'For ranking questions, drag the items to order them',
+        'Quality matters more than speed',
       ],
     },
     post: {
-      icon: '💻', title: 'Quiz Skills',
-      desc: 'Valutiamo le tue competenze tecniche specifiche per il ruolo. Include domande teoriche, scenari pratici e ranking.',
+      icon: '💻', title: 'Skills Quiz',
+      desc: 'We assess the technical skills specific to this role. Includes theoretical questions, practical scenarios, and ranking.',
       rules: [
-        'Le domande sono specifiche per la posizione a cui ti sei candidato',
-        'Per le domande aperte, sii concreto e usa esempi reali',
-        'Meglio provare che lasciare in bianco',
+        'Questions are tailored to the position you applied for',
+        'For open-ended questions, be concrete and use real examples',
+        'Better to try than to leave blank',
       ],
     },
     att: {
-      icon: '💬', title: 'Domande Attitudinali',
-      desc: 'Queste domande ci aiutano a conoscerti meglio. Non ci sono risposte giuste o sbagliate — vogliamo capire come lavori.',
+      icon: '💬', title: 'Attitudinal Questions',
+      desc: 'These questions help us get to know you better. There are no right or wrong answers — we want to understand how you work.',
       rules: [
-        'Rispondi in modo autentico: la coerenza conta più della "risposta giusta"',
-        'Non c\'è un limite di tempo',
-        'Le tue risposte guidano il colloquio, non lo sostituiscono',
+        'Answer authentically: consistency matters more than the "right answer"',
+        'There is no time limit',
+        'Your answers guide the interview, not replace it',
       ],
     },
   };
@@ -1215,7 +1217,7 @@
     let app, quiz;
     try {
       app = await api.getApplicationWithPosition(applicationId);
-      if (!app) throw new Error('Candidatura non trovata');
+      if (!app) throw new Error('Application not found');
 
       const cached = readQuizCache(applicationId, quizType);
       if (cached) {
@@ -1227,7 +1229,7 @@
       }
     } catch (err) {
       derr('overview load', err);
-      toast(err.message || 'Errore', true);
+      toast(err.message || 'Error', true);
       location.hash = '#/portal';
       return;
     }
@@ -1238,7 +1240,7 @@
       att: app.att_quiz_completed_at,
     };
     if (doneMap[quizType]) {
-      toast('Hai già completato questo quiz');
+      toast('You have already completed this quiz');
       location.hash = '#/portal';
       return;
     }
@@ -1248,7 +1250,7 @@
 
     APP_EL.innerHTML = `
       <div class="quiz-overview">
-        <a href="#/portal" class="job-back">← Le mie candidature</a>
+        <a href="#/portal" class="job-back">← My applications</a>
 
         <div class="quiz-overview-header">
           <span class="icon" aria-hidden="true">${info.icon}</span>
@@ -1275,11 +1277,11 @@
         </div>
 
         <div class="quiz-overview-warn">
-          <p class="warn-title">⚠️ Importante</p>
+          <p class="warn-title">⚠️ Important</p>
           <p class="warn-body">
             Non condividere, copiare o divulgare il contenuto di questo quiz.
             Le risposte devono essere il frutto del tuo lavoro personale.
-            ${quiz.duration_minutes ? 'Il timer partirà nel momento in cui clicchi "Inizia il quiz".' : ''}
+            ${quiz.duration_minutes ? 'The timer starts the moment you click "Start quiz".' : ''}
           </p>
         </div>
 
@@ -1291,7 +1293,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
             </svg>
           </a>
-          <p class="hint">Questa pagina non farà iniziare la tua task</p>
+          <p class="hint">This page will not start your task</p>
         </div>
       </div>
     `;
@@ -1304,7 +1306,7 @@
     let app, quiz;
     try {
       app = await api.getApplicationWithPosition(applicationId);
-      if (!app) throw new Error('Candidatura non trovata');
+      if (!app) throw new Error('Application not found');
 
       const doneMap = {
         pre: app.pre_quiz_completed_at,
@@ -1312,7 +1314,7 @@
         att: app.att_quiz_completed_at,
       };
       if (doneMap[quizType]) {
-        toast('Hai già completato questo quiz');
+        toast('You have already completed this quiz');
         location.hash = '#/portal';
         return;
       }
@@ -1326,14 +1328,14 @@
       }
     } catch (err) {
       derr('quiz load', err);
-      toast(err.message || 'Errore', true);
+      toast(err.message || 'Error', true);
       location.hash = '#/portal';
       return;
     }
 
     const questions = Array.isArray(quiz.questions) ? quiz.questions : [];
     if (!questions.length) {
-      APP_EL.innerHTML = emptyState('Quiz non disponibile', 'Questo quiz non ha ancora domande configurate.', '#/portal', 'Torna al portale');
+      APP_EL.innerHTML = emptyState('Quiz unavailable', 'This quiz has no questions configured yet.', '#/portal', 'Back to portal');
       return;
     }
     dlog('renderQuiz:', { quizId: quiz.quiz_id, count: questions.length, types: questions.map((q) => q.question_type) });
@@ -1358,7 +1360,7 @@
 
     APP_EL.innerHTML = `
       <div class="quiz-page">
-        <a href="#/portal" class="job-back">← Le mie candidature</a>
+        <a href="#/portal" class="job-back">← My applications</a>
         <h1>${escapeHtml(quiz.title)}</h1>
         ${quiz.description ? `<p class="quiz-desc">${escapeHtml(quiz.description)}</p>` : ''}
         ${durationMs ? `<div class="quiz-timer" id="quiz-timer">⏱ --:--</div>` : ''}
@@ -1395,9 +1397,9 @@
           expired = true;
           timerEl.classList.remove('warning');
           timerEl.classList.add('expired');
-          timerEl.textContent = '⏱ Tempo scaduto';
+          timerEl.textContent = '⏱ Time expired';
           clearInterval(timerId);
-          toast('Tempo scaduto — invio in corso');
+          toast('Time expired — submitting');
           doSubmit();
         }
       };
@@ -1424,14 +1426,7 @@
         );
         clearQuizCache(applicationId, quizType);
         dlog('doSubmit success', result);
-
-        const hasScore = quizType !== 'att' && result && result.max_score > 0;
-        if (hasScore) {
-          const pct = Math.round((result.total_score / result.max_score) * 100);
-          toast(`Quiz completato! ${pct}% 🎉`);
-        } else {
-          toast('Quiz completato! 🎉');
-        }
+        toast('Quiz completed! 🎉');
         setTimeout(() => { location.hash = '#/portal'; }, 1500);
       } catch (err) {
         derr('doSubmit failed', err);
@@ -1445,14 +1440,14 @@
                         :                       check?.att_quiz_completed_at;
             if (field) {
               clearQuizCache(applicationId, quizType);
-              toast('Quiz completato! 🎉');
+              toast('Quiz completed! 🎉');
               setTimeout(() => { location.hash = '#/portal'; }, 1200);
               return;
             }
           } catch (e2) { derr('post-timeout check', e2); }
         }
 
-        toast(err.message || 'Errore durante l\'invio', true);
+        toast(err.message || 'Submission error', true);
         submitting = false;
         submitBtn.disabled = false;
         submitBtn.innerHTML = `
@@ -1503,7 +1498,7 @@
   function mcHtml(q) {
     const options = (q.config && q.config.options) || [];
     const multi = !!(q.config && q.config.allow_multiple);
-    const hint = multi ? `<p class="question-hint">Puoi selezionare più risposte.</p>` : '';
+    const hint = multi ? `<p class="question-hint">You can select more than one answer.</p>` : '';
     return hint + options.map((opt, j) => mcOptionHtml(q.id, opt, j, multi)).join('');
   }
 
@@ -1528,7 +1523,7 @@
 
   function rankingHtml(q) {
     const options = (q.config && q.config.options) || [];
-    const hint = `<p class="question-hint">Trascina per ordinare dal più importante (in alto) al meno importante.</p>`;
+    const hint = `<p class="question-hint">Drag to order from most important (top) to least important.</p>`;
     const items = options.map((opt, i) => `
       <li class="ranking-item" draggable="true"
           data-question-id="${escapeHtml(q.id)}"
