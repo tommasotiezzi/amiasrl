@@ -1325,15 +1325,15 @@
           <div class="quiz-overview-stats">
             <div>
               <p class="stat-num">${count || '—'}</p>
-              <p class="stat-label">Domande</p>
+              <p class="stat-label">Questions</p>
             </div>
             <div>
               <p class="stat-num">${quiz.duration_minutes ? escapeHtml(String(quiz.duration_minutes)) + ' min' : '∞'}</p>
-              <p class="stat-label">Tempo${quiz.duration_minutes ? '' : ' (illimitato)'}</p>
+              <p class="stat-label">Time${quiz.duration_minutes ? '' : ' (unlimited)'}</p>
             </div>
           </div>
           <div class="quiz-overview-rules">
-            <p class="rules-title">Da sapere prima di iniziare:</p>
+            <p class="rules-title">Before Starting</p>
             <ul>${info.rules.map((r) => `<li>${escapeHtml(r)}</li>`).join('')}</ul>
           </div>
         </div>
@@ -1341,8 +1341,8 @@
         <div class="quiz-overview-warn">
           <p class="warn-title">⚠️ Important</p>
           <p class="warn-body">
-            Non condividere, copiare o divulgare il contenuto di questo quiz.
-            Le risposte devono essere il frutto del tuo lavoro personale.
+            Do not share, copy or disclose the content of this quiz.
+            The answers must be the fruit of your personal work.
             ${quiz.duration_minutes ? 'The timer starts the moment you click "Start quiz".' : ''}
           </p>
         </div>
@@ -1350,7 +1350,7 @@
         <div class="quiz-overview-actions">
           <a href="#/quiz/${encodeURIComponent(applicationId)}/${encodeURIComponent(quizType)}"
              class="submit-btn" style="text-decoration:none">
-            Inizia il quiz
+            Start quiz
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
             </svg>
@@ -1385,7 +1385,7 @@
       if (cached) quiz = cached;
       else {
         quiz = await api.getQuizForCandidate(applicationId, quizType);
-        if (!quiz) throw new Error('Quiz non disponibile');
+        if (!quiz) throw new Error('Quiz not available');
         writeQuizCache(applicationId, quizType, quiz);
       }
     } catch (err) {
