@@ -1111,7 +1111,96 @@ legend { display: block; }
   20%  { box-shadow: 0 0 0 4px rgba(255, 100, 68, 0.4); }
   100% { box-shadow: 0 0 0 4px rgba(255, 100, 68, 0); }
 }
+/* ════════════════════════════════════════════════════════════════
+   APPEND TO style.css (or REPLACE existing .md-content block)
+   Tightens spacing so careers description matches admin preview.
+   ════════════════════════════════════════════════════════════════ */
 
+.md-content {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #141414;
+}
+
+.md-content > *:first-child { margin-top: 0; }
+.md-content > *:last-child  { margin-bottom: 0; }
+
+.md-content h1,
+.md-content h2,
+.md-content h3 {
+  font-weight: 600;
+  line-height: 1.3;
+  color: #141414;
+  margin: 1.2em 0 0.4em;
+}
+.md-content h1 { font-size: 1.5em; }
+.md-content h2 { font-size: 1.25em; }
+.md-content h3 { font-size: 1.1em; }
+.md-content h1:first-child,
+.md-content h2:first-child,
+.md-content h3:first-child { margin-top: 0; }
+
+.md-content p {
+  margin: 0.6em 0;
+  line-height: 1.65;
+}
+
+.md-content strong { font-weight: 700; color: #141414; }
+.md-content em     { font-style: italic; }
+
+.md-content a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+.md-content a:hover { color: #1d4ed8; }
+
+.md-content ul,
+.md-content ol {
+  margin: 0.6em 0;
+  padding-left: 1.5em;
+  line-height: 1.65;
+}
+.md-content ul { list-style: disc; }
+.md-content ol { list-style: decimal; }
+
+.md-content li { margin: 0.2em 0; }
+.md-content li > ul,
+.md-content li > ol { margin: 0.2em 0; }
+
+.md-content blockquote {
+  border-left: 3px solid #d4d4d4;
+  padding-left: 0.9em;
+  margin: 0.8em 0;
+  color: #525252;
+  font-style: italic;
+}
+
+.md-content code {
+  background: #f5f5f4;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.88em;
+}
+.md-content pre {
+  background: #1c1c1c;
+  color: #fafafa;
+  padding: 0.8em 1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 0.8em 0;
+}
+.md-content pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.md-content hr {
+  border: none;
+  border-top: 1px solid #e6e6e6;
+  margin: 1.2em 0;
+}
 /* ── Portal: all-quizzes-done congrats card ── */
 .app-card-congrats {
   margin-top: 16px;

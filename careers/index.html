@@ -86,6 +86,11 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- ── App script ── -->
+  <script type="module">
+    // Load `marked` from CDN and expose it on window so renderMarkdown() can use it.
+    import { marked } from 'https://esm.sh/marked@12';
+    window.marked = marked;
+  </script>
   <script type="module" src="./src/main.js"></script>
 </body>
 </html>

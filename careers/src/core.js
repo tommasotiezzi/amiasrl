@@ -611,94 +611,32 @@ function bindLightboxTriggers(root /* defaults to document */) {
 
 
 // ── Markdown renderer ──
-// Lean inline markdown — supports the subset we need:
-//   **bold**, *italic*, `code`, [text](url),
-//   # ## ### headings, > blockquote, --- hr,
-//   - / 1. lists, blank-line paragraphs.
-// No HTML escaping is needed for inputs because we escape first then inject markdown patterns.
+// ── Markdown renderer ──
+// Uses the marked library (loaded globally from a CDN script in index.html).
+// Falls back to a minimal implementation if marked isn't available.
 
 function renderMarkdown(md) {
   if (!md) return '';
-  // Escape HTML first
+  if (typeof window !== 'undefined' && window.marked && typeof window.marked.parse === 'function') {
+    try {
+      return window.marked.parse(String(md), { async: false, breaks: false, gfm: true });
+    } catch (e) {
+      // fall through to fallback
+    }
+  }
+  // Minimal fallback — preserves bold/italic/links and line breaks.
   let s = String(md)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
-
-  // Code spans: `code`
   s = s.replace(/`([^`\n]+)`/g, '<code>$1</code>');
-
-  // Bold then italic
   s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
   s = s.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
-
-  // Links [text](url) — only allow http(s) and mailto:
   s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, text, url) => {
     if (!/^(https?:|mailto:)/i.test(url)) return m;
     return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
   });
-
-  // Process line by line for blocks
-  const lines = s.split('\n');
-  const out = [];
-  let inUl = false, inOl = false, inP = false, inBq = false;
-
-  const closeBlocks = () => {
-    if (inP)  { out.push('</p>');          inP = false; }
-    if (inUl) { out.push('</ul>');         inUl = false; }
-    if (inOl) { out.push('</ol>');         inOl = false; }
-    if (inBq) { out.push('</blockquote>'); inBq = false; }
-  };
-
-  for (let line of lines) {
-    if (/^\s*$/.test(line)) { closeBlocks(); continue; }
-
-    // Headings
-    let m = /^(#{1,3})\s+(.+)$/.exec(line);
-    if (m) {
-      closeBlocks();
-      const level = m[1].length;
-      out.push(`<h${level}>${m[2]}</h${level}>`);
-      continue;
-    }
-
-    // Hr
-    if (/^(\*{3,}|-{3,})\s*$/.test(line)) {
-      closeBlocks();
-      out.push('<hr>');
-      continue;
-    }
-
-    // Blockquote
-    m = /^>\s?(.*)$/.exec(line);
-    if (m) {
-      if (!inBq) { closeBlocks(); out.push('<blockquote>'); inBq = true; }
-      out.push(m[1]);
-      continue;
-    }
-
-    // Unordered list
-    m = /^[-*+]\s+(.+)$/.exec(line);
-    if (m) {
-      if (!inUl) { closeBlocks(); out.push('<ul>'); inUl = true; }
-      out.push(`<li>${m[1]}</li>`);
-      continue;
-    }
-
-    // Ordered list
-    m = /^\d+\.\s+(.+)$/.exec(line);
-    if (m) {
-      if (!inOl) { closeBlocks(); out.push('<ol>'); inOl = true; }
-      out.push(`<li>${m[1]}</li>`);
-      continue;
-    }
-
-    // Paragraph
-    if (!inP && !inBq) { closeBlocks(); out.push('<p>'); inP = true; }
-    out.push(line);
-  }
-  closeBlocks();
-  return out.join('\n');
+  return '<p>' + s.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>';
 }
 
 
