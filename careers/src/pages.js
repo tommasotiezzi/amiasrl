@@ -13,6 +13,9 @@ import {
   emptyState, readQuizCache, writeQuizCache, clearQuizCache,
   setPageTransition, loadingCenter, updateHeaderAuthUI,
   resolveImage,
+  salaryRangeText, appPillHtml,
+  renderMarkdown,
+  bindLightboxTriggers,
 } from './core.js';
 
 import { questionHtml, bindMultipleChoice, bindOpenText, bindRanking } from './quiz.js';
@@ -51,16 +54,21 @@ async function renderJobsList() {
 
 function jobCard(j) {
   const href = `#/apply/${encodeURIComponent(j.slug || j.id)}`;
+  const ral = salaryRangeText(j.salary_min, j.salary_max);
   return `
     <a href="${href}" class="job-card">
       <div class="job-card-info">
-        <h3>${escapeHtml(j.title)}</h3>
+        <div class="job-card-titlerow">
+          <h3>${escapeHtml(j.title)}</h3>
+          ${appPillHtml(j, 'sm')}
+        </div>
         <div class="job-card-meta">
           <span>${escapeHtml(j.department)}</span>
           <span>·</span>
           <span>${escapeHtml(j.location)}</span>
           <span>·</span>
           <span>${escapeHtml(contractLabel(j.contract_type))}</span>
+          ${ral ? `<span>·</span><span class="job-card-salary">${escapeHtml(ral)}</span>` : ''}
         </div>
       </div>
       <div class="job-card-arrow" aria-hidden="true">
@@ -206,11 +214,16 @@ async function renderSigninView(position) {
 function renderApplyForm(position) {
   const authed = store.isAuthed;
   const cand = store.candidate;
+  const ral = salaryRangeText(position.salary_min, position.salary_max);
+  const hasComp = ral || position.stock_options || position.bonus;
 
   APP_EL.innerHTML = `
     <div class="job-detail">
       <a href="#/" class="job-back">← All positions</a>
-      <h1>${escapeHtml(position.title)}</h1>
+      <div class="job-detail-titlerow">
+        <h1>${escapeHtml(position.title)}</h1>
+        ${appPillHtml(position, 'md')}
+      </div>
       <div class="job-detail-meta">
         <span>${escapeHtml(position.department)}</span>
         <span>·</span>
@@ -219,7 +232,27 @@ function renderApplyForm(position) {
         <span>${escapeHtml(contractLabel(position.contract_type))}</span>
       </div>
 
-      <div class="job-description">${escapeHtmlMultiline(position.description || '')}</div>
+      <div class="job-description md-content">${renderMarkdown(position.description || '')}</div>
+
+      ${hasComp ? `
+        <div class="job-comp">
+          <div class="job-comp-title">Compensation</div>
+          <dl class="job-comp-list">
+            ${ral ? `
+              <dt>Salary range</dt>
+              <dd>${escapeHtml(ral)}</dd>
+            ` : ''}
+            ${position.stock_options ? `
+              <dt>Stock options</dt>
+              <dd>${escapeHtml(position.stock_options)}</dd>
+            ` : ''}
+            ${position.bonus ? `
+              <dt>Bonus</dt>
+              <dd>${escapeHtml(position.bonus)}</dd>
+            ` : ''}
+          </dl>
+        </div>
+      ` : ''}
 
       <form id="apply-form" class="apply-form" novalidate>
         ${authed ? accountBlockAuthed() : accountBlockSignup()}
@@ -258,7 +291,7 @@ function renderApplyForm(position) {
             <div class="form-group full">
               <label class="form-label" for="f-cover">Cover letter</label>
               <textarea id="f-cover" class="form-textarea"
-                placeholder="Tell us why you'd like to work with us..."></textarea>
+                placeholder="Add anything relevant to your application: a portfolio link, a piece of work you're proud of, why you'd be a fit, references, anything else you want us to know."></textarea>
             </div>
             <div class="form-group full">
               <label class="form-label">CV (PDF) <span class="required">*</span></label>

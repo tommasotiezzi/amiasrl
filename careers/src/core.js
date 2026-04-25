@@ -265,7 +265,7 @@ const api = {
 
   async listPublishedPositions() {
     return await request(
-      '/rest/v1/positions?select=id,slug,title,department,location,contract_type&status=eq.published&order=published_at.desc',
+      '/rest/v1/positions?select=id,slug,title,department,location,contract_type,salary_min,salary_max,app_name,app_color_from,app_color_to&status=eq.published&order=published_at.desc',
       { auth: false }
     );
   },
@@ -539,6 +539,169 @@ function emptyState(title, body, href, linkLabel) {
 }
 
 
+// ── Salary range formatter ──
+
+function salaryRangeText(min, max) {
+  if (!min && !max) return '';
+  const fmt = (v) => '€' + Number(v).toLocaleString('it-IT');
+  if (min && max && min !== max) return `${fmt(min)} — ${fmt(max)}`;
+  return fmt(min || max);
+}
+
+
+// ── App pill (gradient) ──
+
+function appPillHtml(p, size /* 'sm' | 'md' */) {
+  if (!p || !p.app_name) return '';
+  const from = p.app_color_from || '#6b7280';
+  const to   = p.app_color_to   || '#374151';
+  const cls = size === 'md' ? 'app-pill app-pill-md' : 'app-pill';
+  return `<span class="${cls}" style="background-image:linear-gradient(135deg, ${from} 0%, ${to} 100%)">${escapeHtml(p.app_name)}</span>`;
+}
+
+
+// ── Lightbox ──
+// Click-anywhere-to-close fullscreen image viewer.
+
+let _lightboxKeyHandler = null;
+
+function openLightbox(src, alt) {
+  // Remove any existing one first
+  closeLightbox();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'lightbox-overlay';
+  overlay.innerHTML = `
+    <button class="lightbox-close" aria-label="Close">×</button>
+    <img class="lightbox-img" src="${escapeHtml(src)}" alt="${escapeHtml(alt || '')}">
+  `;
+  overlay.addEventListener('click', closeLightbox);
+
+  _lightboxKeyHandler = (e) => { if (e.key === 'Escape') closeLightbox(); };
+  document.addEventListener('keydown', _lightboxKeyHandler);
+
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  const overlay = document.querySelector('.lightbox-overlay');
+  if (overlay) overlay.remove();
+  if (_lightboxKeyHandler) {
+    document.removeEventListener('keydown', _lightboxKeyHandler);
+    _lightboxKeyHandler = null;
+  }
+  document.body.style.overflow = '';
+}
+
+// Bind any element with [data-lightbox-src] to open lightbox on click.
+// Call this after rendering any container that may include lightbox triggers.
+function bindLightboxTriggers(root /* defaults to document */) {
+  const scope = root || document;
+  scope.querySelectorAll('[data-lightbox-src]').forEach((el) => {
+    if (el._lightboxBound) return;
+    el._lightboxBound = true;
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openLightbox(el.dataset.lightboxSrc, el.dataset.lightboxAlt || '');
+    });
+  });
+}
+
+
+// ── Markdown renderer ──
+// Lean inline markdown — supports the subset we need:
+//   **bold**, *italic*, `code`, [text](url),
+//   # ## ### headings, > blockquote, --- hr,
+//   - / 1. lists, blank-line paragraphs.
+// No HTML escaping is needed for inputs because we escape first then inject markdown patterns.
+
+function renderMarkdown(md) {
+  if (!md) return '';
+  // Escape HTML first
+  let s = String(md)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Code spans: `code`
+  s = s.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+
+  // Bold then italic
+  s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
+
+  // Links [text](url) — only allow http(s) and mailto:
+  s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, text, url) => {
+    if (!/^(https?:|mailto:)/i.test(url)) return m;
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+  });
+
+  // Process line by line for blocks
+  const lines = s.split('\n');
+  const out = [];
+  let inUl = false, inOl = false, inP = false, inBq = false;
+
+  const closeBlocks = () => {
+    if (inP)  { out.push('</p>');          inP = false; }
+    if (inUl) { out.push('</ul>');         inUl = false; }
+    if (inOl) { out.push('</ol>');         inOl = false; }
+    if (inBq) { out.push('</blockquote>'); inBq = false; }
+  };
+
+  for (let line of lines) {
+    if (/^\s*$/.test(line)) { closeBlocks(); continue; }
+
+    // Headings
+    let m = /^(#{1,3})\s+(.+)$/.exec(line);
+    if (m) {
+      closeBlocks();
+      const level = m[1].length;
+      out.push(`<h${level}>${m[2]}</h${level}>`);
+      continue;
+    }
+
+    // Hr
+    if (/^(\*{3,}|-{3,})\s*$/.test(line)) {
+      closeBlocks();
+      out.push('<hr>');
+      continue;
+    }
+
+    // Blockquote
+    m = /^>\s?(.*)$/.exec(line);
+    if (m) {
+      if (!inBq) { closeBlocks(); out.push('<blockquote>'); inBq = true; }
+      out.push(m[1]);
+      continue;
+    }
+
+    // Unordered list
+    m = /^[-*+]\s+(.+)$/.exec(line);
+    if (m) {
+      if (!inUl) { closeBlocks(); out.push('<ul>'); inUl = true; }
+      out.push(`<li>${m[1]}</li>`);
+      continue;
+    }
+
+    // Ordered list
+    m = /^\d+\.\s+(.+)$/.exec(line);
+    if (m) {
+      if (!inOl) { closeBlocks(); out.push('<ol>'); inOl = true; }
+      out.push(`<li>${m[1]}</li>`);
+      continue;
+    }
+
+    // Paragraph
+    if (!inP && !inBq) { closeBlocks(); out.push('<p>'); inP = true; }
+    out.push(line);
+  }
+  closeBlocks();
+  return out.join('\n');
+}
+
+
 
 /* ─────────────────────────────────────────────────────────────
    Exports
@@ -572,4 +735,7 @@ export {
   setPageTransition, loadingCenter, updateHeaderAuthUI,
   readQuizCache, writeQuizCache, clearQuizCache,
   emptyState,
+  salaryRangeText, appPillHtml,
+  openLightbox, closeLightbox, bindLightboxTriggers,
+  renderMarkdown,
 };
