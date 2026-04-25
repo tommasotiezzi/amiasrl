@@ -605,6 +605,8 @@ function applicationCard(app) {
     done: !!app.att_quiz_completed_at,
   });
 
+  const allDone = quizzes.length > 0 && quizzes.every((q) => q.done);
+
   return `
     <div class="app-card">
       <div class="app-card-header">
@@ -618,6 +620,16 @@ function applicationCard(app) {
         ? `<div class="quiz-rows">${quizzes.map((q) => quizRow(app.id, q)).join('')}</div>`
         : '<p class="quiz-empty">No quizzes for this position.</p>'
       }
+      ${allDone ? `
+        <div class="app-card-congrats">
+          <div class="app-card-congrats-icon">🎉</div>
+          <p class="app-card-congrats-title">All quizzes completed</p>
+          <p class="app-card-congrats-body">
+            Congratulations — you've completed all the quizzes. Thank you for your time;
+            we'll be in touch as soon as possible to follow up with your application.
+          </p>
+        </div>
+      ` : ''}
     </div>
   `;
 }
@@ -841,32 +853,60 @@ async function renderQuiz(applicationId, quizType) {
 
   // answers shape:
   //   MC:      [index, ...]           0-based indices
-  //   ranking: ["id", ...]            option IDs, top→bottom
+  //   ranking: ["id", ...]            option IDs, top→bottom (set only when fully placed)
   //   open:    "string"
-  const answers = {};
+  // Note: ranking doesn't pre-seed anymore — candidate must place every chip
+  // into a slot for it to count as "answered". MC and open seed as empty.
+  const _answers = {};
   for (const q of questions) {
-    if (q.question_type === 'ranking') {
-      answers[q.id] = ((q.config && q.config.options) || []).map((o) => o.id);
-    } else if (q.question_type === 'multiple_choice') {
-      answers[q.id] = [];
-    } else if (q.question_type === 'open_text') {
-      answers[q.id] = '';
-    }
+    if (q.question_type === 'multiple_choice') _answers[q.id] = [];
+    else if (q.question_type === 'open_text')  _answers[q.id] = '';
+    // ranking: leave undefined until candidate completes the slots
   }
 
+  // Wrap in a Proxy so any write dispatches a "quiz:progress" event.
+  // The sticky progress bar listens to this and recomputes counts.
+  const answers = new Proxy(_answers, {
+    set(t, k, v) {
+      const ok = Reflect.set(t, k, v);
+      window.dispatchEvent(new CustomEvent('quiz:progress'));
+      return ok;
+    },
+    deleteProperty(t, k) {
+      const ok = Reflect.deleteProperty(t, k);
+      window.dispatchEvent(new CustomEvent('quiz:progress'));
+      return ok;
+    },
+  });
+
   APP_EL.innerHTML = `
-    <div class="quiz-page">
+    <div class="quiz-page quiz-page-with-bar">
       <a href="#/portal" class="job-back">← My applications</a>
       <h1>${escapeHtml(quiz.title)}</h1>
       ${quiz.description ? `<p class="quiz-desc">${escapeHtml(quiz.description)}</p>` : ''}
-      ${durationMs ? `<div class="quiz-timer" id="quiz-timer">⏱ --:--</div>` : ''}
 
       <div id="quiz-questions">
         ${questions.map((q, i) => questionHtml(q, i, questions.length)).join('')}
       </div>
+    </div>
 
-      <button class="submit-btn" id="quiz-submit">
-        Consegna quiz
+    <div class="quiz-stickybar" id="quiz-stickybar">
+      <button type="button" class="quiz-progress-btn" id="quiz-progress-btn" aria-haspopup="true" aria-expanded="false">
+        <span class="quiz-progress-fill" id="quiz-progress-fill"></span>
+        <span class="quiz-progress-label">
+          <span id="quiz-progress-count">0 of ${questions.length}</span>
+          <span class="quiz-progress-sub">answered</span>
+        </span>
+      </button>
+      <div class="quiz-progress-popover" id="quiz-progress-popover" role="menu" hidden>
+        <div class="quiz-progress-popover-title">Missing answers</div>
+        <div class="quiz-progress-popover-grid" id="quiz-progress-popover-grid"></div>
+      </div>
+
+      ${durationMs ? `<div class="quiz-timer" id="quiz-timer">⏱ --:--</div>` : '<div></div>'}
+
+      <button class="submit-btn quiz-submit-btn" id="quiz-submit">
+        Submit quiz
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
         </svg>
@@ -878,6 +918,80 @@ async function renderQuiz(applicationId, quizType) {
   bindOpenText(questions, answers);
   const rankingTeardown = bindRanking(questions, answers);
   bindLightboxTriggers(APP_EL);
+
+  // ── Sticky bar progress + popover ──
+  const progressBtn   = document.getElementById('quiz-progress-btn');
+  const progressFill  = document.getElementById('quiz-progress-fill');
+  const progressCount = document.getElementById('quiz-progress-count');
+  const popover       = document.getElementById('quiz-progress-popover');
+  const popoverGrid   = document.getElementById('quiz-progress-popover-grid');
+
+  function isAnswered(q) {
+    const a = answers[q.id];
+    if (a == null) return false;
+    if (Array.isArray(a)) return a.length > 0;
+    if (typeof a === 'string') return a.trim().length > 0;
+    return true;
+  }
+
+  function updateProgress() {
+    const answered = questions.filter(isAnswered).length;
+    const total = questions.length;
+    const pct = total ? (answered / total) * 100 : 0;
+    progressCount.textContent = `${answered} of ${total}`;
+    progressFill.style.width = pct + '%';
+
+    // Build popover content: list of missing question numbers
+    const missing = [];
+    questions.forEach((q, i) => { if (!isAnswered(q)) missing.push(i + 1); });
+    if (missing.length === 0) {
+      popoverGrid.innerHTML = '<p class="quiz-progress-popover-done">✓ All questions answered</p>';
+    } else {
+      popoverGrid.innerHTML = missing.map((n) => `
+        <button type="button" class="quiz-progress-chip" data-q-index="${n - 1}">${n}</button>
+      `).join('');
+    }
+  }
+
+  function togglePopover(force) {
+    const open = force != null ? force : popover.hasAttribute('hidden');
+    if (open) {
+      popover.removeAttribute('hidden');
+      progressBtn.setAttribute('aria-expanded', 'true');
+    } else {
+      popover.setAttribute('hidden', '');
+      progressBtn.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  progressBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    togglePopover();
+  });
+
+  popover.addEventListener('click', (e) => {
+    const chip = e.target.closest('.quiz-progress-chip');
+    if (!chip) return;
+    const idx = parseInt(chip.dataset.qIndex, 10);
+    const cards = APP_EL.querySelectorAll('.question-card');
+    if (cards[idx]) {
+      cards[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      cards[idx].classList.add('question-flash');
+      setTimeout(() => cards[idx].classList.remove('question-flash'), 1400);
+    }
+    togglePopover(false);
+  });
+
+  // Click outside closes popover
+  const onDocClick = (e) => {
+    if (!popover.contains(e.target) && !progressBtn.contains(e.target)) {
+      togglePopover(false);
+    }
+  };
+  document.addEventListener('click', onDocClick);
+
+  window.addEventListener('quiz:progress', updateProgress);
+  updateProgress();
 
   // Timer
   let timerId = null, expired = false;
@@ -959,6 +1073,8 @@ async function renderQuiz(applicationId, quizType) {
   return () => {
     if (timerId) clearInterval(timerId);
     if (typeof rankingTeardown === 'function') rankingTeardown();
+    document.removeEventListener('click', onDocClick);
+    window.removeEventListener('quiz:progress', updateProgress);
   };
 }
 

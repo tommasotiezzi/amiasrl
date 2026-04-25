@@ -937,7 +937,210 @@ legend { display: block; }
   box-shadow: 0 0 0 3px rgba(20,20,20,0.06);
 }
 
+/* ════════════════════════════════════════════════════════════════
+   APPEND TO style.css — sticky quiz bar + portal congrats
+   ════════════════════════════════════════════════════════════════ */
 
+/* ── Quiz page padding so sticky bar doesn't overlap last question ── */
+.quiz-page-with-bar {
+  padding-bottom: 110px;
+}
+
+/* ── Sticky bottom bar ── */
+.quiz-stickybar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid #e6e6e6;
+  padding: 12px 20px;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 16px;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .quiz-stickybar {
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+  .quiz-stickybar .quiz-timer { grid-column: 1; grid-row: 2; }
+  .quiz-stickybar .quiz-submit-btn { grid-column: 2; grid-row: 1 / span 2; }
+}
+
+/* ── Progress button (left) ── */
+.quiz-progress-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #f5f5f4;
+  border: 1px solid #e6e6e6;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  overflow: hidden;
+  transition: background 0.15s;
+  max-width: 320px;
+}
+.quiz-progress-btn:hover { background: #efefee; }
+.quiz-progress-btn[aria-expanded="true"] {
+  background: #efefee;
+  border-color: #141414;
+}
+
+.quiz-progress-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 0%;
+  background: linear-gradient(90deg, rgba(255, 100, 68, 0.18), rgba(255, 227, 103, 0.18));
+  transition: width 0.3s ease;
+  z-index: 0;
+}
+
+.quiz-progress-label {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.quiz-progress-label > span:first-child {
+  font-size: 14px;
+  font-weight: 600;
+  color: #141414;
+}
+.quiz-progress-sub {
+  font-size: 11px;
+  color: #787774;
+}
+
+/* ── Popover ── */
+.quiz-progress-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 20px;
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  min-width: 240px;
+  max-width: 90vw;
+  z-index: 101;
+}
+.quiz-progress-popover[hidden] { display: none; }
+
+.quiz-progress-popover-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #787774;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.quiz-progress-popover-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.quiz-progress-popover-done {
+  margin: 0;
+  font-size: 13px;
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.quiz-progress-chip {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: #f5f5f4;
+  border: 1px solid #e6e6e6;
+  font-size: 13px;
+  font-weight: 600;
+  color: #141414;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.quiz-progress-chip:hover {
+  background: #141414;
+  color: #fff;
+  border-color: #141414;
+}
+
+/* ── Submit button in sticky bar ── */
+.quiz-submit-btn {
+  margin: 0 !important;
+  padding: 10px 18px !important;
+  font-size: 14px !important;
+  width: auto !important;
+}
+
+/* ── Timer in sticky bar (overrides any old top placement) ── */
+.quiz-stickybar .quiz-timer {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #141414;
+}
+.quiz-stickybar .quiz-timer.warning {
+  color: #ea580c;
+}
+.quiz-stickybar .quiz-timer.expired {
+  color: #dc2626;
+}
+
+/* ── Question flash highlight (when jumped to from popover) ── */
+.question-flash {
+  animation: question-flash 1.4s ease-out;
+}
+@keyframes question-flash {
+  0%   { box-shadow: 0 0 0 4px rgba(255, 100, 68, 0); }
+  20%  { box-shadow: 0 0 0 4px rgba(255, 100, 68, 0.4); }
+  100% { box-shadow: 0 0 0 4px rgba(255, 100, 68, 0); }
+}
+
+/* ── Portal: all-quizzes-done congrats card ── */
+.app-card-congrats {
+  margin-top: 16px;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, rgba(255, 227, 103, 0.15) 0%, rgba(255, 100, 68, 0.10) 100%);
+  border: 1px solid rgba(255, 100, 68, 0.25);
+  border-radius: 14px;
+  text-align: center;
+}
+.app-card-congrats-icon {
+  font-size: 28px;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+.app-card-congrats-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #141414;
+  margin: 0 0 6px;
+}
+.app-card-congrats-body {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #525252;
+  margin: 0;
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
+}
 /* File upload placeholder */
 
 .file-upload-placeholder {
