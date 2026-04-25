@@ -877,6 +877,7 @@ async function renderQuiz(applicationId, quizType) {
   bindMultipleChoice(questions, answers);
   bindOpenText(questions, answers);
   const rankingTeardown = bindRanking(questions, answers);
+  bindLightboxTriggers(APP_EL);
 
   // Timer
   let timerId = null, expired = false;
