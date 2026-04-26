@@ -737,7 +737,7 @@ const QUIZ_TYPE_INFO = {
 
 async function renderQuizOverview(applicationId, quizType) {
   const info = QUIZ_TYPE_INFO[quizType];
-  if (!info) { toast('Quiz non valido', true); location.hash = '#/portal'; return; }
+  if (!info) { toast('Invalid quiz', true); location.hash = '#/portal'; return; }
 
   let app, quiz;
   try {
@@ -749,7 +749,7 @@ async function renderQuizOverview(applicationId, quizType) {
       quiz = cached;
     } else {
       quiz = await api.getQuizForCandidate(applicationId, quizType);
-      if (!quiz) throw new Error('Quiz non disponibile');
+      if (!quiz) throw new Error('Quiz not available');
       writeQuizCache(applicationId, quizType, quiz);
     }
   } catch (err) {
@@ -948,7 +948,22 @@ async function renderQuiz(applicationId, quizType) {
       <div class="quiz-progress-popover-grid" id="quiz-progress-popover-grid"></div>
     </div>
 
-    ${durationMs ? `<div class="quiz-timer" id="quiz-timer">⏱ --:--</div>` : '<div></div>'}
+    ${durationMs ? `
+      <div class="quiz-timer-wrap">
+        <div class="quiz-timer" id="quiz-timer">⏱ --:--</div>
+        <button type="button" class="quiz-timer-toggle" id="quiz-timer-toggle"
+                aria-label="Hide timer" title="Hide timer">
+          <svg class="icon-eye-open"   width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <svg class="icon-eye-closed" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.94 17.94A10.94 10.94 0 0112 19c-7 0-11-7-11-7a18.45 18.45 0 015.06-5.94M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 7 11 7a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M1 1l22 22"/>
+          </svg>
+        </button>
+      </div>
+    ` : '<div></div>'}
 
     <button class="submit-btn quiz-submit-btn" id="quiz-submit">
       Submit quiz
@@ -1074,6 +1089,31 @@ async function renderQuiz(applicationId, quizType) {
     };
     tick();
     timerId = setInterval(tick, 500);
+
+    // Eye toggle — hides/shows the timer numbers without affecting the timer
+    // logic (countdown still runs, auto-submit still fires at 0). Preference
+    // persists per quiz in sessionStorage so navigating within the same quiz
+    // remembers the user's choice. Default: visible.
+    const toggleBtn = document.getElementById('quiz-timer-toggle');
+    const wrap = toggleBtn?.closest('.quiz-timer-wrap');
+    const hideKey = `quiz-timer-hidden:${applicationId}:${quizType}`;
+    const applyHidden = (hidden) => {
+      if (!wrap || !toggleBtn) return;
+      wrap.classList.toggle('timer-hidden', hidden);
+      toggleBtn.setAttribute('aria-label', hidden ? 'Show timer' : 'Hide timer');
+      toggleBtn.setAttribute('title', hidden ? 'Show timer' : 'Hide timer');
+    };
+    // Read persisted state (default: visible)
+    let timerHidden = false;
+    try { timerHidden = sessionStorage.getItem(hideKey) === '1'; } catch {}
+    applyHidden(timerHidden);
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        timerHidden = !timerHidden;
+        applyHidden(timerHidden);
+        try { sessionStorage.setItem(hideKey, timerHidden ? '1' : '0'); } catch {}
+      });
+    }
   }
 
   const submitBtn = document.getElementById('quiz-submit');
@@ -1120,7 +1160,7 @@ async function renderQuiz(applicationId, quizType) {
       submitting = false;
       submitBtn.disabled = false;
       submitBtn.innerHTML = `
-        Consegna quiz
+        Submit quiz
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
         </svg>

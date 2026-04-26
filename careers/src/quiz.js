@@ -13,7 +13,7 @@ import { APP_EL, escapeHtml, questionImageUrl, optionImageUrl } from './core.js'
 
 function questionHtml(q, index, total) {
   const imgUrl = questionImageUrl(q.config);
-  const points = q.points > 0 ? ` · ${q.points} punti` : '';
+  const points = q.points > 0 ? ` · ${q.points} pts` : '';
 
   let body;
   if (q.question_type === 'multiple_choice') body = mcHtml(q);
@@ -21,14 +21,14 @@ function questionHtml(q, index, total) {
   else if (q.question_type === 'open_text') {
     body = `<textarea class="open-textarea" data-question-id="${escapeHtml(q.id)}" placeholder="Write your answer..." rows="6"></textarea>`;
   } else if (q.question_type === 'file_upload') {
-    body = `<div class="file-upload-placeholder">Upload file disponibile a breve. Puoi proseguire senza caricare nulla.</div>`;
+    body = `<div class="file-upload-placeholder">File upload coming soon. You can proceed without uploading anything.</div>`;
   } else {
-    body = `<div class="file-upload-placeholder">Tipo di domanda non supportato: ${escapeHtml(q.question_type)}</div>`;
+    body = `<div class="file-upload-placeholder">Unsupported question type: ${escapeHtml(q.question_type)}</div>`;
   }
 
   return `
     <div class="question-card" data-question-id="${escapeHtml(q.id)}">
-      <div class="question-num">Domanda ${index + 1} di ${total}${points}</div>
+      <div class="question-num">Question ${index + 1} of ${total}${points}</div>
       <div class="question-text">${escapeHtml(q.question_text)}</div>
       ${imgUrl ? questionImageBlock(imgUrl) : ''}
       ${body}
