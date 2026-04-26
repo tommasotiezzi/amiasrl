@@ -116,28 +116,37 @@ async function renderApply(slugOrId) {
   renderApplyForm(position);
 }
 
-// Standalone sign-in view. Authenticates, then branches based on
-// whether the signed-in candidate already has an application for this
-// position.
+// Standalone sign-in view. Authenticates, then branches:
+//   - If a position is provided (apply-bound flow): redirect to portal if the
+//     candidate already applied, otherwise show the apply form.
+//   - If no position (top-level "/signin" route): redirect to portal on success.
 async function renderSigninView(position) {
+  const isStandalone = !position;
   APP_EL.innerHTML = `
     <div class="job-detail">
       <a href="#/" class="job-back">← All positions</a>
-      <h1>${escapeHtml(position.title)}</h1>
-      <div class="job-detail-meta">
-        <span>${escapeHtml(position.department)}</span>
-        <span>·</span>
-        <span>${escapeHtml(position.location)}</span>
-        <span>·</span>
-        <span>${escapeHtml(contractLabel(position.contract_type))}</span>
-      </div>
+      ${isStandalone ? `
+        <h1>Sign in</h1>
+        <p class="quiz-desc" style="margin-top:8px">Sign in to access your applications and pending quizzes.</p>
+      ` : `
+        <h1>${escapeHtml(position.title)}</h1>
+        <div class="job-detail-meta">
+          <span>${escapeHtml(position.department)}</span>
+          <span>·</span>
+          <span>${escapeHtml(position.location)}</span>
+          <span>·</span>
+          <span>${escapeHtml(contractLabel(position.contract_type))}</span>
+        </div>
+      `}
 
       <form id="signin-form" class="apply-form" novalidate style="max-width:480px">
         <fieldset class="form-section form-section-account">
-          <legend class="form-section-title">Sign in to your account</legend>
+          <legend class="form-section-title">${isStandalone ? 'Welcome back' : 'Sign in to your account'}</legend>
           <p class="form-section-desc">
-            Sign in to continue with your application.
-            New here? <button type="button" class="link-btn" id="switch-to-signup">Create an account</button>.
+            ${isStandalone
+              ? `Don\'t have an account yet? <a href="#/" style="color:var(--accent);text-decoration:underline">Browse open positions</a> and apply.`
+              : `Sign in to continue with your application. New here? <button type="button" class="link-btn" id="switch-to-signup">Create an account</button>.`
+            }
           </p>
           <div class="form-grid">
             <div class="form-group">
@@ -163,12 +172,14 @@ async function renderSigninView(position) {
     </div>
   `;
 
-  // Back to signup
-  APP_EL.querySelector('#switch-to-signup').addEventListener('click', () => {
-    renderApplyForm(position);
-  });
+  // Back to signup (only present in apply-bound flow)
+  const switchBtn = APP_EL.querySelector('#switch-to-signup');
+  if (switchBtn) {
+    switchBtn.addEventListener('click', () => {
+      renderApplyForm(position);
+    });
+  }
 
-  // Submit
   APP_EL.querySelector('#signin-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = APP_EL.querySelector('#si-email').value.trim();
@@ -182,10 +193,16 @@ async function renderSigninView(position) {
 
     try {
       await api.signIn(email, pass);
-      // Load their candidate row so the "already applied?" check below
-      // has the candidate id.
       await store.hydrate();
 
+      if (isStandalone) {
+        // Top-level signin → straight to portal
+        toast('Signed in');
+        location.hash = '#/portal';
+        return;
+      }
+
+      // Apply-bound signin: check for existing application
       if (store.candidate) {
         try {
           const ex = await api.findExistingApplication(position.id, store.candidate.id);
@@ -199,7 +216,7 @@ async function renderSigninView(position) {
         }
       }
 
-      // Not applied yet (or no candidate row) → show apply form prefilled
+      // Not applied yet → show apply form prefilled
       toast('Signed in');
       renderApplyForm(position);
     } catch (err) {
@@ -789,7 +806,13 @@ async function renderQuizOverview(applicationId, quizType) {
         <p class="warn-body">
           Do not share, copy or disclose the content of this quiz.
           The answers must be the fruit of your personal work.
-          ${quiz.duration_minutes ? 'The timer starts the moment you click "Start quiz".' : ''}
+          ${quiz.duration_minutes ? `
+            <br><br>
+            The timer starts the moment you click <strong>Start quiz</strong> and runs server-side
+            — leaving and returning to the page does not reset it.
+            When the timer hits zero your quiz will be <strong>auto-submitted</strong> with whatever
+            answers you have entered.
+          ` : ''}
         </p>
       </div>
 
@@ -848,7 +871,19 @@ async function renderQuiz(applicationId, quizType) {
   }
   dlog('renderQuiz:', { quizId: quiz.quiz_id, count: questions.length, types: questions.map((q) => q.question_type) });
 
-  const startedAt = new Date();
+  // Server-anchored timer. We ask the DB for the started_at for this
+  // (application, quiz_type) pair. First call writes NOW(); subsequent calls
+  // (page reloads, navigating away and back) return the same value, so the
+  // timer cannot be reset by the candidate.
+  let startedAt;
+  try {
+    const startedIso = await api.startQuiz(applicationId, quizType);
+    startedAt = new Date(startedIso);
+    if (isNaN(startedAt.getTime())) throw new Error('invalid started_at');
+  } catch (e) {
+    derr('start_quiz failed, falling back to local now', e);
+    startedAt = new Date();
+  }
   const durationMs = quiz.duration_minutes ? quiz.duration_minutes * 60000 : null;
 
   // answers shape:
@@ -889,30 +924,40 @@ async function renderQuiz(applicationId, quizType) {
         ${questions.map((q, i) => questionHtml(q, i, questions.length)).join('')}
       </div>
     </div>
-
-    <div class="quiz-stickybar" id="quiz-stickybar">
-      <button type="button" class="quiz-progress-btn" id="quiz-progress-btn" aria-haspopup="true" aria-expanded="false">
-        <span class="quiz-progress-fill" id="quiz-progress-fill"></span>
-        <span class="quiz-progress-label">
-          <span id="quiz-progress-count">0 of ${questions.length}</span>
-          <span class="quiz-progress-sub">answered</span>
-        </span>
-      </button>
-      <div class="quiz-progress-popover" id="quiz-progress-popover" role="menu" hidden>
-        <div class="quiz-progress-popover-title">Missing answers</div>
-        <div class="quiz-progress-popover-grid" id="quiz-progress-popover-grid"></div>
-      </div>
-
-      ${durationMs ? `<div class="quiz-timer" id="quiz-timer">⏱ --:--</div>` : '<div></div>'}
-
-      <button class="submit-btn quiz-submit-btn" id="quiz-submit">
-        Submit quiz
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-        </svg>
-      </button>
-    </div>
   `;
+
+  // Sticky bar lives OUTSIDE #app because #app receives `.page-active` with a
+  // transform, which would trap `position: fixed` descendants in its containing
+  // block (i.e. they'd scroll with the page). Appending to <body> avoids that.
+  const oldBar = document.getElementById('quiz-stickybar');
+  if (oldBar) oldBar.remove();
+
+  const stickyBar = document.createElement('div');
+  stickyBar.className = 'quiz-stickybar';
+  stickyBar.id = 'quiz-stickybar';
+  stickyBar.innerHTML = `
+    <button type="button" class="quiz-progress-btn" id="quiz-progress-btn" aria-haspopup="true" aria-expanded="false">
+      <span class="quiz-progress-fill" id="quiz-progress-fill"></span>
+      <span class="quiz-progress-label">
+        <span id="quiz-progress-count">0 of ${questions.length}</span>
+        <span class="quiz-progress-sub">answered</span>
+      </span>
+    </button>
+    <div class="quiz-progress-popover" id="quiz-progress-popover" role="menu" hidden>
+      <div class="quiz-progress-popover-title">Missing answers</div>
+      <div class="quiz-progress-popover-grid" id="quiz-progress-popover-grid"></div>
+    </div>
+
+    ${durationMs ? `<div class="quiz-timer" id="quiz-timer">⏱ --:--</div>` : '<div></div>'}
+
+    <button class="submit-btn quiz-submit-btn" id="quiz-submit">
+      Submit quiz
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+      </svg>
+    </button>
+  `;
+  document.body.appendChild(stickyBar);
 
   bindMultipleChoice(questions, answers);
   bindOpenText(questions, answers);
@@ -993,23 +1038,36 @@ async function renderQuiz(applicationId, quizType) {
   window.addEventListener('quiz:progress', updateProgress);
   updateProgress();
 
-  // Timer
+  // Timer — hard cutoff. At 0:00 the quiz auto-submits with whatever
+  // answers the candidate has entered. Note the use of getElementById
+  // for #quiz-timer because it lives in the sticky bar appended to body,
+  // not inside APP_EL.
   let timerId = null, expired = false;
   if (durationMs) {
-    const timerEl = APP_EL.querySelector('#quiz-timer');
+    const timerEl = document.getElementById('quiz-timer');
     const tick = () => {
       const elapsed = Date.now() - startedAt.getTime();
       const remaining = Math.max(0, durationMs - elapsed);
       const m = Math.floor(remaining / 60000);
       const s = Math.floor((remaining % 60000) / 1000);
-      timerEl.textContent = `⏱ ${m}:${String(s).padStart(2, '0')}`;
-      if (remaining < 300000) timerEl.classList.add('warning');
+      if (timerEl) timerEl.textContent = `⏱ ${m}:${String(s).padStart(2, '0')}`;
+      if (timerEl && remaining < 300000) timerEl.classList.add('warning');
       if (remaining <= 0 && !expired) {
         expired = true;
-        timerEl.classList.remove('warning');
-        timerEl.classList.add('expired');
-        timerEl.textContent = '⏱ Time expired';
+        if (timerEl) {
+          timerEl.classList.remove('warning');
+          timerEl.classList.add('expired');
+          timerEl.textContent = '⏱ Time expired';
+        }
         clearInterval(timerId);
+        // Lock the UI so the candidate can't keep editing answers
+        // while the auto-submit is in flight.
+        APP_EL.querySelectorAll('button, input, textarea, [draggable]').forEach((el) => {
+          if (el.tagName === 'BUTTON') el.disabled = true;
+          else if ('disabled' in el) el.disabled = true;
+          el.setAttribute('draggable', 'false');
+        });
+        APP_EL.classList.add('quiz-locked');
         toast('Time expired — submitting');
         doSubmit();
       }
@@ -1018,8 +1076,8 @@ async function renderQuiz(applicationId, quizType) {
     timerId = setInterval(tick, 500);
   }
 
-  const submitBtn = APP_EL.querySelector('#quiz-submit');
-  submitBtn.addEventListener('click', () => doSubmit());
+  const submitBtn = document.getElementById('quiz-submit');
+  if (submitBtn) submitBtn.addEventListener('click', () => doSubmit());
 
   let submitting = false;
   async function doSubmit() {
@@ -1075,6 +1133,8 @@ async function renderQuiz(applicationId, quizType) {
     if (typeof rankingTeardown === 'function') rankingTeardown();
     document.removeEventListener('click', onDocClick);
     window.removeEventListener('quiz:progress', updateProgress);
+    const bar = document.getElementById('quiz-stickybar');
+    if (bar) bar.remove();
   };
 }
 
@@ -1089,6 +1149,7 @@ let currentTeardown = null;
 
 const routes = [
   [/^\/$/,                                () => renderJobsList()],
+  [/^\/signin$/,                          () => renderSigninView(null)],
   [/^\/apply\/([^/]+)$/,                  (slug) => renderApply(slug)],
   [/^\/portal$/,                          () => renderPortal()],
   [/^\/quiz-overview\/([^/]+)\/([^/]+)$/, (id, t) => renderQuizOverview(id, t)],
@@ -1115,6 +1176,13 @@ async function route() {
   if (needsAuth && !store.isAuthed) {
     dlog('auth required, redirecting to /');
     location.hash = '#/';
+    return;
+  }
+
+  // Already-signed-in users visiting /signin → straight to portal
+  if (path === '/signin' && store.isAuthed) {
+    dlog('already signed in, redirecting to /portal');
+    location.hash = '#/portal';
     return;
   }
 

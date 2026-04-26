@@ -397,6 +397,21 @@ const api = {
       timeout: 25000,
     });
   },
+
+  // Server-side timer anchor. Returns the immutable started_at for this
+  // application + quiz type (writes NOW() on first call, returns existing
+  // value on subsequent calls). Used by the quiz page to anchor the timer
+  // so reloading or navigating away cannot reset it.
+  async startQuiz(applicationId, quizType) {
+    return await request('/rest/v1/rpc/start_quiz', {
+      method: 'POST',
+      body: {
+        p_application_id: applicationId,
+        p_quiz_type: quizType,
+      },
+      timeout: 15000,
+    });
+  },
 };
 
 
@@ -499,6 +514,11 @@ function updateHeaderAuthUI() {
   document.querySelectorAll('[data-requires-auth="true"]').forEach((el) => {
     if (store.isAuthed) el.removeAttribute('hidden');
     else el.setAttribute('hidden', '');
+  });
+  // Inverse: hide when authed (e.g., the "Sign in" link)
+  document.querySelectorAll('[data-hide-when-authed="true"]').forEach((el) => {
+    if (store.isAuthed) el.setAttribute('hidden', '');
+    else el.removeAttribute('hidden');
   });
 }
 
