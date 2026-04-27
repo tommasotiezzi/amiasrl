@@ -899,17 +899,55 @@ async function renderQuiz(applicationId, quizType) {
     // ranking: leave undefined until candidate completes the slots
   }
 
-  // Wrap in a Proxy so any write dispatches a "quiz:progress" event.
-  // The sticky progress bar listens to this and recomputes counts.
+  // ── localStorage draft ──
+  // Persist answers locally so a crash, refresh, or accidental tab close
+  // doesn't lose progress. Keyed per (application, quiz_type). Cleared
+  // on successful submit. Note this only protects the same browser/device.
+  const draftKey = `quiz-draft:${applicationId}:${quizType}`;
+  let restoredFromDraft = false;
+  try {
+    const raw = localStorage.getItem(draftKey);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        // Only restore answers for questions that still exist in this quiz
+        // (in case the quiz was edited admin-side between sessions).
+        const validIds = new Set(questions.map((q) => q.id));
+        for (const [k, v] of Object.entries(parsed)) {
+          if (validIds.has(k)) _answers[k] = v;
+        }
+        restoredFromDraft = Object.keys(parsed).length > 0;
+      }
+    }
+  } catch (e) {
+    derr('quiz draft restore failed', e);
+  }
+
+  let saveTimer = null;
+  const saveDraft = () => {
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      try { localStorage.setItem(draftKey, JSON.stringify(_answers)); } catch {}
+    }, 300);
+  };
+  const clearDraft = () => {
+    try { localStorage.removeItem(draftKey); } catch {}
+  };
+
+  // Wrap in a Proxy so any write dispatches a "quiz:progress" event AND
+  // saves the draft locally. The sticky progress bar listens to the event
+  // and recomputes counts; the draft is persisted to localStorage.
   const answers = new Proxy(_answers, {
     set(t, k, v) {
       const ok = Reflect.set(t, k, v);
       window.dispatchEvent(new CustomEvent('quiz:progress'));
+      saveDraft();
       return ok;
     },
     deleteProperty(t, k) {
       const ok = Reflect.deleteProperty(t, k);
       window.dispatchEvent(new CustomEvent('quiz:progress'));
+      saveDraft();
       return ok;
     },
   });
@@ -978,6 +1016,45 @@ async function renderQuiz(applicationId, quizType) {
   bindOpenText(questions, answers);
   const rankingTeardown = bindRanking(questions, answers);
   bindLightboxTriggers(APP_EL);
+
+  // If we restored a draft, paint the restored state into the DOM.
+  // The bind*() functions don't paint initial state — they wire event
+  // handlers — so we have to walk the DOM and reflect _answers here.
+  if (restoredFromDraft) {
+    for (const q of questions) {
+      const stored = _answers[q.id];
+
+      if (q.question_type === 'multiple_choice' && Array.isArray(stored)) {
+        const card = APP_EL.querySelector(`.question-card[data-question-id="${q.id}"]`);
+        if (!card) continue;
+        card.querySelectorAll('.mc-option').forEach((opt) => {
+          const v = parseInt(opt.dataset.value, 10);
+          opt.classList.toggle('selected', stored.includes(v));
+        });
+      }
+      else if (q.question_type === 'open_text' && typeof stored === 'string') {
+        const ta = APP_EL.querySelector(`.open-textarea[data-question-id="${q.id}"]`);
+        if (ta) ta.value = stored;
+      }
+      else if (q.question_type === 'ranking' && Array.isArray(stored)) {
+        const block = APP_EL.querySelector(`.rank-block[data-question-id="${q.id}"]`);
+        if (!block) continue;
+        const slotEls = block.querySelectorAll('.rank-slot');
+        // Move chips from pool into slots in stored order
+        stored.forEach((optId, i) => {
+          const chip = block.querySelector(`.rank-chip[data-option-id="${optId}"]`);
+          const slot = slotEls[i];
+          if (chip && slot) {
+            slot.appendChild(chip);
+            slot.classList.add('rank-slot-filled');
+          }
+        });
+      }
+    }
+    // Notify toast + recompute progress bar
+    setTimeout(() => toast('Your previous answers were restored'), 200);
+    window.dispatchEvent(new CustomEvent('quiz:progress'));
+  }
 
   // ── Sticky bar progress + popover ──
   const progressBtn   = document.getElementById('quiz-progress-btn');
@@ -1117,7 +1194,55 @@ async function renderQuiz(applicationId, quizType) {
   }
 
   const submitBtn = document.getElementById('quiz-submit');
-  if (submitBtn) submitBtn.addEventListener('click', () => doSubmit());
+  if (submitBtn) submitBtn.addEventListener('click', () => {
+    // Don't show confirmation when auto-submitting on time expiry — just submit.
+    if (expired) { doSubmit(); return; }
+    const missing = questions.filter((q) => !isAnswered(q));
+    showSubmitConfirm(missing.length, () => doSubmit());
+  });
+
+  function showSubmitConfirm(missingCount, onConfirm) {
+    // Remove any existing modal
+    const existing = document.getElementById('quiz-confirm-overlay');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'quiz-confirm-overlay';
+    overlay.className = 'quiz-confirm-overlay';
+    overlay.innerHTML = `
+      <div class="quiz-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="quiz-confirm-title">
+        <h3 id="quiz-confirm-title" class="quiz-confirm-title">Submit your quiz?</h3>
+        ${missingCount > 0 ? `
+          <p class="quiz-confirm-body">
+            You have <strong>${missingCount} unanswered question${missingCount === 1 ? '' : 's'}</strong>.
+            Once submitted, you cannot change your answers.
+          </p>
+        ` : `
+          <p class="quiz-confirm-body">
+            All questions answered. Once submitted, you cannot change your answers.
+          </p>
+        `}
+        <div class="quiz-confirm-actions">
+          <button type="button" class="quiz-confirm-cancel" id="quiz-confirm-cancel">Keep editing</button>
+          <button type="button" class="quiz-confirm-ok ${missingCount > 0 ? 'is-warning' : ''}" id="quiz-confirm-ok">
+            ${missingCount > 0 ? 'Submit anyway' : 'Submit'}
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const close = () => { overlay.remove(); document.removeEventListener('keydown', onEsc); };
+    const onEsc = (e) => { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', onEsc);
+
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    overlay.querySelector('#quiz-confirm-cancel').addEventListener('click', close);
+    overlay.querySelector('#quiz-confirm-ok').addEventListener('click', () => {
+      close();
+      onConfirm();
+    });
+  }
 
   let submitting = false;
   async function doSubmit() {
@@ -1134,6 +1259,7 @@ async function renderQuiz(applicationId, quizType) {
         startedAt.toISOString(), completedAt.toISOString()
       );
       clearQuizCache(applicationId, quizType);
+      clearDraft();
       dlog('doSubmit success', result);
       toast('Quiz completed! 🎉');
       setTimeout(() => { location.hash = '#/portal'; }, 1500);
@@ -1149,6 +1275,7 @@ async function renderQuiz(applicationId, quizType) {
                       :                       check?.att_quiz_completed_at;
           if (field) {
             clearQuizCache(applicationId, quizType);
+            clearDraft();
             toast('Quiz completed! 🎉');
             setTimeout(() => { location.hash = '#/portal'; }, 1200);
             return;
@@ -1170,11 +1297,18 @@ async function renderQuiz(applicationId, quizType) {
 
   return () => {
     if (timerId) clearInterval(timerId);
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      // Flush any pending draft write so we don't lose the last edits.
+      try { localStorage.setItem(draftKey, JSON.stringify(_answers)); } catch {}
+    }
     if (typeof rankingTeardown === 'function') rankingTeardown();
     document.removeEventListener('click', onDocClick);
     window.removeEventListener('quiz:progress', updateProgress);
     const bar = document.getElementById('quiz-stickybar');
     if (bar) bar.remove();
+    const overlay = document.getElementById('quiz-confirm-overlay');
+    if (overlay) overlay.remove();
   };
 }
 
