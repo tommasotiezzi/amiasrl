@@ -1507,3 +1507,85 @@ legend { display: block; }
 .quiz-confirm-ok.is-warning:hover {
   background: #c2410c;
 }
+/* ════════════════════════════════════════════════════════════════
+   APPEND TO style.css — apply form polish round
+   ════════════════════════════════════════════════════════════════
+   Covers:
+   - Job card stock/bonus chips
+   - Prominent compensation block (placed above description)
+   - Reply-disclaimer panel at bottom of apply form
+   - Shorter "Any relevant link" textarea
+   - Better line-height / letter-spacing on description
+   ════════════════════════════════════════════════════════════════ */
+
+/* Stock / Bonus chips on job card */
+.job-card-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid #a7f3d0;
+}
+
+/* Prominent compensation block (above description)
+   Warm cream background to visually separate from the candidate form below. */
+.job-comp.job-comp-prominent {
+  margin-top: 8px;
+  margin-bottom: 24px;
+  padding: 22px 24px;
+  background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
+  border: 1px solid #fde68a;
+  border-radius: 14px;
+}
+.job-comp.job-comp-prominent .job-comp-title {
+  color: #78350f;
+}
+.job-comp.job-comp-prominent dt {
+  color: #92400e;
+}
+.job-comp.job-comp-prominent dd {
+  color: #1c1917;
+  font-weight: 500;
+}
+
+/* Reply disclaimer at bottom of apply form */
+.form-disclaimer {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  margin: 18px 0 22px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+}
+.form-disclaimer-icon {
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1.4;
+}
+.form-disclaimer p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #78350f;
+}
+
+/* Shorter textarea for the "Any relevant link" field */
+.form-textarea-short {
+  min-height: 64px;
+}
+
+/* Description: more comfortable reading */
+.md-content {
+  line-height: 1.72;
+  letter-spacing: 0.005em;
+}
+.md-content p {
+  margin: 0.75em 0;
+}

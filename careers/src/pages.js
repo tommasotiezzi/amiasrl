@@ -55,6 +55,8 @@ async function renderJobsList() {
 function jobCard(j) {
   const href = `#/apply/${encodeURIComponent(j.slug || j.id)}`;
   const ral = salaryRangeText(j.salary_min, j.salary_max);
+  const hasStock = !!j.stock_options;
+  const hasBonus = !!j.bonus;
   return `
     <a href="${href}" class="job-card">
       <div class="job-card-info">
@@ -69,6 +71,8 @@ function jobCard(j) {
           <span>·</span>
           <span>${escapeHtml(contractLabel(j.contract_type))}</span>
           ${ral ? `<span>·</span><span class="job-card-salary">${escapeHtml(ral)}</span>` : ''}
+          ${hasStock ? `<span class="job-card-chip">Stock</span>` : ''}
+          ${hasBonus ? `<span class="job-card-chip">Bonus</span>` : ''}
         </div>
       </div>
       <div class="job-card-arrow" aria-hidden="true">
@@ -249,10 +253,8 @@ function renderApplyForm(position) {
         <span>${escapeHtml(contractLabel(position.contract_type))}</span>
       </div>
 
-      <div class="job-description md-content">${renderMarkdown(position.description || '')}</div>
-
       ${hasComp ? `
-        <div class="job-comp">
+        <div class="job-comp job-comp-prominent">
           <div class="job-comp-title">Compensation</div>
           <dl class="job-comp-list">
             ${ral ? `
@@ -271,13 +273,13 @@ function renderApplyForm(position) {
         </div>
       ` : ''}
 
+      <div class="job-description md-content">${renderMarkdown(position.description || '')}</div>
+
       <form id="apply-form" class="apply-form" novalidate>
         ${authed ? accountBlockAuthed() : accountBlockSignup()}
 
         <fieldset class="form-section">
-          <legend class="form-section-title">
-            Informazioni di contatto
-          </legend>
+          <legend class="form-section-title">Contact information</legend>
           <div class="form-grid">
             <div class="form-group">
               <label class="form-label" for="f-first">First name <span class="required">*</span></label>
@@ -295,8 +297,8 @@ function renderApplyForm(position) {
                 value="${escapeHtml(cand?.phone || '')}">
             </div>
             <div class="form-group">
-              <label class="form-label" for="f-linkedin">LinkedIn</label>
-              <input type="url" id="f-linkedin" class="form-input" placeholder="https://linkedin.com/in/..."
+              <label class="form-label" for="f-linkedin">LinkedIn or Professional Profile <span class="required">*</span></label>
+              <input type="url" id="f-linkedin" class="form-input" placeholder="https://linkedin.com/in/..." required
                 value="${escapeHtml(cand?.linkedin_url || '')}">
             </div>
           </div>
@@ -306,9 +308,14 @@ function renderApplyForm(position) {
           <legend class="form-section-title">Your application</legend>
           <div class="form-grid">
             <div class="form-group full">
-              <label class="form-label" for="f-cover">Cover letter</label>
+              <label class="form-label" for="f-cover">Why you want to join the team</label>
               <textarea id="f-cover" class="form-textarea"
-                placeholder="Add anything relevant to your application: a portfolio link, a piece of work you're proud of, why you'd be a fit, references, anything else you want us to know."></textarea>
+                placeholder="Tell us what draws you to Amia, why this role, what you'd bring to the team..."></textarea>
+            </div>
+            <div class="form-group full">
+              <label class="form-label" for="f-links">Any relevant link</label>
+              <textarea id="f-links" class="form-textarea form-textarea-short"
+                placeholder="Portfolio, Google Drive, video presentation, GitHub, anything that shows your work."></textarea>
             </div>
             <div class="form-group full">
               <label class="form-label">CV (PDF) <span class="required">*</span></label>
@@ -330,6 +337,15 @@ function renderApplyForm(position) {
               as stated in the <a href="https://amia.technology/privacy" target="_blank" rel="noopener">privacy policy</a>.
               <span class="required">*</span></span>
           </label>
+        </div>
+
+        <div class="form-disclaimer">
+          <span class="form-disclaimer-icon" aria-hidden="true">⚠️</span>
+          <p>
+            We're a small team without an HR department and we're heads-down building.
+            We may not reply to every application individually, but we read each one carefully.
+            Thank you for your patience.
+          </p>
         </div>
 
         <button type="submit" class="submit-btn" id="apply-submit-btn">
@@ -439,13 +455,22 @@ async function submitApplication(position) {
   const last  = APP_EL.querySelector('#f-last').value.trim();
   const phone = APP_EL.querySelector('#f-phone').value.trim();
   const linkedin = APP_EL.querySelector('#f-linkedin').value.trim();
-  const cover = APP_EL.querySelector('#f-cover').value.trim();
+  const coverWhy   = APP_EL.querySelector('#f-cover').value.trim();
+  const coverLinks = APP_EL.querySelector('#f-links').value.trim();
   const cvFile = APP_EL.querySelector('#f-cv').files[0];
   const consent = APP_EL.querySelector('#f-consent').checked;
+
+  // Merge the two cover-letter textareas into one stored field.
+  // Admin sees the full text in one block. Empty halves are skipped.
+  let cover = '';
+  if (coverWhy && coverLinks)      cover = `${coverWhy}\n\n--- Links ---\n${coverLinks}`;
+  else if (coverWhy)               cover = coverWhy;
+  else if (coverLinks)             cover = `--- Links ---\n${coverLinks}`;
 
   // Validation
   if (!consent) { toast('You must accept the data processing consent', true); return; }
   if (!first || !last) { toast('First and last name are required', true); return; }
+  if (!linkedin) { toast('LinkedIn or professional profile is required', true); return; }
   if (!cvFile) { toast('CV is required', true); return; }
   if (cvFile.type !== 'application/pdf') { toast('CV must be in PDF format', true); return; }
   if (cvFile.size > 10 * 1024 * 1024) { toast('CV cannot exceed 10 MB', true); return; }

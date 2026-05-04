@@ -265,7 +265,7 @@ const api = {
 
   async listPublishedPositions() {
     return await request(
-      '/rest/v1/positions?select=id,slug,title,department,location,contract_type,salary_min,salary_max,app_name,app_color_from,app_color_to&status=eq.published&order=published_at.desc',
+      '/rest/v1/positions?select=id,slug,title,department,location,contract_type,salary_min,salary_max,stock_options,bonus,app_name,app_color_from,app_color_to&status=eq.published&order=published_at.desc',
       { auth: false }
     );
   },
