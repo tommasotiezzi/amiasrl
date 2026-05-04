@@ -55,8 +55,20 @@ async function renderJobsList() {
 function jobCard(j) {
   const href = `#/apply/${encodeURIComponent(j.slug || j.id)}`;
   const ral = salaryRangeText(j.salary_min, j.salary_max);
-  const hasStock = !!j.stock_options;
-  const hasBonus = !!j.bonus;
+  // Build a single salary-line string with optional inline extras.
+  // Examples:
+  //   €40K–€60K
+  //   €40K–€60K + Stock
+  //   €40K–€60K + Stock + Bonus
+  //   + Stock + Bonus  (when no salary range is set)
+  const extras = [];
+  if (j.stock_options) extras.push('Stock');
+  if (j.bonus)         extras.push('Bonus');
+  let compText = '';
+  if (ral && extras.length)      compText = `${ral} + ${extras.join(' + ')}`;
+  else if (ral)                  compText = ral;
+  else if (extras.length)        compText = `+ ${extras.join(' + ')}`;
+
   return `
     <a href="${href}" class="job-card">
       <div class="job-card-info">
@@ -70,9 +82,7 @@ function jobCard(j) {
           <span>${escapeHtml(j.location)}</span>
           <span>·</span>
           <span>${escapeHtml(contractLabel(j.contract_type))}</span>
-          ${ral ? `<span>·</span><span class="job-card-salary">${escapeHtml(ral)}</span>` : ''}
-          ${hasStock ? `<span class="job-card-chip">Stock</span>` : ''}
-          ${hasBonus ? `<span class="job-card-chip">Bonus</span>` : ''}
+          ${compText ? `<span>·</span><span class="job-card-salary">${escapeHtml(compText)}</span>` : ''}
         </div>
       </div>
       <div class="job-card-arrow" aria-hidden="true">
@@ -318,12 +328,12 @@ function renderApplyForm(position) {
                 placeholder="Portfolio, Google Drive, video presentation, GitHub, anything that shows your work."></textarea>
             </div>
             <div class="form-group full">
-              <label class="form-label">CV (PDF) <span class="required">*</span></label>
+              <label class="form-label">Any document that shows your competences (CV, project, etc.) <span class="required">*</span></label>
               <label class="form-file-label" id="cv-label" for="f-cv">
                 <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                <span id="cv-label-text">Upload your CV</span>
+                <span id="cv-label-text">Upload your file (PDF)</span>
                 <input type="file" id="f-cv" class="form-file-input" accept=".pdf,application/pdf" required>
               </label>
             </div>
@@ -410,7 +420,7 @@ function bindApplyForm(position) {
     const file = cvInput.files[0];
     if (!file) {
       cvLabel.classList.remove('has-file');
-      cvText.textContent = 'Upload your CV';
+      cvText.textContent = 'Upload your file (PDF)';
       return;
     }
     if (file.type !== 'application/pdf') {
@@ -471,9 +481,9 @@ async function submitApplication(position) {
   if (!consent) { toast('You must accept the data processing consent', true); return; }
   if (!first || !last) { toast('First and last name are required', true); return; }
   if (!linkedin) { toast('LinkedIn or professional profile is required', true); return; }
-  if (!cvFile) { toast('CV is required', true); return; }
-  if (cvFile.type !== 'application/pdf') { toast('CV must be in PDF format', true); return; }
-  if (cvFile.size > 10 * 1024 * 1024) { toast('CV cannot exceed 10 MB', true); return; }
+  if (!cvFile) { toast('A document is required', true); return; }
+  if (cvFile.type !== 'application/pdf') { toast('The file must be in PDF format', true); return; }
+  if (cvFile.size > 10 * 1024 * 1024) { toast('The file cannot exceed 10 MB', true); return; }
 
   // Auth fields (only present when not logged in)
   const accountSection = APP_EL.querySelector('.form-section-account');

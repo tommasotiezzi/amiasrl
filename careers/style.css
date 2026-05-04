@@ -1511,26 +1511,15 @@ legend { display: block; }
    APPEND TO style.css — apply form polish round
    ════════════════════════════════════════════════════════════════
    Covers:
-   - Job card stock/bonus chips
    - Prominent compensation block (placed above description)
    - Reply-disclaimer panel at bottom of apply form
    - Shorter "Any relevant link" textarea
    - Better line-height / letter-spacing on description
-   ════════════════════════════════════════════════════════════════ */
 
-/* Stock / Bonus chips on job card */
-.job-card-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: #ecfdf5;
-  color: #047857;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  border: 1px solid #a7f3d0;
-}
+   Note: stock options + bonus on the job listing card are now
+   inline text alongside the salary range (e.g. "€26K–€30K + Bonus"),
+   handled by the existing .job-card-salary styling. No chip CSS needed.
+   ════════════════════════════════════════════════════════════════ */
 
 /* Prominent compensation block (above description)
    Warm cream background to visually separate from the candidate form below. */
