@@ -16,6 +16,7 @@ import {
   salaryRangeText, appPillHtml,
   renderMarkdown,
   bindLightboxTriggers,
+  normalizeProfileUrl,
 } from './core.js';
 
 import { questionHtml, bindMultipleChoice, bindOpenText, bindRanking } from './quiz.js';
@@ -314,6 +315,29 @@ function renderApplyForm(position) {
           </div>
         </fieldset>
 
+        ${position.requires_in_person && !cand?.work_location ? `
+          <fieldset class="form-section">
+            <legend class="form-section-title">Where will you work from?</legend>
+            <p class="form-section-hint">This role requires being in Milan. Let us know your situation.</p>
+            <div class="form-radio-group">
+              <label class="form-radio">
+                <input type="radio" name="f-work-location" value="milan" required>
+                <span class="form-radio-label">
+                  <strong>📍 I'm based in Milan</strong>
+                  <span class="form-radio-sub">I live in or around Milan, hybrid is fine.</span>
+                </span>
+              </label>
+              <label class="form-radio">
+                <input type="radio" name="f-work-location" value="remote" required>
+                <span class="form-radio-label">
+                  <strong>🌍 I'd work remotely</strong>
+                  <span class="form-radio-sub">I'm not in Milan and would prefer remote.</span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+        ` : ''}
+
         <fieldset class="form-section">
           <legend class="form-section-title">Your application</legend>
           <div class="form-grid">
@@ -464,7 +488,14 @@ async function submitApplication(position) {
   const first = APP_EL.querySelector('#f-first').value.trim();
   const last  = APP_EL.querySelector('#f-last').value.trim();
   const phone = APP_EL.querySelector('#f-phone').value.trim();
-  const linkedin = APP_EL.querySelector('#f-linkedin').value.trim();
+  const linkedinRaw = APP_EL.querySelector('#f-linkedin').value.trim();
+  const linkedin = normalizeProfileUrl(linkedinRaw);
+
+  // work_location: only present in the DOM when position.requires_in_person AND
+  // candidate hadn't previously answered. If not in the DOM, reuse the
+  // candidate's existing value (the form already prefilled / skipped the question).
+  const workLocEl = APP_EL.querySelector('input[name="f-work-location"]:checked');
+  const workLocation = workLocEl ? workLocEl.value : (store.candidate?.work_location ?? null);
   const coverWhy   = APP_EL.querySelector('#f-cover').value.trim();
   const coverLinks = APP_EL.querySelector('#f-links').value.trim();
   const cvFile = APP_EL.querySelector('#f-cv').files[0];
@@ -481,6 +512,9 @@ async function submitApplication(position) {
   if (!consent) { toast('You must accept the data processing consent', true); return; }
   if (!first || !last) { toast('First and last name are required', true); return; }
   if (!linkedin) { toast('LinkedIn or professional profile is required', true); return; }
+  if (position.requires_in_person && !workLocation) {
+    toast('Please tell us where you will work from', true); return;
+  }
   if (!cvFile) { toast('A document is required', true); return; }
   if (cvFile.type !== 'application/pdf') { toast('The file must be in PDF format', true); return; }
   if (cvFile.size > 10 * 1024 * 1024) { toast('The file cannot exceed 10 MB', true); return; }
@@ -536,6 +570,7 @@ async function submitApplication(position) {
       email: store.user.email,
       phone: phone || null,
       linkedin_url: linkedin || null,
+      work_location: workLocation,
     };
     if (candidate) {
       candidate = await api.updateCandidate(candidate.id, candidatePayload);

@@ -1578,3 +1578,62 @@ legend { display: block; }
 .md-content p {
   margin: 0.75em 0;
 }
+/* ════════════════════════════════════════════════════════════════
+   APPEND TO style.css — work-location question on apply form
+   ════════════════════════════════════════════════════════════════ */
+
+.form-section-hint {
+  font-size: 13px;
+  color: #525252;
+  margin: -8px 0 14px;
+  line-height: 1.5;
+}
+
+.form-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #e6e6e6;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.form-radio:hover {
+  border-color: #141414;
+  background: #fafafa;
+}
+.form-radio input[type="radio"] {
+  margin-top: 3px;
+  flex-shrink: 0;
+  accent-color: #141414;
+}
+.form-radio:has(input[type="radio"]:checked) {
+  border-color: #141414;
+  background: #fafafa;
+}
+
+.form-radio-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+.form-radio-label strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: #141414;
+  line-height: 1.3;
+}
+.form-radio-sub {
+  font-size: 12px;
+  color: #787774;
+  line-height: 1.4;
+}

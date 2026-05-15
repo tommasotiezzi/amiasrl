@@ -472,6 +472,32 @@ function escapeHtml(s) {
 }
 function escapeHtmlMultiline(s) { return escapeHtml(s).replace(/\n/g, '<br>'); }
 
+// Normalize a user-entered profile URL (LinkedIn etc.) into a real, absolute URL.
+// Real-world inputs we've seen:
+//   "linkedin.com/in/foo"                      → "https://linkedin.com/in/foo"
+//   "www.linkedin.com/in/foo"                  → "https://www.linkedin.com/in/foo"
+//   "amianshr.vercel.app/www.linkedin.com/..." → "https://www.linkedin.com/..."  (our own domain accidentally prefixed)
+//   "https://linkedin.com/in/foo"              → unchanged
+//   "  https://linkedin.com/in/foo  "          → trimmed
+// Returns null for empty / whitespace input.
+function normalizeProfileUrl(raw) {
+  if (!raw) return null;
+  let s = String(raw).trim();
+  if (!s) return null;
+
+  // Strip a leading scheme so we can re-add it cleanly
+  s = s.replace(/^https?:\/\//i, '');
+
+  // Strip our own domain if it got prefixed (browser treated input as relative URL)
+  // Match: amiasrl.it/..., amia.technology/..., amianshr.vercel.app/..., amia.vercel.app/... etc.
+  s = s.replace(/^(?:www\.)?(?:amiasrl\.it|amia\.technology|[a-z0-9-]+\.vercel\.app)\//i, '');
+
+  // Strip any leading slashes
+  s = s.replace(/^\/+/, '');
+
+  return 'https://' + s;
+}
+
 const CONTRACT_LABELS = {
   full_time: 'Full-time', part_time: 'Part-time',
   freelance: 'Freelance', internship: 'Internship',
@@ -696,4 +722,5 @@ export {
   salaryRangeText, appPillHtml,
   openLightbox, closeLightbox, bindLightboxTriggers,
   renderMarkdown,
+  normalizeProfileUrl,
 };
