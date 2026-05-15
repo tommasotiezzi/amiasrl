@@ -65,14 +65,84 @@
     }
     </script>
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-13920YSJ44"></script>
-    <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-13920YSJ44');
-    </script>
-    </head>
+    <!--
+        Google Analytics is NOT loaded here. It only gets loaded after the
+        visitor explicitly accepts the cookie banner (see <body> bottom).
+        This keeps us GDPR-compliant: no tracking before consent.
+    -->
+
+    <!-- ── Cookie banner styles ── -->
+    <style>
+      .cookie-banner {
+        position: fixed;
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+        z-index: 9999;
+        max-width: 540px;
+        margin: 0 auto;
+        background: #ffffff;
+        color: #141414;
+        border: 1px solid #e6e6e6;
+        border-radius: 14px;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
+        padding: 18px 20px;
+        font-family: 'Manrope', sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        display: none; /* JS toggles this */
+      }
+      .cookie-banner.is-visible { display: block; }
+      .cookie-banner-title {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0 0 6px;
+      }
+      .cookie-banner-body {
+        margin: 0 0 14px;
+        color: #525252;
+        font-size: 13px;
+      }
+      .cookie-banner-body a {
+        color: #141414;
+        text-decoration: underline;
+      }
+      .cookie-banner-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .cookie-btn {
+        flex: 1 1 auto;
+        min-width: 120px;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: background 0.15s, border-color 0.15s, color 0.15s;
+      }
+      .cookie-btn-reject {
+        background: #f5f5f4;
+        color: #141414;
+        border-color: #e6e6e6;
+      }
+      .cookie-btn-reject:hover { background: #efefee; }
+      .cookie-btn-accept {
+        background: #141414;
+        color: #ffffff;
+      }
+      .cookie-btn-accept:hover { background: #000000; }
+      @media (max-width: 640px) {
+        .cookie-banner {
+          left: 8px; right: 8px; bottom: 8px;
+          padding: 16px;
+        }
+      }
+    </style>
+</head>
 <body>
     <!-- Header -->
     <header role="banner">
@@ -600,6 +670,11 @@
                             Darfo Boario Terme (BS) 25047
                         </address>
                         <p class="footer-vat">P.IVA 04501060984</p>
+                        <p class="footer-legal" style="margin-top:10px; font-size:12px;">
+                            <a href="./privacy.html">Privacy Policy</a>
+                            &nbsp;·&nbsp;
+                            <a href="#" id="cookie-prefs-link">Preferenze cookie</a>
+                        </p>
                     </div>
                 </div>
                 
@@ -623,37 +698,152 @@
         </div>
     </footer>
 
+    <!-- ════════════════════════════════════════════════════════════
+         Cookie consent banner
+         ──────────────────────────────────────────────────────────
+         Hidden by default. JS reveals it on first visit, or whenever
+         the user clicks "Preferenze cookie" in the footer.
+         ════════════════════════════════════════════════════════════ -->
+    <div class="cookie-banner" id="cookie-banner" role="dialog" aria-labelledby="cookie-banner-title" aria-describedby="cookie-banner-body">
+      <p class="cookie-banner-title" id="cookie-banner-title">Cookie analitici</p>
+      <p class="cookie-banner-body" id="cookie-banner-body">
+        Usiamo Google Analytics per capire come i visitatori usano il sito. È completamente opzionale.
+        Maggiori dettagli nella <a href="./privacy.html">Privacy Policy</a>.
+      </p>
+      <div class="cookie-banner-actions">
+        <button type="button" class="cookie-btn cookie-btn-reject" id="cookie-reject">Rifiuta</button>
+        <button type="button" class="cookie-btn cookie-btn-accept" id="cookie-accept">Accetta</button>
+      </div>
+    </div>
+
     <!-- Scripts -->
     <script src="script.js"></script>
-    <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const ctaButtons = document.querySelectorAll('a[href="#lavora-con-noi"], .cta-button, .final-cta-button');
-    
-    ctaButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            gtag('event', 'cta_click', {
-                'event_category': 'engagement',
-                'event_label': 'lavora_con_noi',
-                'value': 1
-            });
-            console.log('GA Event: CTA clicked');
-        });
-    });
 
-    const socialLinks = document.querySelectorAll('.social-link');
-    
-    socialLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            const socialPlatform = this.classList.contains('instagram') ? 'instagram' : 'linkedin';
-            
-            gtag('event', 'social_click', {
-                'event_category': 'social',
-                'event_label': socialPlatform,
-                'value': 1
+    <!-- ════════════════════════════════════════════════════════════
+         Consent-gated Google Analytics
+         ──────────────────────────────────────────────────────────
+         GA only loads after explicit user consent. The banner shows
+         on first visit (no localStorage entry). Choice is remembered
+         per browser. Footer link re-opens the banner.
+         ════════════════════════════════════════════════════════════ -->
+    <script>
+    (function () {
+      'use strict';
+
+      var STORAGE_KEY = 'amia-cookie-consent';
+      var GA_ID = 'G-13920YSJ44';
+      var loaded = false;
+
+      // Pending events queued before consent decision. If user accepts,
+      // we flush them. If user rejects, we drop them.
+      var pendingEvents = [];
+
+      function loadGA() {
+        if (loaded) return;
+        loaded = true;
+
+        // Load gtag.js
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+        document.head.appendChild(s);
+
+        // Initialize gtag exactly like the original snippet
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function () { window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', GA_ID);
+
+        // Flush any events queued before consent was given
+        for (var i = 0; i < pendingEvents.length; i++) {
+          var ev = pendingEvents[i];
+          window.gtag.apply(null, ev);
+        }
+        pendingEvents = [];
+      }
+
+      // Safe gtag wrapper. Site code uses window.trackEvent(...) and we
+      // either send to GA (if loaded) or queue for later (if pending) or
+      // drop entirely (if rejected).
+      window.trackEvent = function () {
+        var args = Array.prototype.slice.call(arguments);
+        var consent = readConsent();
+        if (consent === 'accepted') {
+          if (loaded && window.gtag) window.gtag.apply(null, args);
+          else pendingEvents.push(args);
+        }
+        // 'rejected' or null → drop
+      };
+
+      function readConsent() {
+        try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; }
+      }
+      function writeConsent(v) {
+        try { localStorage.setItem(STORAGE_KEY, v); } catch (e) {}
+      }
+
+      var banner = document.getElementById('cookie-banner');
+      var btnAccept = document.getElementById('cookie-accept');
+      var btnReject = document.getElementById('cookie-reject');
+      var prefsLink = document.getElementById('cookie-prefs-link');
+
+      function showBanner() { if (banner) banner.classList.add('is-visible'); }
+      function hideBanner() { if (banner) banner.classList.remove('is-visible'); }
+
+      // On load: show banner if no choice was made yet; auto-load GA if accepted
+      var existing = readConsent();
+      if (existing === 'accepted') {
+        loadGA();
+      } else if (existing !== 'rejected') {
+        showBanner();
+      }
+
+      if (btnAccept) btnAccept.addEventListener('click', function () {
+        writeConsent('accepted');
+        hideBanner();
+        loadGA();
+      });
+      if (btnReject) btnReject.addEventListener('click', function () {
+        writeConsent('rejected');
+        hideBanner();
+      });
+      if (prefsLink) prefsLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        showBanner();
+      });
+    })();
+    </script>
+
+    <!-- ────────────────────────────────────────────────────────────
+         Site events (CTA + social clicks)
+         Now goes through window.trackEvent which is consent-aware.
+         If the user rejected (or hasn't decided yet), nothing fires.
+         ──────────────────────────────────────────────────────────── -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var ctaButtons = document.querySelectorAll('a[href="#lavora-con-noi"], .cta-button, .final-cta-button');
+        ctaButtons.forEach(function (button) {
+            button.addEventListener('click', function() {
+                window.trackEvent('event', 'cta_click', {
+                    'event_category': 'engagement',
+                    'event_label': 'lavora_con_noi',
+                    'value': 1
+                });
             });
-            console.log('GA Event: Social clicked -', socialPlatform);
+        });
+
+        var socialLinks = document.querySelectorAll('.social-link');
+        socialLinks.forEach(function (link) {
+            link.addEventListener('click', function() {
+                var socialPlatform = this.classList.contains('instagram') ? 'instagram' : 'linkedin';
+                window.trackEvent('event', 'social_click', {
+                    'event_category': 'social',
+                    'event_label': socialPlatform,
+                    'value': 1
+                });
+            });
         });
     });
-});
-</script>
+    </script>
 </body>
+</html>
