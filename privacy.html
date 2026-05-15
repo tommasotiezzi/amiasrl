@@ -21,6 +21,35 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
+      /* ════════════════════════════════════════════════════════
+         Liquid-glass header (privacy page only)
+         The landing page has a big hero so its header sits on
+         empty space. Here content scrolls under, so the header
+         needs its own frosted background.
+         ════════════════════════════════════════════════════════ */
+      body > header[role="banner"] {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.72);
+        -webkit-backdrop-filter: blur(16px) saturate(160%);
+        backdrop-filter: blur(16px) saturate(160%);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        transition: background 0.2s;
+      }
+      /* Push the page content below the now-fixed header */
+      body > main {
+        padding-top: 80px;
+      }
+      /* Safari fallback when backdrop-filter is unsupported */
+      @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+        body > header[role="banner"] {
+          background: rgba(255, 255, 255, 0.95);
+        }
+      }
+
       /* Privacy page-specific styles. Inherits Manrope + container from style.css. */
       .privacy-page {
         max-width: 760px;
